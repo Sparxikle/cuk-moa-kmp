@@ -3,8 +3,8 @@ package kr.ac.catholic.cukmoa.model
 import kotlinx.serialization.Serializable
 
 /**
- * One school department (major). Source: Public Data Portal "University Department Information"; the server filters out closed departments
- * and admission units (…계열, 기타모집단위, etc.) and groups the rest by college.
+ * One school department (major). Source: Public Data Portal "National University Department Standard Data" (Korean Council for University Education);
+ * the server filters out closed departments and admission units (…계열, …대학, 기타, etc.) and groups the rest by college.
  */
 @Serializable
 data class Department(
@@ -18,6 +18,14 @@ data class Department(
     val campus: String,
     /** Board code of a department whose announcements are collected (csie, ai …). null for departments that aren't collected yet */
     val board: String? = null,
+    /** Main courses (per-department main courses published by the school) */
+    val subjects: List<String> = emptyList(),
+    /** Related careers */
+    val careers: List<String> = emptyList(),
+    /** Admission quota */
+    val quota: Int? = null,
+    /** Number of graduates (as of the published year) */
+    val graduates: Int? = null,
 )
 
 @Serializable
