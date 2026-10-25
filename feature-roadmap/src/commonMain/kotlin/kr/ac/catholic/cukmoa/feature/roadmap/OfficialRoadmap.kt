@@ -80,7 +80,8 @@ fun LazyListScope.officialRoadmap(
         return
     }
 
-    val bySemester = roadmap.entries.groupBy { it.semester }.toSortedMap(compareByDescending { it.ordinal })
+    // Recent semesters on top (toSortedMap is JVM-only, so common code uses a sorted list)
+    val bySemester = roadmap.entries.groupBy { it.semester }.entries.sortedByDescending { it.key.ordinal }
     bySemester.forEach { (semester, entries) ->
         item(key = "official-${roadmap.major}-$semester") {
             val now = semester == student.currentSemester
