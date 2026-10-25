@@ -274,7 +274,7 @@ private fun Intro() {
             Box(Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(c.accent), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Bookmark, null, tint = c.onAccent, modifier = Modifier.size(22.dp))
             }
-            Txt("가대모아", AppTheme.type.title)
+            Txt(APP_NAME, AppTheme.type.title)
         }
         Column(verticalArrangement = Arrangement.spacedBy(Space.m)) {
             Txt("학과 정보를\n내 학기에 맞춰\n정리해요", AppTheme.type.largeTitle.copy(fontSize = 34.sp, lineHeight = 42.sp))

@@ -22,7 +22,7 @@ fun main() = application {
     )
     Window(
         onCloseRequest = ::exitApplication,
-        title = "가대모아",
+        title = kr.ac.catholic.cukmoa.app.ui.APP_NAME,
         state = rememberWindowState(width = 430.dp, height = 900.dp),
     ) {
         App(platform)

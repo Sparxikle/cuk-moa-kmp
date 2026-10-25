@@ -55,6 +55,8 @@ import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.StudentState
 
+/** App name (가대모아 = "gathering Catholic University info"). The store/launcher name is also set in AndroidManifest and the desktop config. */
+const val APP_NAME = "가대모아"
 const val APP_VERSION = "0.2.0"
 
 private enum class SettingsPage { Main, Department }
@@ -87,7 +89,7 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, 
     var confirmReset by remember { mutableStateOf(false) }
     val c = AppTheme.colors
 
-    ScreenList(title = "설정", eyebrow = "가대모아", trailing = { BackButton(onBack) }) {
+    ScreenList(title = "설정", eyebrow = APP_NAME, trailing = { BackButton(onBack) }) {
         // ---- My info ----
         item {
             Section("내 정보") {
