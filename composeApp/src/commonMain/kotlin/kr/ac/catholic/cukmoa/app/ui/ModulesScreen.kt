@@ -71,7 +71,7 @@ private fun ModuleIcon(m: FeatureModule, on: Boolean) {
 @Composable
 fun ModulesScreen(enabled: List<String>, onChange: (List<String>) -> Unit, onBack: () -> Unit) {
     ScreenList(
-        title = "모듈",
+        title = "기능",
         eyebrow = "필요한 기능만 골라 쓰기",
         trailing = {
             Box(
@@ -81,12 +81,12 @@ fun ModulesScreen(enabled: List<String>, onChange: (List<String>) -> Unit, onBac
         },
     ) {
         item {
-            Section("기능 모듈", "켠 모듈은 아래 탭과 한눈에 카드에 나타나요. 탭은 최대 ${ModuleRegistry.MAX_TABS}개예요.") {
+            Section("기능", "켠 기능은 아래 탭과 홈 카드에 나타나요. 탭은 최대 ${ModuleRegistry.MAX_TABS}개예요.") {
                 ModuleList(enabled, onChange)
             }
         }
         item {
-            Section("앞으로 추가될 모듈") {
+            Section("앞으로 추가될 기능") {
                 Group {
                     listOf(
                         "현직자 답장 게시판" to "선배·현직자에게 직접 묻고 답을 모아 보기",
@@ -100,8 +100,8 @@ fun ModulesScreen(enabled: List<String>, onChange: (List<String>) -> Unit, onBac
         }
         item {
             DataNotice(
-                "Android는 모듈을 켤 때 내려받는 방식(Play Feature Delivery)으로 앱 크기를 줄일 예정이에요. " +
-                    "iOS는 앱 스토어 규칙상 모든 모듈을 앱에 포함하고 켜고 끄는 방식이에요.",
+                "Android는 기능을 켤 때 내려받는 방식(Play Feature Delivery)으로 앱 크기를 줄일 예정이에요." +
+                    "iOS는 앱 스토어 규칙상 모든 기능을 앱에 포함하고 켜고 끄는 방식이에요.",
             )
         }
     }

@@ -68,8 +68,8 @@ fun Department.matches(query: String): Boolean {
     return listOf(name, college, campus).any { it.squash().contains(q, ignoreCase = true) } || subjectHits(query).isNotEmpty()
 }
 
-/** Major order label: the first is the primary major; the second is the 2nd major (double major/minor) */
-fun majorLabel(index: Int) = if (index == 0) "주전공" else "제2전공"
+/** Major order label: the first is the 1st major; the second is the 2nd major (double major/minor) */
+fun majorLabel(index: Int) = if (index == 0) "제1전공" else "제2전공"
 
 /**
  * Toggles one entry in the chosen major list. Up to 2 majors — if 2 are already chosen, replace the 2nd major.
@@ -82,7 +82,7 @@ fun List<Department>.toggle(d: Department): List<Department> = when {
 
 /**
  * Shows every school department grouped by college (or by field when there's no college info). Search box on top.
- * Up to 2 majors can be chosen regardless of college (primary major + 2nd major).
+ * Up to 2 majors can be chosen regardless of college (1st major + 2nd major).
  * Departments whose announcements are collected (currently the College of AI, Electronics & Information Convergence) get an "announcements supported" mark.
  */
 @Composable
@@ -122,9 +122,9 @@ fun DepartmentPicker(list: DepartmentList?, selected: List<Department>, onChange
             ),
         )
 
-        // Summary of chosen majors (primary major · 2nd major)
+        // Summary of chosen majors (1st major · 2nd major)
         Row(Modifier.padding(horizontal = Space.xs), horizontalArrangement = Arrangement.spacedBy(Space.s), verticalAlignment = Alignment.CenterVertically) {
-            if (selected.isEmpty()) Txt("전공을 1~2개 골라 주세요. 첫 번째가 주전공이에요.", AppTheme.type.footnote, tone = Tone.Ink2)
+            if (selected.isEmpty()) Txt("전공을 1~2개 골라 주세요. 첫 번째가 제1전공이에요.", AppTheme.type.footnote, tone = Tone.Ink2)
             selected.forEachIndexed { i, d -> Chip("${majorLabel(i)} · ${d.name}", if (i == 0) ChipTone.Accent else ChipTone.Neutral) }
         }
 

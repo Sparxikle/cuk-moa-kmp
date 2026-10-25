@@ -185,14 +185,14 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                                 )
                             }
                         }
-                        Step.Major -> StepFrame("전공이 무엇인가요?", "단과대학과 상관없이 2개까지 고를 수 있어요 (주전공 + 복수·부전공). 내 전공 게시판 공지를 먼저 보여 드려요.") {
+                        Step.Major -> StepFrame("전공이 무엇인가요?", "단과대학과 상관없이 2개까지 고를 수 있어요 (제1전공 + 복수·부전공). 내 전공 게시판 공지를 먼저 보여 드려요.") {
                             DepartmentPicker(departments, majors) { picked = it }
                         }
                         Step.Tracks -> TracksStep(catalog, tracks, grade) { tracks = it }
-                        Step.Modules -> StepFrame("어떤 기능을 쓸까요?", "필요한 기능만 골라 앱을 가볍게 써요. 나중에 한눈에 → 모듈 추가·관리에서 바꿀 수 있어요.") {
+                        Step.Modules -> StepFrame("어떤 기능을 쓸까요?", "필요한 기능만 골라 앱을 가볍게 써요. 나중에 설정 → 기능에서 바꿀 수 있어요.") {
                             ModuleList(modules) { modules = it }
                         }
-                        Step.Cards -> StepFrame("한눈에 화면에 무엇을 둘까요?", "고른 정보를 홈에 모아 보여 드려요. 언제든 바꿀 수 있어요.") {
+                        Step.Cards -> StepFrame("홈 화면에 무엇을 둘까요?", "고른 정보를 홈에 모아 보여 드려요. 언제든 바꿀 수 있어요.") {
                             Group {
                                 homeCardInfo.forEachIndexed { i, info ->
                                     ListRow(
@@ -277,7 +277,7 @@ private fun Intro() {
             Txt(APP_NAME, AppTheme.type.title)
         }
         Column(verticalArrangement = Arrangement.spacedBy(Space.m)) {
-            Txt("학과 정보를\n내 학기에 맞춰\n정리해요", AppTheme.type.largeTitle.copy(fontSize = 34.sp, lineHeight = 42.sp))
+            Txt("흩어진 학교 정보를\n내 전공에 맞춰\n한곳에", AppTheme.type.largeTitle.copy(fontSize = 34.sp, lineHeight = 42.sp))
             Txt("컴퓨터정보공학부 학생을 위한 수강·진로 길잡이예요.", AppTheme.type.body, tone = Tone.Ink2)
         }
         Column(verticalArrangement = Arrangement.spacedBy(Space.xl)) {

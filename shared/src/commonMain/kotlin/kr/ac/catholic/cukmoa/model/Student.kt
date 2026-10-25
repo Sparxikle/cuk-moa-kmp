@@ -45,7 +45,7 @@ data class StudentState(
     val otherCredits: Map<BucketId, Int>,
     val exam: ExamState,
     /**
-     * My majors (Department.id), up to 2. The first is the primary major, the second is the 2nd major (double major/minor).
+     * My majors (Department.id), up to 2. The first is the 1st major, the second is the 2nd major (double major/minor).
      * The school allows up to 2 majors regardless of college.
      */
     val departments: List<String> = emptyList(),

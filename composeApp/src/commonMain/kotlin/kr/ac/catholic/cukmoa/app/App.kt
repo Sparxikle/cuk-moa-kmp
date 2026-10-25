@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.app
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,8 @@ import kr.ac.catholic.cukmoa.app.ui.ModulesScreen
 import kr.ac.catholic.cukmoa.app.ui.OnboardingScreen
 import kr.ac.catholic.cukmoa.app.ui.SettingsScreen
 import kr.ac.catholic.cukmoa.core.ui.AppBackHandler
+import kr.ac.catholic.cukmoa.core.ui.screenPop
+import kr.ac.catholic.cukmoa.core.ui.tabSlide
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.LocalNavigator
 import kr.ac.catholic.cukmoa.core.Navigator
@@ -47,6 +50,60 @@ private sealed interface Sheet {
 }
 
 private data class TabItem(val route: String, val label: String, val icon: ImageVector)
+
+private enum class AppScreen(val depth: Int) { Onboarding(0), Main(1), Settings(2), Modules(2) }
+
+/** Bottom tabs + tab screens. Switching tabs slides left or right according to tab order. */
+@Composable
+private fun MainTabs(
+    catalog: kr.ac.catholic.cukmoa.model.Catalog,
+    student: kr.ac.catholic.cukmoa.model.StudentState,
+    modules: List<kr.ac.catholic.cukmoa.core.FeatureModule>,
+    route: String,
+    newCount: Long,
+    onTab: (String) -> Unit,
+) {
+    val tabs = listOf(TabItem(Routes.HOME, "홈", Icons.Default.GridView)) + modules.map { TabItem(it.id, it.title, it.icon) }
+    fun index(r: String) = tabs.indexOfFirst { it.route == r }.coerceAtLeast(0)
+
+    Scaffold(
+        containerColor = AppTheme.colors.bg,
+        bottomBar = {
+            NavigationBar(containerColor = AppTheme.colors.surface) {
+                tabs.forEach { t ->
+                    NavigationBarItem(
+                        selected = route == t.route,
+                        onClick = { onTab(t.route) },
+                        icon = {
+                            if (t.route == Routes.ANNOUNCEMENTS && newCount > 0) {
+                                BadgedBox(badge = { Badge { Text("$newCount") } }) { Icon(t.icon, null) }
+                            } else Icon(t.icon, null)
+                        },
+                        label = { Text(t.label, style = AppTheme.type.caption) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = AppTheme.colors.accent,
+                            selectedTextColor = AppTheme.colors.accent,
+                            indicatorColor = AppTheme.colors.accentSoft,
+                            unselectedIconColor = AppTheme.colors.ink3,
+                            unselectedTextColor = AppTheme.colors.ink3,
+                        ),
+                    )
+                }
+            }
+        },
+    ) { padding ->
+        // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
+        AnimatedContent(
+            targetState = route,
+            modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg).padding(bottom = padding.calculateBottomPadding()),
+            transitionSpec = { tabSlide(forward = index(targetState) > index(initialState)) },
+            label = "tab",
+        ) { r ->
+            val module = ModuleRegistry.byId(r)
+            if (module == null) HomeScreen(catalog, student, modules) else module.Screen(catalog, student)
+        }
+    }
+}
 
 /**
  * App shell: onboarding → bottom tabs (dashboard + enabled modules) → detail sheets.
@@ -92,58 +149,36 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
         val c = catalog ?: return@AppTheme Box(Modifier.fillMaxSize().background(AppTheme.colors.bg))
 
         CompositionLocalProvider(LocalNavigator provides navigator, LocalAppViewModel provides vm) {
-            if (!student.onboarded) {
-                OnboardingScreen(catalog = c, student = student, editing = false, startAtCards = false, onClose = {})
-                return@CompositionLocalProvider
+            // Screen to show now. Depth decides the open/close direction: onboarding 0 → main 1 → settings/modules 2
+            val screen = when {
+                !student.onboarded -> AppScreen.Onboarding
+                settings -> AppScreen.Settings
+                managing -> AppScreen.Modules
+                else -> AppScreen.Main
             }
-            if (settings) {
-                SettingsScreen(c, student, platform.apiBaseUrl, onBack = { settings = false })
-                return@CompositionLocalProvider
-            }
-            if (managing) {
-                AppBackHandler { managing = false }
-                ModulesScreen(modules.map { it.id }, vm::setModules, onBack = { managing = false })
-                return@CompositionLocalProvider
-            }
-            // Back: on another tab, go to the dashboard; on the dashboard, close the app (system default)
-            AppBackHandler(enabled = route != Routes.HOME && sheet == null) { route = Routes.HOME }
-
-            // If the current tab's module was turned off, go home
-            if (route != Routes.HOME && modules.none { it.id == route }) route = Routes.HOME
-
-            val tabs = listOf(TabItem(Routes.HOME, "한눈에", Icons.Default.GridView)) +
-                modules.map { TabItem(it.id, it.title, it.icon) }
-
-            Scaffold(
-                containerColor = AppTheme.colors.bg,
-                bottomBar = {
-                    NavigationBar(containerColor = AppTheme.colors.surface) {
-                        tabs.forEach { t ->
-                            NavigationBarItem(
-                                selected = route == t.route,
-                                onClick = { navigator.open(t.route) },
-                                icon = {
-                                    if (t.route == Routes.ANNOUNCEMENTS && announcements.newCount > 0) {
-                                        BadgedBox(badge = { Badge { Text("${announcements.newCount}") } }) { Icon(t.icon, null) }
-                                    } else Icon(t.icon, null)
-                                },
-                                label = { Text(t.label, style = AppTheme.type.caption) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = AppTheme.colors.accent,
-                                    selectedTextColor = AppTheme.colors.accent,
-                                    indicatorColor = AppTheme.colors.accentSoft,
-                                    unselectedIconColor = AppTheme.colors.ink3,
-                                    unselectedTextColor = AppTheme.colors.ink3,
-                                ),
-                            )
-                        }
+            // Paint the background so the window's white backdrop doesn't show through while resizing
+            AnimatedContent(
+                targetState = screen,
+                modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg),
+                transitionSpec = { screenPop(forward = targetState.depth >= initialState.depth) },
+                label = "screen",
+            ) { current ->
+                when (current) {
+                    AppScreen.Onboarding ->
+                        OnboardingScreen(catalog = c, student = student, editing = false, startAtCards = false, onClose = {})
+                    AppScreen.Settings ->
+                        SettingsScreen(c, student, platform.apiBaseUrl, onBack = { settings = false })
+                    AppScreen.Modules -> {
+                        AppBackHandler { managing = false }
+                        ModulesScreen(modules.map { it.id }, vm::setModules, onBack = { managing = false })
                     }
-                },
-            ) { padding ->
-                // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
-                Box(Modifier.padding(bottom = padding.calculateBottomPadding())) {
-                    val module = ModuleRegistry.byId(route)
-                    if (module == null) HomeScreen(c, student, modules) else module.Screen(c, student)
+                    AppScreen.Main -> {
+                        // Back: on another tab, go home; on home, close the app (system default)
+                        AppBackHandler(enabled = route != Routes.HOME && sheet == null) { route = Routes.HOME }
+                        // If the current tab's module was turned off, go home
+                        if (route != Routes.HOME && modules.none { it.id == route }) route = Routes.HOME
+                        MainTabs(c, student, modules, route, announcements.newCount, onTab = { navigator.open(it) })
+                    }
                 }
             }
 

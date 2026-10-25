@@ -262,7 +262,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     fun setTracks(trackIds: List<TrackId>) = update { it.copy(trackIds = trackIds) }
     fun setExam(transform: (ExamState) -> ExamState) = update { it.copy(exam = transform(it.exam)) }
 
-    /** Sets the majors (up to 2; the first is the primary major). For departments with collected announcements, also sets the board codes. */
+    /** Sets the majors (up to 2; the first is the 1st major). For departments with collected announcements, also sets the board codes. */
     fun setDepartments(list: List<Department>) {
         val picked = list.take(StudentState.MAX_MAJORS)
         update { it.copy(departments = picked.map { d -> d.id }, majors = picked.mapNotNull { d -> d.board }) }

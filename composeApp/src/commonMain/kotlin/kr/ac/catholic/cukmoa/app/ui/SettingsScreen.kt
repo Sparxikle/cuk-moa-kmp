@@ -1,11 +1,13 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,6 +43,7 @@ import kr.ac.catholic.cukmoa.core.state.StorageStatus
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.core.ui.AppBackHandler
+import kr.ac.catholic.cukmoa.core.ui.screenPop
 import kr.ac.catholic.cukmoa.core.ui.Chip
 import kr.ac.catholic.cukmoa.core.ui.ChipTone
 import kr.ac.catholic.cukmoa.core.ui.Chips
@@ -66,13 +69,31 @@ private enum class SettingsPage { Main, Department }
 fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, onBack: () -> Unit) {
     var page by rememberSaveable { mutableStateOf(SettingsPage.Main) }
     AppBackHandler { if (page == SettingsPage.Main) onBack() else page = SettingsPage.Main }
+    // Settings ↔ major picker: screen open/close transition
+    AnimatedContent(
+        targetState = page,
+        modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg),
+        transitionSpec = { screenPop(forward = targetState.ordinal > initialState.ordinal) },
+        label = "settings",
+    ) { p -> SettingsPageContent(p, catalog, student, apiBaseUrl, onBack) { page = it } }
+}
+
+@Composable
+private fun SettingsPageContent(
+    page: SettingsPage,
+    catalog: Catalog,
+    student: StudentState,
+    apiBaseUrl: String,
+    onBack: () -> Unit,
+    go: (SettingsPage) -> Unit,
+) {
 
     val vm = LocalAppViewModel.current
     val departments by vm.departments.collectAsStateWithLifecycle()
     val majors = departments.findAll(student.departments, student.majors)
 
     if (page == SettingsPage.Department) {
-        ScreenList(title = "전공", eyebrow = "설정 · 최대 2개", trailing = { BackButton { page = SettingsPage.Main } }) {
+        ScreenList(title = "전공", eyebrow = "설정 · 최대 2개", trailing = { BackButton { go(SettingsPage.Main) } }) {
             item {
                 Column(Modifier.contentWidth()) {
                     DepartmentPicker(departments, majors) { vm.setDepartments(it) }
@@ -110,7 +131,7 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, 
                         "전공",
                         majors.mapIndexed { i, d -> "${majorLabel(i)} ${d.name}" }.joinToString(" · ").ifEmpty { "고르지 않음" },
                         chevron = true,
-                        onClick = { page = SettingsPage.Department },
+                        onClick = { go(SettingsPage.Department) },
                     )
                     Column(Modifier.fillMaxWidth().padding16(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
                         Txt("관심 진로", AppTheme.type.callout)
@@ -133,14 +154,14 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, 
 
         // ---- Dashboard ----
         item {
-            Section("한눈에 화면", "켠 카드가 위에서부터 이 순서로 나와요.") {
+            Section("홈 화면", "켠 카드가 위에서부터 이 순서로 나와요.") {
                 Group {
                     homeCardInfo.forEachIndexed { i, info ->
                         val provider = ModuleRegistry.all.firstOrNull { info.id in it.homeCards }
                         val moduleOff = provider != null && ModuleRegistry.enabled(student).none { it.id == provider.id }
                         ListRow(
                             info.title,
-                            if (moduleOff) "${provider!!.title} 모듈을 켜면 쓸 수 있어요" else info.detail,
+                            if (moduleOff) "${provider!!.title} 기능을 켜면 쓸 수 있어요" else info.detail,
                             divider = i < homeCardInfo.lastIndex,
                             trailing = {
                                 Switch(
@@ -161,7 +182,7 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, 
 
         // ---- Feature modules ----
         item {
-            Section("기능 모듈", "켠 모듈만 아래 탭과 한눈에 카드에 나와요.") {
+            Section("기능", "켠 기능만 아래 탭과 홈 카드에 나와요.") {
                 ModuleList(ModuleRegistry.enabled(student).map { it.id }, vm::setModules)
             }
         }
@@ -180,7 +201,7 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, 
                         )
                     }
                     ListRow(
-                        "새 글 표시 초기화",
+                        "새 공지 표시 지우기",
                         "다음에 공지를 열 때까지 새 글 배지를 표시하지 않아요",
                         divider = false,
                         onClick = vm::resetAnnouncementsSeen,
@@ -210,7 +231,7 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, 
                         "기기 저장",
                         when (storage) {
                             StorageStatus.Ok -> "학년·이수 체크·담은 과목은 이 기기에만 저장돼요"
-                            StorageStatus.Unreadable -> "저장된 기록을 읽지 못했어요 — 한눈에 화면에서 새로 저장할 수 있어요"
+                            StorageStatus.Unreadable -> "저장된 기록을 읽지 못했어요 — 홈 화면에서 새로 저장할 수 있어요"
                             StorageStatus.SaveFailed -> "마지막 변경을 저장하지 못했어요"
                         },
                     )

@@ -82,7 +82,7 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
     val eyebrow = listOf("${student.grade}학년", track?.shortName ?: "진로 탐색 중", catalog.term.label).joinToString(" · ")
 
     ScreenList(
-        title = "한눈에",
+        title = "오늘",
         eyebrow = eyebrow,
         trailing = {
             Box(
@@ -112,13 +112,13 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
         if (student.homeCards.isEmpty()) item {
             Card {
                 Txt("홈이 비어 있어요", AppTheme.type.headline)
-                Txt("보고 싶은 정보를 골라 한눈에 화면을 채워 보세요.", AppTheme.type.callout, tone = Tone.Ink2)
+                Txt("보고 싶은 정보를 골라 홈 화면을 채워 보세요.", AppTheme.type.callout, tone = Tone.Ink2)
             }
         }
         item {
             Column(Modifier.contentWidth(), verticalArrangement = Arrangement.spacedBy(Space.m)) {
-                PrimaryButton("설정 · 한눈에 화면 편집", onClick = nav.openSettings, tinted = true)
-                PrimaryButton("모듈 추가·관리", onClick = nav.manageModules, tinted = true)
+                PrimaryButton("설정 · 홈 화면 편집", onClick = nav.openSettings, tinted = true)
+                PrimaryButton("기능 켜고 끄기", onClick = nav.manageModules, tinted = true)
                 DataNotice("학점·과목·선배 기록은 시연용 예시예요. 공지·학사일정은 학교 사이트에서 실시간으로 모아요.")
             }
         }

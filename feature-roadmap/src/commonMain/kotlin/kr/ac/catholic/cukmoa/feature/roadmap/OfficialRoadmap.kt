@@ -152,7 +152,7 @@ private fun ImageOnlyRoadmap(department: String, url: String) {
 fun RoadmapModeChips(official: Boolean, onChange: (Boolean) -> Unit) {
     Chips {
         FilterChip("학과 공식 로드맵", official) { onChange(true) }
-        FilterChip("선배 수강 기록 (예시)", !official) { onChange(false) }
+        FilterChip("선배 기록 (예시)", !official) { onChange(false) }
     }
 }
 

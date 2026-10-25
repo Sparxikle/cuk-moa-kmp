@@ -8,7 +8,7 @@
         android:label="가대모아"
         android:icon="@android:drawable/ic_menu_agenda"
         android:usesCleartextTraffic="true"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        android:theme="@style/Theme.App">
         <activity
             android:name=".MainActivity"
             android:exported="true"
