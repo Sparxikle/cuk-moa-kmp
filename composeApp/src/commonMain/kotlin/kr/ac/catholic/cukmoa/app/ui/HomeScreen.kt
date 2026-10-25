@@ -64,6 +64,9 @@ import kr.ac.catholic.cukmoa.logic.daysUntil
 import kr.ac.catholic.cukmoa.logic.findCourse
 import kr.ac.catholic.cukmoa.logic.findTrack
 import kr.ac.catholic.cukmoa.logic.nextRecommendations
+import kr.ac.catholic.cukmoa.logic.officialRecommendations
+import kr.ac.catholic.cukmoa.logic.courseName
+import kr.ac.catholic.cukmoa.logic.ROADMAP_COURSE_PREFIX
 import kr.ac.catholic.cukmoa.logic.shortDate
 import kr.ac.catholic.cukmoa.logic.today
 import kr.ac.catholic.cukmoa.logic.todayKst
@@ -146,13 +149,29 @@ private fun ProgressCard(catalog: Catalog, student: StudentState) {
 @Composable
 private fun NextCard(catalog: Catalog, student: StudentState) {
     val nav = LocalNavigator.current
+    val roadmaps by LocalAppViewModel.current.roadmaps.collectAsStateWithLifecycle()
+    // Recommend from my major's official department roadmap if there is one, otherwise from seniors' records (sample)
+    val official = roadmaps?.let { officialRecommendations(catalog, student, it.items) }
+    if (official != null) {
+        val departments = official.items.map { it.department }.distinct().joinToString("·").ifEmpty { "내 전공" }
+        val action = ("로드맵" to { nav.open(Routes.ROADMAP) }).takeIf { nav.isEnabled(Routes.ROADMAP) }
+        Section("다음 학기 추천", "$departments 로드맵의 ${official.periodLabel} 과목", action = action) {
+            if (official.items.isEmpty()) Card { Txt("이 학기 로드맵 과목은 이미 다 들었거나 듣고 있어요.", AppTheme.type.callout, tone = Tone.Ink2) }
+            else Group {
+                val shown = official.items.take(6)
+                shown.forEachIndexed { i, r -> OfficialCourseRow(r.name, r.courseId, listOfNotNull(r.marks.firstOrNull(), r.track, r.catalogCourse?.let { "${it.credits}학점" }).joinToString(" · "), student, divider = i < shown.lastIndex || official.items.size > 6) }
+                if (official.items.size > 6) ListRow("나머지 ${official.items.size - 6}과목은 로드맵에서", chevron = true, divider = false, onClick = { nav.open(Routes.ROADMAP) })
+            }
+        }
+        return
+    }
     val rec = nextRecommendations(catalog, student)
     val semester = rec.semester
     if (semester == null) {
         Section("다음 학기 추천") { Card { Txt("마지막 학기예요. 남은 졸업요건부터 확인해 보세요.", AppTheme.type.callout, tone = Tone.Ink2) } }
         return
     }
-    val detail = rec.track?.let { "${it.shortName} 선배 ${it.seniorCount}명이 ${semester.label}에 들은 과목" }
+    val detail = rec.track?.let { "${it.shortName} 선배 ${it.seniorCount}명이 ${semester.label}에 들은 과목 (예시)" }
         ?: "${semester.label} 권장 과목 · 관심 진로를 고르면 선배 기록으로 바뀌어요"
     Section("다음 학기 추천", detail, action = ("로드맵" to { nav.open(Routes.ROADMAP) }).takeIf { nav.isEnabled(Routes.ROADMAP) }) {
         if (rec.items.isEmpty()) Card { Txt("이 학기 추천 과목은 이미 다 들었거나 듣고 있어요.", AppTheme.type.callout, tone = Tone.Ink2) }
@@ -168,12 +187,34 @@ private fun NextCard(catalog: Catalog, student: StudentState) {
     }
 }
 
+/** One roadmap course row: opens course details if it's in the catalog; saving works either way */
+@Composable
+private fun OfficialCourseRow(name: String, courseId: String, detail: String, student: StudentState, divider: Boolean) {
+    val vm = LocalAppViewModel.current
+    val nav = LocalNavigator.current
+    val inCatalog = !courseId.startsWith(ROADMAP_COURSE_PREFIX)
+    ListRow(
+        name, detail,
+        divider = divider,
+        onClick = if (inCatalog) ({ nav.openCourse(courseId) }) else null,
+        trailing = { SaveButton(courseId in student.savedCourseIds, name) { vm.toggleSaved(courseId) } },
+    )
+}
+
 @Composable
 private fun SavedCard(catalog: Catalog, student: StudentState) {
-    val courses = student.savedCourseIds.mapNotNull { catalog.findCourse(it) }
-    Section("담은 과목", if (courses.isNotEmpty()) "${courses.size}과목 · ${courses.sumOf { it.credits }}학점" else null) {
-        if (courses.isEmpty()) Card { Txt("로드맵이나 추천 과목에서 책갈피를 누르면 여기에 모여요.", AppTheme.type.callout, tone = Tone.Ink2) }
-        else Group { courses.forEachIndexed { i, c -> SavableCourseRow(c, student, divider = i < courses.lastIndex) } }
+    val roadmaps by LocalAppViewModel.current.roadmaps.collectAsStateWithLifecycle()
+    // Show catalog courses and courses saved from roadmaps (rm:) together
+    val saved = student.savedCourseIds.mapNotNull { id -> courseName(id, catalog, roadmaps?.items.orEmpty())?.let { id to it } }
+    val credits = saved.sumOf { (id, _) -> catalog.findCourse(id)?.credits ?: 0 }
+    Section("담은 과목", if (saved.isNotEmpty()) "${saved.size}과목" + (if (credits > 0) " · 학점이 알려진 과목 ${credits}학점" else "") else null) {
+        if (saved.isEmpty()) Card { Txt("로드맵이나 추천 과목에서 책갈피를 누르면 여기에 모여요.", AppTheme.type.callout, tone = Tone.Ink2) }
+        else Group {
+            saved.forEachIndexed { i, (id, name) ->
+                val course = catalog.findCourse(id)
+                OfficialCourseRow(name, id, course?.let { "${it.category.label} · ${it.credits}학점" } ?: "학과 로드맵 과목", student, divider = i < saved.lastIndex)
+            }
+        }
     }
 }
 

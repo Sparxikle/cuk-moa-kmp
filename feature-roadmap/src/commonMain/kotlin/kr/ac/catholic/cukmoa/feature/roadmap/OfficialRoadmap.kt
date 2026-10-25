@@ -38,6 +38,7 @@ import kr.ac.catholic.cukmoa.model.MajorRoadmapList
 import kr.ac.catholic.cukmoa.model.Majors
 import kr.ac.catholic.cukmoa.model.StudentState
 import kr.ac.catholic.cukmoa.model.courseKey
+import kr.ac.catholic.cukmoa.logic.roadmapCourseId
 import androidx.compose.foundation.lazy.LazyListScope
 
 /** Color of marks (graduation requirement, priority course, etc.): warning color for graduation requirements, accent color for the rest */
@@ -94,7 +95,7 @@ fun LazyListScope.officialRoadmap(
                 Group {
                     entries.forEachIndexed { i, e ->
                         val course = catalogByKey[courseKey(e.name)]
-                        OfficialRow(e.name, e.track, e.marks, course?.id, student, divider = i < entries.lastIndex)
+                        OfficialRow(e.name, e.track, e.marks, course?.id ?: roadmapCourseId(e.name), course != null, student, divider = i < entries.lastIndex)
                     }
                 }
             }
@@ -104,20 +105,20 @@ fun LazyListScope.officialRoadmap(
 }
 
 @Composable
-private fun OfficialRow(name: String, track: String, marks: List<String>, courseId: String?, student: StudentState, divider: Boolean) {
+private fun OfficialRow(name: String, track: String, marks: List<String>, courseId: String, inCatalog: Boolean, student: StudentState, divider: Boolean) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
-    val status = courseId?.let { student.statusOf(it) }
+    // Courses not in the catalog can be saved with an rm: ID too (completion checks and credits apply only to catalog courses)
+    val status = student.statusOf(courseId)
     ListRow(
         name,
         track,
         divider = divider,
-        onClick = courseId?.let { id -> { nav.openCourse(id) } },
+        onClick = if (inCatalog) ({ nav.openCourse(courseId) }) else null,
         trailing = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s)) {
                 marks.forEach { Chip(it.removeSuffix("과목"), markTone(it)) }
                 when (status) {
-                    null -> Unit
                     CourseStatus.Completed -> CheckCircle(true)
                     CourseStatus.InProgress -> Chip("수강 중", ChipTone.Accent)
                     else -> SaveButton(status == CourseStatus.Saved, name) { vm.toggleSaved(courseId) }
