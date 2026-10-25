@@ -1,0 +1,1626 @@
+{
+  "term": {
+    "year": 2026,
+    "semester": 2,
+    "label": "2026년 2학기",
+    "today": "2026-10-11"
+  },
+  "tracks": [
+    {
+      "id": "web",
+      "name": "웹·프론트엔드",
+      "shortName": "프론트엔드",
+      "summary": "사람이 직접 만지는 화면과 웹 서비스를 만들어요.",
+      "seniorCount": 14,
+      "keyCourseIds": [
+        "web-programming",
+        "software-engineering",
+        "web-services"
+      ]
+    },
+    {
+      "id": "backend",
+      "name": "서버·백엔드",
+      "shortName": "백엔드",
+      "summary": "데이터가 오가는 길과 저장소를 설계해요.",
+      "seniorCount": 18,
+      "keyCourseIds": [
+        "operating-systems",
+        "database-design",
+        "computer-networks"
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "AI·데이터",
+      "shortName": "AI",
+      "summary": "데이터에서 패턴을 찾고 모델을 만들어요.",
+      "seniorCount": 21,
+      "keyCourseIds": [
+        "artificial-intelligence",
+        "data-mining",
+        "algorithm-design"
+      ]
+    },
+    {
+      "id": "security",
+      "name": "정보보안",
+      "shortName": "보안",
+      "summary": "시스템의 약한 곳을 찾고 지키는 법을 익혀요.",
+      "seniorCount": 9,
+      "keyCourseIds": [
+        "system-security",
+        "operating-systems",
+        "computer-networks"
+      ]
+    },
+    {
+      "id": "embedded",
+      "name": "임베디드·하드웨어",
+      "shortName": "임베디드",
+      "summary": "기기 속에서 돌아가는 소프트웨어를 다뤄요.",
+      "seniorCount": 7,
+      "keyCourseIds": [
+        "microprocessors",
+        "embedded-mobile",
+        "operating-systems"
+      ]
+    }
+  ],
+  "courses": [
+    {
+      "id": "humanity-1",
+      "name": "인간학1",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "humanity-2",
+      "name": "인간학2",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2",
+      "prerequisiteIds": [
+        "humanity-1"
+      ]
+    },
+    {
+      "id": "cap-1",
+      "name": "CAP1",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "cap-2",
+      "name": "CAP2",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "global-comm-1",
+      "name": "글로벌커뮤니케이션1",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "global-comm-2",
+      "name": "글로벌커뮤니케이션2",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2",
+      "prerequisiteIds": [
+        "global-comm-1"
+      ]
+    },
+    {
+      "id": "spirituality",
+      "name": "영성",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "sharing-love",
+      "name": "사랑나누기",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "core-humanities",
+      "name": "중핵교양 (인문 영역)",
+      "category": "liberal-core",
+      "credits": 3,
+      "summary": "중핵교양 영역 중 하나를 대표하는 예시 항목이에요.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "general-elective",
+      "name": "일반선택 과목",
+      "category": "general",
+      "credits": 3,
+      "summary": "전공·교양 밖에서 자유롭게 고른 과목을 대표하는 예시 항목이에요.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "calculus-1",
+      "name": "일반수학1 및 연습",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "미분과 적분의 기본 개념을 연습 문제와 함께 익혀요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "calculus-2",
+      "name": "일반수학2 및 연습",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "다변수 함수와 급수 등 일반수학1 다음 단계를 다뤄요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2",
+      "prerequisiteIds": [
+        "calculus-1"
+      ]
+    },
+    {
+      "id": "programming-1",
+      "name": "컴퓨터와 프로그래밍1",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "변수, 조건문, 반복문부터 시작해 프로그램을 직접 짜 봐요.",
+      "professorIds": [
+        "prof-jeong"
+      ],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "programming-2",
+      "name": "컴퓨터와 프로그래밍2",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "함수, 배열, 포인터를 다루며 더 큰 프로그램을 만들어요.",
+      "professorIds": [
+        "prof-jeong"
+      ],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2",
+      "prerequisiteIds": [
+        "programming-1"
+      ]
+    },
+    {
+      "id": "natural-science",
+      "name": "기초과학 실험 (화학·물리·생물 중)",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "일반화학·물리·생물 및 실험 중 3학점 이상을 들어야 해요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "data-structures",
+      "name": "자료구조",
+      "category": "major",
+      "credits": 3,
+      "summary": "리스트, 스택, 트리, 그래프처럼 데이터를 담는 구조와 그 비용을 배워요.",
+      "professorIds": [
+        "prof-yoon"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "2-1",
+      "prerequisiteIds": [
+        "programming-2"
+      ]
+    },
+    {
+      "id": "oop",
+      "name": "객체지향패러다임",
+      "category": "major",
+      "credits": 3,
+      "summary": "클래스와 객체, 상속과 다형성으로 프로그램을 설계하는 법을 익혀요.",
+      "professorIds": [
+        "prof-jeong"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "2-1"
+    },
+    {
+      "id": "data-communication",
+      "name": "데이터통신",
+      "category": "major",
+      "credits": 3,
+      "summary": "신호, 부호화, 전송 매체 등 데이터가 오가는 물리적 바탕을 다뤄요.",
+      "professorIds": [
+        "prof-park"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "2-1"
+    },
+    {
+      "id": "file-processing",
+      "name": "파일처리",
+      "category": "major",
+      "credits": 3,
+      "summary": "파일 구조와 인덱스, 해싱으로 데이터를 저장하고 찾는 방법을 배워요.",
+      "professorIds": [
+        "prof-lee"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "2-2"
+    },
+    {
+      "id": "automata",
+      "name": "오토마타",
+      "category": "major",
+      "credits": 3,
+      "summary": "유한 오토마타와 형식 언어로 계산이 무엇인지 따져 봐요.",
+      "professorIds": [
+        "prof-yoon"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "2-2"
+    },
+    {
+      "id": "programming-languages",
+      "name": "프로그래밍언어론",
+      "category": "major",
+      "credits": 3,
+      "summary": "여러 언어의 문법과 의미, 실행 모델을 비교해요.",
+      "professorIds": [],
+      "isExamSubject": true,
+      "recommendedSemester": "2-2"
+    },
+    {
+      "id": "operating-systems",
+      "name": "운영체제",
+      "category": "major",
+      "credits": 3,
+      "summary": "프로세스, 메모리, 파일 시스템을 운영체제가 어떻게 관리하는지 배워요.",
+      "professorIds": [
+        "prof-choi"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-1",
+      "prerequisiteIds": [
+        "data-structures"
+      ]
+    },
+    {
+      "id": "computer-networks",
+      "name": "컴퓨터네트워크",
+      "category": "major",
+      "credits": 3,
+      "summary": "인터넷 계층 구조와 TCP/IP, 라우팅을 다뤄요.",
+      "professorIds": [
+        "prof-park"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-1"
+    },
+    {
+      "id": "software-engineering",
+      "name": "소프트웨어공학",
+      "category": "major",
+      "credits": 3,
+      "summary": "요구사항, 설계, 테스트까지 팀으로 소프트웨어를 만드는 과정을 배워요.",
+      "professorIds": [
+        "prof-jeong"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-1"
+    },
+    {
+      "id": "system-security",
+      "name": "시스템보안",
+      "category": "major",
+      "credits": 3,
+      "summary": "취약점이 생기는 원리와 시스템을 지키는 기법을 다뤄요.",
+      "professorIds": [
+        "prof-choi"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-2",
+      "prerequisiteIds": [
+        "operating-systems"
+      ]
+    },
+    {
+      "id": "information-systems",
+      "name": "정보시스템분석및설계",
+      "category": "major",
+      "credits": 3,
+      "summary": "실제 업무를 분석해 정보 시스템으로 옮기는 설계 과정을 익혀요.",
+      "professorIds": [
+        "prof-lee"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "4-1"
+    },
+    {
+      "id": "database-design",
+      "name": "데이터베이스설계",
+      "category": "major",
+      "credits": 3,
+      "summary": "관계형 모델, SQL, 정규화로 데이터베이스를 설계해요.",
+      "professorIds": [
+        "prof-lee"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-2",
+      "prerequisiteIds": [
+        "file-processing"
+      ]
+    },
+    {
+      "id": "algorithm-design",
+      "name": "알고리즘설계",
+      "category": "major",
+      "credits": 3,
+      "summary": "분할 정복, 동적 계획법, 그리디로 문제를 푸는 전략을 배워요.",
+      "professorIds": [
+        "prof-yoon"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-1",
+      "prerequisiteIds": [
+        "data-structures"
+      ]
+    },
+    {
+      "id": "artificial-intelligence",
+      "name": "인공지능",
+      "category": "major",
+      "credits": 3,
+      "summary": "탐색, 추론, 기계학습의 기초로 지능적인 프로그램을 만들어요.",
+      "professorIds": [
+        "prof-kim"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-2"
+    },
+    {
+      "id": "microprocessors",
+      "name": "마이크로프로세서",
+      "category": "major",
+      "credits": 3,
+      "summary": "프로세서 구조와 어셈블리, 입출력 제어를 실습으로 다뤄요.",
+      "professorIds": [
+        "prof-han"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-1"
+    },
+    {
+      "id": "embedded-mobile",
+      "name": "임베디드및모바일시스템",
+      "category": "major",
+      "credits": 3,
+      "summary": "제한된 자원의 기기에서 돌아가는 소프트웨어를 설계해요.",
+      "professorIds": [
+        "prof-han"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-2",
+      "prerequisiteIds": [
+        "microprocessors"
+      ]
+    },
+    {
+      "id": "computer-graphics",
+      "name": "컴퓨터그래픽스",
+      "category": "major",
+      "credits": 3,
+      "summary": "좌표 변환, 렌더링, 셰이딩으로 화면에 그림이 그려지는 원리를 배워요.",
+      "professorIds": [
+        "prof-kim"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "4-1"
+    },
+    {
+      "id": "data-mining",
+      "name": "데이터마이닝",
+      "category": "major",
+      "credits": 3,
+      "summary": "대량의 데이터에서 패턴과 규칙을 찾는 기법을 다뤄요.",
+      "professorIds": [
+        "prof-kim"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "3-2"
+    },
+    {
+      "id": "web-services",
+      "name": "웹서비스컴퓨팅",
+      "category": "major",
+      "credits": 3,
+      "summary": "웹 API와 분산 서비스로 시스템을 연결하는 방법을 배워요.",
+      "professorIds": [
+        "prof-jeong"
+      ],
+      "isExamSubject": true,
+      "recommendedSemester": "4-1"
+    },
+    {
+      "id": "web-programming",
+      "name": "웹프로그래밍",
+      "category": "major",
+      "credits": 3,
+      "summary": "HTML, CSS, 자바스크립트로 동작하는 웹 페이지를 만들어요.",
+      "professorIds": [
+        "prof-jeong"
+      ],
+      "isExamSubject": false,
+      "recommendedSemester": "3-1"
+    }
+  ],
+  "roadmaps": [
+    {
+      "trackId": "web",
+      "steps": [
+        {
+          "semester": "1-1",
+          "items": [
+            {
+              "courseId": "programming-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-1",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "1-2",
+          "items": [
+            {
+              "courseId": "programming-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-2",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "2-1",
+          "items": [
+            {
+              "courseId": "data-structures",
+              "kind": "popular",
+              "takenRatio": 0.97
+            },
+            {
+              "courseId": "oop",
+              "kind": "popular",
+              "takenRatio": 0.88
+            },
+            {
+              "courseId": "data-communication",
+              "kind": "popular",
+              "takenRatio": 0.62
+            }
+          ]
+        },
+        {
+          "semester": "2-2",
+          "items": [
+            {
+              "courseId": "file-processing",
+              "kind": "popular",
+              "takenRatio": 0.74
+            },
+            {
+              "courseId": "automata",
+              "kind": "popular",
+              "takenRatio": 0.58
+            },
+            {
+              "courseId": "programming-languages",
+              "kind": "popular",
+              "takenRatio": 0.52
+            }
+          ]
+        },
+        {
+          "semester": "3-1",
+          "items": [
+            {
+              "courseId": "web-programming",
+              "kind": "popular",
+              "takenRatio": 0.86
+            },
+            {
+              "courseId": "software-engineering",
+              "kind": "popular",
+              "takenRatio": 0.64
+            }
+          ]
+        },
+        {
+          "semester": "3-2",
+          "items": [
+            {
+              "courseId": "database-design",
+              "kind": "popular",
+              "takenRatio": 0.57
+            },
+            {
+              "courseId": "data-mining",
+              "kind": "popular",
+              "takenRatio": 0.21
+            }
+          ]
+        },
+        {
+          "semester": "4-1",
+          "items": [
+            {
+              "courseId": "web-services",
+              "kind": "popular",
+              "takenRatio": 0.79
+            },
+            {
+              "courseId": "information-systems",
+              "kind": "popular",
+              "takenRatio": 0.5
+            },
+            {
+              "courseId": "computer-graphics",
+              "kind": "popular",
+              "takenRatio": 0.43
+            }
+          ]
+        },
+        {
+          "semester": "4-2",
+          "items": [
+            {
+              "label": "졸업종합시험",
+              "kind": "milestone",
+              "takenRatio": 1
+            }
+          ]
+        }
+      ],
+      "source": {
+        "label": "시안용 예시 데이터 (선배 설문 전)",
+        "asOf": "2026-10-11",
+        "isSample": true
+      }
+    },
+    {
+      "trackId": "backend",
+      "steps": [
+        {
+          "semester": "1-1",
+          "items": [
+            {
+              "courseId": "programming-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-1",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "1-2",
+          "items": [
+            {
+              "courseId": "programming-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-2",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "2-1",
+          "items": [
+            {
+              "courseId": "data-structures",
+              "kind": "popular",
+              "takenRatio": 0.97
+            },
+            {
+              "courseId": "oop",
+              "kind": "popular",
+              "takenRatio": 0.88
+            },
+            {
+              "courseId": "data-communication",
+              "kind": "popular",
+              "takenRatio": 0.62
+            }
+          ]
+        },
+        {
+          "semester": "2-2",
+          "items": [
+            {
+              "courseId": "file-processing",
+              "kind": "popular",
+              "takenRatio": 0.74
+            },
+            {
+              "courseId": "automata",
+              "kind": "popular",
+              "takenRatio": 0.58
+            },
+            {
+              "courseId": "programming-languages",
+              "kind": "popular",
+              "takenRatio": 0.52
+            }
+          ]
+        },
+        {
+          "semester": "3-1",
+          "items": [
+            {
+              "courseId": "operating-systems",
+              "kind": "popular",
+              "takenRatio": 0.89
+            },
+            {
+              "courseId": "computer-networks",
+              "kind": "popular",
+              "takenRatio": 0.78
+            },
+            {
+              "courseId": "algorithm-design",
+              "kind": "popular",
+              "takenRatio": 0.5
+            }
+          ]
+        },
+        {
+          "semester": "3-2",
+          "items": [
+            {
+              "courseId": "database-design",
+              "kind": "popular",
+              "takenRatio": 0.83
+            },
+            {
+              "courseId": "system-security",
+              "kind": "popular",
+              "takenRatio": 0.39
+            }
+          ]
+        },
+        {
+          "semester": "4-1",
+          "items": [
+            {
+              "courseId": "information-systems",
+              "kind": "popular",
+              "takenRatio": 0.72
+            },
+            {
+              "courseId": "web-services",
+              "kind": "popular",
+              "takenRatio": 0.61
+            },
+            {
+              "courseId": "software-engineering",
+              "kind": "popular",
+              "takenRatio": 0.44
+            }
+          ]
+        },
+        {
+          "semester": "4-2",
+          "items": [
+            {
+              "label": "졸업종합시험",
+              "kind": "milestone",
+              "takenRatio": 1
+            }
+          ]
+        }
+      ],
+      "source": {
+        "label": "시안용 예시 데이터 (선배 설문 전)",
+        "asOf": "2026-10-11",
+        "isSample": true
+      }
+    },
+    {
+      "trackId": "ai",
+      "steps": [
+        {
+          "semester": "1-1",
+          "items": [
+            {
+              "courseId": "programming-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-1",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "1-2",
+          "items": [
+            {
+              "courseId": "programming-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-2",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "2-1",
+          "items": [
+            {
+              "courseId": "data-structures",
+              "kind": "popular",
+              "takenRatio": 0.97
+            },
+            {
+              "courseId": "oop",
+              "kind": "popular",
+              "takenRatio": 0.88
+            },
+            {
+              "courseId": "data-communication",
+              "kind": "popular",
+              "takenRatio": 0.62
+            }
+          ]
+        },
+        {
+          "semester": "2-2",
+          "items": [
+            {
+              "courseId": "file-processing",
+              "kind": "popular",
+              "takenRatio": 0.74
+            },
+            {
+              "courseId": "automata",
+              "kind": "popular",
+              "takenRatio": 0.58
+            },
+            {
+              "courseId": "programming-languages",
+              "kind": "popular",
+              "takenRatio": 0.52
+            }
+          ]
+        },
+        {
+          "semester": "3-1",
+          "items": [
+            {
+              "courseId": "algorithm-design",
+              "kind": "popular",
+              "takenRatio": 0.81
+            },
+            {
+              "courseId": "operating-systems",
+              "kind": "popular",
+              "takenRatio": 0.43
+            }
+          ]
+        },
+        {
+          "semester": "3-2",
+          "items": [
+            {
+              "courseId": "artificial-intelligence",
+              "kind": "popular",
+              "takenRatio": 0.95
+            },
+            {
+              "courseId": "data-mining",
+              "kind": "popular",
+              "takenRatio": 0.76
+            },
+            {
+              "courseId": "database-design",
+              "kind": "popular",
+              "takenRatio": 0.62
+            }
+          ]
+        },
+        {
+          "semester": "4-1",
+          "items": [
+            {
+              "courseId": "computer-graphics",
+              "kind": "popular",
+              "takenRatio": 0.48
+            },
+            {
+              "courseId": "web-services",
+              "kind": "popular",
+              "takenRatio": 0.33
+            }
+          ]
+        },
+        {
+          "semester": "4-2",
+          "items": [
+            {
+              "label": "졸업종합시험",
+              "kind": "milestone",
+              "takenRatio": 1
+            }
+          ]
+        }
+      ],
+      "source": {
+        "label": "시안용 예시 데이터 (선배 설문 전)",
+        "asOf": "2026-10-11",
+        "isSample": true
+      }
+    },
+    {
+      "trackId": "security",
+      "steps": [
+        {
+          "semester": "1-1",
+          "items": [
+            {
+              "courseId": "programming-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-1",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "1-2",
+          "items": [
+            {
+              "courseId": "programming-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-2",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "2-1",
+          "items": [
+            {
+              "courseId": "data-structures",
+              "kind": "popular",
+              "takenRatio": 0.97
+            },
+            {
+              "courseId": "oop",
+              "kind": "popular",
+              "takenRatio": 0.88
+            },
+            {
+              "courseId": "data-communication",
+              "kind": "popular",
+              "takenRatio": 0.62
+            }
+          ]
+        },
+        {
+          "semester": "2-2",
+          "items": [
+            {
+              "courseId": "file-processing",
+              "kind": "popular",
+              "takenRatio": 0.74
+            },
+            {
+              "courseId": "automata",
+              "kind": "popular",
+              "takenRatio": 0.58
+            },
+            {
+              "courseId": "programming-languages",
+              "kind": "popular",
+              "takenRatio": 0.52
+            }
+          ]
+        },
+        {
+          "semester": "3-1",
+          "items": [
+            {
+              "courseId": "operating-systems",
+              "kind": "popular",
+              "takenRatio": 0.89
+            },
+            {
+              "courseId": "computer-networks",
+              "kind": "popular",
+              "takenRatio": 0.89
+            }
+          ]
+        },
+        {
+          "semester": "3-2",
+          "items": [
+            {
+              "courseId": "system-security",
+              "kind": "popular",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "algorithm-design",
+              "kind": "popular",
+              "takenRatio": 0.56
+            }
+          ]
+        },
+        {
+          "semester": "4-1",
+          "items": [
+            {
+              "courseId": "software-engineering",
+              "kind": "popular",
+              "takenRatio": 0.56
+            },
+            {
+              "courseId": "embedded-mobile",
+              "kind": "popular",
+              "takenRatio": 0.44
+            }
+          ]
+        },
+        {
+          "semester": "4-2",
+          "items": [
+            {
+              "label": "졸업종합시험",
+              "kind": "milestone",
+              "takenRatio": 1
+            }
+          ]
+        }
+      ],
+      "source": {
+        "label": "시안용 예시 데이터 (선배 설문 전)",
+        "asOf": "2026-10-11",
+        "isSample": true
+      }
+    },
+    {
+      "trackId": "embedded",
+      "steps": [
+        {
+          "semester": "1-1",
+          "items": [
+            {
+              "courseId": "programming-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-1",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-1",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "1-2",
+          "items": [
+            {
+              "courseId": "programming-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "calculus-2",
+              "kind": "required",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "humanity-2",
+              "kind": "required",
+              "takenRatio": 1
+            }
+          ]
+        },
+        {
+          "semester": "2-1",
+          "items": [
+            {
+              "courseId": "data-structures",
+              "kind": "popular",
+              "takenRatio": 0.97
+            },
+            {
+              "courseId": "oop",
+              "kind": "popular",
+              "takenRatio": 0.88
+            },
+            {
+              "courseId": "data-communication",
+              "kind": "popular",
+              "takenRatio": 0.62
+            }
+          ]
+        },
+        {
+          "semester": "2-2",
+          "items": [
+            {
+              "courseId": "file-processing",
+              "kind": "popular",
+              "takenRatio": 0.74
+            },
+            {
+              "courseId": "automata",
+              "kind": "popular",
+              "takenRatio": 0.58
+            },
+            {
+              "courseId": "programming-languages",
+              "kind": "popular",
+              "takenRatio": 0.52
+            }
+          ]
+        },
+        {
+          "semester": "3-1",
+          "items": [
+            {
+              "courseId": "microprocessors",
+              "kind": "popular",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "operating-systems",
+              "kind": "popular",
+              "takenRatio": 0.86
+            }
+          ]
+        },
+        {
+          "semester": "3-2",
+          "items": [
+            {
+              "courseId": "embedded-mobile",
+              "kind": "popular",
+              "takenRatio": 1
+            },
+            {
+              "courseId": "computer-networks",
+              "kind": "popular",
+              "takenRatio": 0.71
+            }
+          ]
+        },
+        {
+          "semester": "4-1",
+          "items": [
+            {
+              "courseId": "system-security",
+              "kind": "popular",
+              "takenRatio": 0.43
+            },
+            {
+              "courseId": "computer-graphics",
+              "kind": "popular",
+              "takenRatio": 0.29
+            }
+          ]
+        },
+        {
+          "semester": "4-2",
+          "items": [
+            {
+              "label": "졸업종합시험",
+              "kind": "milestone",
+              "takenRatio": 1
+            }
+          ]
+        }
+      ],
+      "source": {
+        "label": "시안용 예시 데이터 (선배 설문 전)",
+        "asOf": "2026-10-11",
+        "isSample": true
+      }
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-backend-1",
+      "trackId": "backend",
+      "cohort": "2019학번 졸업생",
+      "role": "커머스 회사 백엔드 개발자",
+      "quote": "운영체제를 일찍 들어 둔 게 서버 공부할 때 가장 오래 남았어요.",
+      "courseIds": [
+        "data-structures",
+        "operating-systems",
+        "database-design",
+        "computer-networks"
+      ]
+    },
+    {
+      "id": "story-backend-2",
+      "trackId": "backend",
+      "cohort": "2020학번 졸업생",
+      "role": "클라우드 인프라 엔지니어",
+      "quote": "컴퓨터네트워크는 3학년 1학기에 들으면 뒤 과목이 훨씬 편해져요.",
+      "courseIds": [
+        "data-communication",
+        "computer-networks",
+        "system-security"
+      ]
+    },
+    {
+      "id": "story-web-1",
+      "trackId": "web",
+      "cohort": "2019학번 졸업생",
+      "role": "웹 서비스 회사 프론트엔드 개발자",
+      "quote": "웹프로그래밍 과제로 만든 서비스가 첫 포트폴리오가 됐어요.",
+      "courseIds": [
+        "oop",
+        "web-programming",
+        "software-engineering"
+      ]
+    },
+    {
+      "id": "story-web-2",
+      "trackId": "web",
+      "cohort": "2021학번 4학년",
+      "role": "UI 개발 인턴",
+      "quote": "소프트웨어공학 팀 프로젝트에서 협업하는 방법을 처음 제대로 배웠어요.",
+      "courseIds": [
+        "web-programming",
+        "software-engineering",
+        "web-services"
+      ]
+    },
+    {
+      "id": "story-ai-1",
+      "trackId": "ai",
+      "cohort": "2018학번 졸업생",
+      "role": "대학원 석사과정 (컴퓨터 비전)",
+      "quote": "일반수학과 알고리즘설계를 탄탄히 해 둔 게 대학원에서 버팀목이 됐어요.",
+      "courseIds": [
+        "calculus-2",
+        "algorithm-design",
+        "artificial-intelligence"
+      ]
+    },
+    {
+      "id": "story-ai-2",
+      "trackId": "ai",
+      "cohort": "2020학번 졸업생",
+      "role": "데이터 분석가",
+      "quote": "면접에서 데이터마이닝 프로젝트를 가장 많이 물어봤어요.",
+      "courseIds": [
+        "database-design",
+        "data-mining",
+        "artificial-intelligence"
+      ]
+    },
+    {
+      "id": "story-security-1",
+      "trackId": "security",
+      "cohort": "2019학번 졸업생",
+      "role": "보안 컨설턴트",
+      "quote": "운영체제와 네트워크를 이해하고 나서야 보안 과목이 읽히기 시작했어요.",
+      "courseIds": [
+        "operating-systems",
+        "computer-networks",
+        "system-security"
+      ]
+    },
+    {
+      "id": "story-embedded-1",
+      "trackId": "embedded",
+      "cohort": "2018학번 졸업생",
+      "role": "가전 회사 펌웨어 개발자",
+      "quote": "마이크로프로세서 실습이 지금 하는 일과 가장 닮아 있어요.",
+      "courseIds": [
+        "microprocessors",
+        "embedded-mobile"
+      ]
+    }
+  ],
+  "professors": [
+    {
+      "id": "prof-kim",
+      "name": "김○○",
+      "field": "컴퓨터 비전·딥러닝",
+      "area": "ai",
+      "keywords": [
+        "이미지 인식",
+        "딥러닝",
+        "데이터셋"
+      ],
+      "courseIds": [
+        "artificial-intelligence",
+        "computer-graphics",
+        "data-mining"
+      ],
+      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
+    },
+    {
+      "id": "prof-lee",
+      "name": "이○○",
+      "field": "데이터베이스·빅데이터 처리",
+      "area": "system",
+      "keywords": [
+        "질의 처리",
+        "데이터 모델링",
+        "분산 저장"
+      ],
+      "courseIds": [
+        "database-design",
+        "file-processing",
+        "information-systems"
+      ],
+      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
+    },
+    {
+      "id": "prof-park",
+      "name": "박○○",
+      "field": "네트워크·분산 시스템",
+      "area": "system",
+      "keywords": [
+        "네트워크 프로토콜",
+        "클라우드",
+        "엣지 컴퓨팅"
+      ],
+      "courseIds": [
+        "computer-networks",
+        "data-communication"
+      ],
+      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
+    },
+    {
+      "id": "prof-choi",
+      "name": "최○○",
+      "field": "시스템 보안·암호",
+      "area": "security",
+      "keywords": [
+        "취약점 분석",
+        "암호 프로토콜",
+        "운영체제 보안"
+      ],
+      "courseIds": [
+        "system-security",
+        "operating-systems"
+      ],
+      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
+    },
+    {
+      "id": "prof-jeong",
+      "name": "정○○",
+      "field": "소프트웨어공학·HCI",
+      "area": "software",
+      "keywords": [
+        "사용자 경험",
+        "테스트 자동화",
+        "웹 서비스"
+      ],
+      "courseIds": [
+        "software-engineering",
+        "web-programming",
+        "web-services",
+        "oop",
+        "programming-1",
+        "programming-2"
+      ],
+      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
+    },
+    {
+      "id": "prof-han",
+      "name": "한○○",
+      "field": "임베디드·모바일 시스템",
+      "area": "system",
+      "keywords": [
+        "저전력 설계",
+        "실시간 시스템",
+        "IoT"
+      ],
+      "courseIds": [
+        "microprocessors",
+        "embedded-mobile"
+      ],
+      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
+    },
+    {
+      "id": "prof-yoon",
+      "name": "윤○○",
+      "field": "알고리즘·계산 이론",
+      "area": "software",
+      "keywords": [
+        "그래프 알고리즘",
+        "최적화",
+        "계산 복잡도"
+      ],
+      "courseIds": [
+        "algorithm-design",
+        "automata",
+        "data-structures"
+      ],
+      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
+    }
+  ],
+  "graduation": {
+    "id": "cse-2018",
+    "label": "2018학년도 입학자 기준 (예시)",
+    "totalCredits": 130,
+    "buckets": [
+      {
+        "id": "liberal",
+        "label": "교양",
+        "requiredCredits": 25,
+        "checklistCourseIds": [
+          "humanity-1",
+          "humanity-2",
+          "cap-1",
+          "cap-2",
+          "global-comm-1",
+          "global-comm-2",
+          "spirituality",
+          "sharing-love"
+        ],
+        "note": "기초필수 16학점 + 중핵교양 9학점. 인간학·글로벌커뮤니케이션은 1 → 2 순서로 들어요."
+      },
+      {
+        "id": "major-basic",
+        "label": "전공기초",
+        "requiredCredits": 15,
+        "checklistCourseIds": [
+          "calculus-1",
+          "calculus-2",
+          "programming-1",
+          "programming-2",
+          "natural-science"
+        ],
+        "note": "공학 영역 6학점 이상 + 본계열 외 선택 9학점 이상."
+      },
+      {
+        "id": "major",
+        "label": "전공",
+        "requiredCredits": 66,
+        "checklistCourseIds": [
+          "data-structures",
+          "oop",
+          "data-communication",
+          "file-processing",
+          "automata",
+          "programming-languages",
+          "operating-systems",
+          "computer-networks",
+          "software-engineering",
+          "system-security",
+          "information-systems",
+          "database-design",
+          "algorithm-design",
+          "artificial-intelligence",
+          "microprocessors",
+          "embedded-mobile",
+          "computer-graphics",
+          "data-mining",
+          "web-services"
+        ],
+        "note": "전공심화 기준 66학점 (단일전공 36학점)."
+      },
+      {
+        "id": "general",
+        "label": "일반선택",
+        "requiredCredits": 24,
+        "note": "졸업 학점 130에서 나머지 영역을 뺀 값이에요."
+      }
+    ],
+    "exam": {
+      "programs": [
+        {
+          "id": "deep",
+          "label": "심화전공",
+          "subjectCount": 4
+        },
+        {
+          "id": "double",
+          "label": "타 계열 복수전공",
+          "subjectCount": 3
+        }
+      ],
+      "englishWaivers": [
+        {
+          "level": 0,
+          "label": "없음"
+        },
+        {
+          "level": 1,
+          "label": "TOEIC 601~700 · 1과목 대체"
+        },
+        {
+          "level": 2,
+          "label": "TOEIC 701~800 · 2과목 대체"
+        },
+        {
+          "level": 3,
+          "label": "TOEIC 801 이상 · 3과목 대체"
+        }
+      ],
+      "alternativeNote": "졸업논문, 1급·공인 자격증, IT 대회 입상 중 하나가 있으면 졸업시험 점수 등급 A로 인정돼요.",
+      "subjectCourseIds": [
+        "data-structures",
+        "oop",
+        "data-communication",
+        "file-processing",
+        "automata",
+        "programming-languages",
+        "operating-systems",
+        "computer-networks",
+        "software-engineering",
+        "system-security",
+        "information-systems",
+        "database-design",
+        "algorithm-design",
+        "artificial-intelligence",
+        "microprocessors",
+        "embedded-mobile",
+        "computer-graphics",
+        "data-mining",
+        "web-services"
+      ]
+    },
+    "source": {
+      "label": "컴퓨터정보공학부 학사정보 · 2018학년도 입학자 기준표",
+      "asOf": "2026-10-08",
+      "isSample": true,
+      "url": "https://csie.catholic.ac.kr"
+    }
+  },
+  "events": [
+    {
+      "id": "midterm",
+      "title": "중간고사",
+      "start": "2026-10-20",
+      "end": "2026-10-26",
+      "kind": "exam"
+    },
+    {
+      "id": "withdraw",
+      "title": "수강철회 신청",
+      "start": "2026-10-28",
+      "end": "2026-10-30",
+      "kind": "deadline"
+    },
+    {
+      "id": "wishlist",
+      "title": "2027-1학기 희망과목 담기",
+      "start": "2026-11-16",
+      "end": "2026-11-20",
+      "kind": "registration"
+    },
+    {
+      "id": "final",
+      "title": "기말고사",
+      "start": "2026-12-14",
+      "end": "2026-12-19",
+      "kind": "exam"
+    },
+    {
+      "id": "break",
+      "title": "겨울방학 시작",
+      "start": "2026-12-21",
+      "kind": "holiday"
+    }
+  ],
+  "source": {
+    "label": "시안용 예시 데이터 (선배 설문 전)",
+    "asOf": "2026-10-11",
+    "isSample": true
+  }
+}
