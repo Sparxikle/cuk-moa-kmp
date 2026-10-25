@@ -24,6 +24,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.shared)
             api(libs.compose.components.resources)
+            implementation(libs.compose.ui.backhandler)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.ui)
@@ -35,10 +36,10 @@ kotlin {
     }
 }
 
-// The single source of the sample catalog is shared/data. Copied into app resources and bundled as the offline fallback.
+// The single source of the sample catalog and department list is shared/data. Copied into app resources and bundled as the offline fallback.
 val assembleComposeResources = tasks.register<Sync>("assembleComposeResources") {
     from("src/commonMain/composeResources")
-    from(rootProject.file("shared/data/sample-catalog.json")) { into("files") }
+    from(rootProject.file("shared/data")) { include("sample-catalog.json", "departments.json"); into("files") }
     into(layout.buildDirectory.dir("assembledComposeResources"))
 }
 

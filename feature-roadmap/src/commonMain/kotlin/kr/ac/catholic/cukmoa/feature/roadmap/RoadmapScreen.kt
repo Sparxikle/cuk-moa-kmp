@@ -117,8 +117,10 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
                 else PrimaryButton("관심 진로로", toggle, Modifier.widthIn(max = 120.dp), tinted = true)
             }
         }
-        roadmap?.steps?.forEachIndexed { i, step ->
-            item(key = "${track.id}-${step.semester}") { SemesterStep(catalog, student, step, track.seniorCount, last = i == roadmap.steps.lastIndex) }
+        // Recent semesters on top, 1st year 1st semester at the bottom
+        val steps = roadmap?.steps.orEmpty().sortedByDescending { it.semester.ordinal }
+        steps.forEachIndexed { i, step ->
+            item(key = "${track.id}-${step.semester}") { SemesterStep(catalog, student, step, track.seniorCount, last = i == steps.lastIndex) }
         }
         if (stories.isNotEmpty()) item {
             Section("선배 이야기", "실명 없이 학번과 지금 하는 일만 적어요") {

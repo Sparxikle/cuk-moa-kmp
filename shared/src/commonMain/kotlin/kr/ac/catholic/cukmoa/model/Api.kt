@@ -82,6 +82,7 @@ data class AnnouncementPage(
 @Serializable
 data class AnnouncementQuery(
     val source: List<String> = emptyList(),
+    /** Department board code. Applies only to department posts (source=dept); school notices are left as is. */
     val major: List<String> = emptyList(),
     val category: List<String> = emptyList(),
     val board: List<String> = emptyList(),
@@ -121,11 +122,5 @@ data class AnnouncementMeta(
     val scrapeRuns: List<ScrapeRun>,
 )
 
-/** Department codes and names. Shared by the server (scraper) and the app (filter chips). */
-val Majors: Map<String, String> = linkedMapOf(
-    "csie" to "컴퓨터정보공학",
-    "mtc" to "미디어콘텐츠",
-    "datascience" to "데이터사이언스",
-    "ice" to "정보통신전자공학",
-    "ai" to "인공지능",
-)
+/** Board code → department name. Shared by the server (collector) and the app (filter chips). */
+val Majors: Map<String, String> = DepartmentBoards.entries.associate { (name, code) -> code to name }

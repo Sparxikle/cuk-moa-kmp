@@ -212,17 +212,17 @@ fun Chip(text: String, tone: ChipTone = ChipTone.Neutral, modifier: Modifier = M
     )
 }
 
-/** Selectable chip (filter). */
+/** Selectable chip (filter). check=true adds a selection mark (✓) for multi-select. */
 @Composable
-fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
+fun FilterChip(text: String, selected: Boolean, check: Boolean = false, onClick: () -> Unit) {
     val c = AppTheme.colors
     val bg by animateColorAsState(if (selected) c.accent else c.surface)
     Text(
-        text,
+        if (check && selected) "✓ $text" else text,
         Modifier
             .clip(RoundedCornerShape(999.dp))
             .background(bg)
-            .clickable(role = Role.Tab, onClick = onClick)
+            .clickable(role = if (check) Role.Checkbox else Role.Tab, onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),
         color = if (selected) c.onAccent else c.ink2,
         style = AppTheme.type.subhead,

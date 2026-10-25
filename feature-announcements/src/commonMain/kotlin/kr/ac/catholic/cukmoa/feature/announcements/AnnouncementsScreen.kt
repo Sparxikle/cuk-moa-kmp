@@ -81,7 +81,14 @@ fun AnnouncementsScreen(student: StudentState) {
             vm.setAnnouncementSearch(search)
         }
     }
-    val majorName = student.major?.let { Majors[it] } ?: "학과"
+    // "My department" = the boards of my two majors. Hide the chip if none of my majors has announcements collected.
+    val majorName = student.majors.mapNotNull { Majors[it] }.let { names ->
+        when (names.size) {
+            0 -> null
+            1 -> names[0]
+            else -> "내 전공 ${names.size}곳"
+        }
+    }
 
     ScreenList(title = "공지", eyebrow = "학교·LMS·학과 게시판을 한곳에") {
         item {
@@ -104,15 +111,22 @@ fun AnnouncementsScreen(student: StudentState) {
                 )
                 Chips {
                     AnnouncementFilter.entries.forEach { f ->
+                        // If none of my majors has announcements collected yet, hide the "My department" filter
+                        if (f == AnnouncementFilter.Mine && majorName == null) return@forEach
                         FilterChip(
-                            if (f == AnnouncementFilter.Mine) majorName else f.label,
+                            if (f == AnnouncementFilter.Mine) majorName!! else f.label,
                             selected = state.filter == f,
                             onClick = { vm.setAnnouncementFilter(f) },
                         )
                     }
+                    FilterChip("전체", selected = state.filter == null, onClick = { vm.setAnnouncementFilter(null) })
                 }
                 Txt(
-                    if (state.loading && state.items.isEmpty()) "불러오는 중…" else "${state.total}개 · 고정 공지 먼저",
+                    when {
+                        state.loading && state.items.isEmpty() -> "불러오는 중…"
+                        majorName == null -> "${state.total}개 · 내 전공 게시판은 준비 중이에요 (지금은 AI전자정보융합대학)"
+                        else -> "${state.total}개 · 고정 공지 먼저"
+                    },
                     AppTheme.type.footnote,
                     Modifier.padding(horizontal = Space.xs),
                     tone = Tone.Ink2,

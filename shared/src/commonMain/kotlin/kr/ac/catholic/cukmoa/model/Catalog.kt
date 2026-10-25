@@ -189,6 +189,9 @@ enum class EventKind {
     @SerialName("registration") Registration,
     @SerialName("deadline") Deadline,
     @SerialName("holiday") Holiday,
+
+    /** Other academic events (Mass, faculty meetings, etc.) */
+    @SerialName("event") Event,
 }
 
 @Serializable

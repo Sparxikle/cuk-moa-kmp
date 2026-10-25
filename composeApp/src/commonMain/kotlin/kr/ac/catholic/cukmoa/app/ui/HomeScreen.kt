@@ -19,7 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -66,6 +66,7 @@ import kr.ac.catholic.cukmoa.logic.findTrack
 import kr.ac.catholic.cukmoa.logic.nextRecommendations
 import kr.ac.catholic.cukmoa.logic.shortDate
 import kr.ac.catholic.cukmoa.logic.today
+import kr.ac.catholic.cukmoa.logic.todayKst
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.Course
 import kr.ac.catholic.cukmoa.model.HomeCardId
@@ -83,9 +84,9 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
         trailing = {
             Box(
                 Modifier.size(38.dp).clip(CircleShape).background(AppTheme.colors.surface)
-                    .clickable(role = Role.Button, onClickLabel = "학년·진로·홈 구성 바꾸기") { nav.editProfile(false) },
+                    .clickable(role = Role.Button, onClickLabel = "설정") { nav.openSettings() },
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Default.Tune, "학년·진로·홈 구성 바꾸기", tint = AppTheme.colors.ink, modifier = Modifier.size(18.dp)) }
+            ) { Icon(Icons.Default.Settings, "설정", tint = AppTheme.colors.ink, modifier = Modifier.size(18.dp)) }
         },
     ) {
         item { StatusBanners() }
@@ -113,9 +114,9 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
         }
         item {
             Column(Modifier.contentWidth(), verticalArrangement = Arrangement.spacedBy(Space.m)) {
-                PrimaryButton("한눈에 화면 편집", onClick = { nav.editProfile(true) }, tinted = true)
+                PrimaryButton("설정 · 한눈에 화면 편집", onClick = nav.openSettings, tinted = true)
                 PrimaryButton("모듈 추가·관리", onClick = nav.manageModules, tinted = true)
-                DataNotice("학점·과목·선배 기록·일정은 시연용 예시예요. 공지는 학교 사이트에서 실시간으로 모아요.")
+                DataNotice("학점·과목·선배 기록은 시연용 예시예요. 공지·학사일정은 학교 사이트에서 실시간으로 모아요.")
             }
         }
     }
@@ -194,13 +195,24 @@ private fun StoryCard(catalog: Catalog, student: StudentState) {
 @Composable
 private fun EventsCard(catalog: Catalog) {
     val c = AppTheme.colors
-    val today = today(catalog)
-    val upcoming = catalog.events.filter { daysUntil(today, it.end ?: it.start) >= 0 }.take(3)
-    Section("다가오는 학사일정", "${shortDate(today)} 기준 예시 일정") {
+    val calendar by LocalAppViewModel.current.calendar.collectAsStateWithLifecycle()
+    // With the real academic calendar, use today's actual date; otherwise the catalog's sample schedule and sample reference date
+    val live = calendar
+    val today = if (live != null) todayKst() else today(catalog)
+    val events = live?.events ?: catalog.events
+    val upcoming = events.filter { daysUntil(today, it.end ?: it.start) >= 0 }.take(3)
+    Section(
+        "다가오는 학사일정",
+        if (live != null) "오늘(${shortDate(today)}) 기준 · 학교 학사일정 ${live.campus}교정" else "${shortDate(today)} 기준 예시 일정",
+    ) {
+        if (upcoming.isEmpty()) {
+            Card { Txt("남은 학사일정이 없어요.", AppTheme.type.callout, tone = Tone.Ink2) }
+            return@Section
+        }
         Group {
             upcoming.forEachIndexed { i, e ->
                 val days = daysUntil(today, e.start)
-                val soon = days in 0..10
+                val soon = days <= 10
                 val (_, m, d) = e.start.split('-')
                 ListRow(
                     e.title,

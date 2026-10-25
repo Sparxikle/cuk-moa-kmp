@@ -91,7 +91,33 @@ class ProgressTest {
         assertEquals(student, decodeStudentState(encodeStudentState(student)))
         assertNull(decodeStudentState("""{"grade": 9}"""))
         assertNull(decodeStudentState("not json"))
-        assertNull(decodeStudentState(encodeStudentState(student).replace("\"schemaVersion\":1", "\"schemaVersion\":99")))
+        assertNull(decodeStudentState(encodeStudentState(student).replace("\"schemaVersion\":2", "\"schemaVersion\":99")))
+    }
+
+    @Test
+    fun `v1 state with one major migrates to v2 with a majors list`() {
+        // v1 format stored on a real phone on 2026-10-25 (single major)
+        val v2 = kotlinx.serialization.json.Json.parseToJsonElement(encodeStudentState(sampleStudent(3))) as kotlinx.serialization.json.JsonObject
+        val v1 = kotlinx.serialization.json.JsonObject(
+            v2 - "majors" - "departments" + mapOf(
+                "schemaVersion" to kotlinx.serialization.json.JsonPrimitive(1),
+                "major" to kotlinx.serialization.json.JsonPrimitive("ai"),
+                "department" to kotlinx.serialization.json.JsonPrimitive("성심/인공지능학과"),
+            ),
+        ).toString()
+        val migrated = decodeStudentState(v1)!!
+        assertEquals(listOf("ai"), migrated.majors)
+        assertEquals(listOf("성심/인공지능학과"), migrated.departments)
+        assertEquals(2, migrated.schemaVersion)
+        assertEquals(sampleStudent(3).completedCourseIds, migrated.completedCourseIds) // Completion checks are kept
+    }
+
+    @Test
+    fun `epoch day converts back to the same ISO date`() {
+        for (d in listOf("1970-01-01", "2000-02-29", "2026-10-25", "2027-01-31", "2100-12-31")) {
+            assertEquals(d, kr.ac.catholic.cukmoa.logic.isoFromEpochDay(daysUntil("1970-01-01", d).toLong()))
+        }
+        assertEquals(java.time.LocalDate.now(java.time.ZoneId.of("Asia/Seoul")).toString(), kr.ac.catholic.cukmoa.logic.todayKst())
     }
 
     @Test

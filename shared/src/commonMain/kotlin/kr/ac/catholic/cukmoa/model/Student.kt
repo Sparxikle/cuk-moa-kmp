@@ -44,14 +44,20 @@ data class StudentState(
     /** Credits completed outside the catalog (stand-in for the transcript total) */
     val otherCredits: Map<BucketId, Int>,
     val exam: ExamState,
-    /** Announcements tab: my department (major) code. null means no department filter. */
-    val major: String? = "csie",
+    /**
+     * My majors (Department.id), up to 2. The first is the primary major, the second is the 2nd major (double major/minor).
+     * The school allows up to 2 majors regardless of college.
+     */
+    val departments: List<String> = emptyList(),
+    /** Announcement board codes of my majors (Department.board). Departments whose announcements aren't collected yet are left out. */
+    val majors: List<String> = listOf("csie"),
     /** Basis for the announcements "new" badge: firstSeen of the last announcement viewed */
     val announcementsSeenAt: String? = null,
     /** Enabled feature module IDs (order = tab order). null means the app default (all). Older stored values don't have it, hence the default. */
     val modules: List<String>? = null,
 ) {
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 1
+        const val CURRENT_SCHEMA_VERSION = 2
+        const val MAX_MAJORS = 2
     }
 }

@@ -44,6 +44,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kr.ac.catholic.cukmoa.app.ModuleRegistry
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
+import kr.ac.catholic.cukmoa.core.ui.AppBackHandler
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.theme.Radius
 import kr.ac.catholic.cukmoa.core.theme.Space
@@ -71,7 +73,7 @@ import kr.ac.catholic.cukmoa.core.ui.trackIcon
 import kr.ac.catholic.cukmoa.logic.defaultHomeCards
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.HomeCardId
-import kr.ac.catholic.cukmoa.model.Majors
+import kr.ac.catholic.cukmoa.model.Department
 import kr.ac.catholic.cukmoa.model.StudentState
 import kr.ac.catholic.cukmoa.model.TrackId
 
@@ -84,9 +86,9 @@ private val gradeInfo = listOf(
     4 to "졸업요건을 마무리하는 중",
 )
 
-private data class CardInfo(val id: HomeCardId, val title: String, val detail: String, val icon: ImageVector)
+internal data class CardInfo(val id: HomeCardId, val title: String, val detail: String, val icon: ImageVector)
 
-private val homeCardInfo = listOf(
+internal val homeCardInfo = listOf(
     CardInfo(HomeCardId.Explore, "진로 둘러보기", "다섯 갈래 진로를 넘겨 보며 비교", Icons.Default.Route),
     CardInfo(HomeCardId.Progress, "졸업까지 남은 학점", "130칸 중 어디까지 채웠는지", Icons.Default.School),
     CardInfo(HomeCardId.Announcements, "새 공지", "학과·학교 공지를 한곳에서", Icons.Default.Campaign),
@@ -105,7 +107,10 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
     var index by remember { mutableIntStateOf(if (startAtCards) steps.indexOf(Step.Cards) else 0) }
     var forward by remember { mutableStateOf(true) }
     var grade by remember { mutableIntStateOf(student.grade) }
-    var major by remember { mutableStateOf(student.major) }
+    val departments by vm.departments.collectAsStateWithLifecycle()
+    var picked by remember { mutableStateOf<List<Department>?>(null) }
+    // If nothing has been picked yet, show the stored majors (or board codes)
+    val majors = picked ?: departments.findAll(student.departments, student.majors)
     var tracks by remember { mutableStateOf(student.trackIds) }
     var cards by remember { mutableStateOf(student.homeCards) }
     var cardsTouched by remember { mutableStateOf(editing) }
@@ -118,9 +123,11 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
     fun finish() {
         vm.completeOnboarding(grade, tracks, cards)
         vm.setModules(modules)
-        if (major != student.major) vm.setMajor(major)
+        vm.setDepartments(majors)
         onClose()
     }
+
+    AppBackHandler(enabled = index > 0) { go(-1) }
 
     Column(Modifier.fillMaxSize().background(c.bg).statusBarsPadding().navigationBarsPadding()) {
         // Header: back/close + step indicator
@@ -178,17 +185,8 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                                 )
                             }
                         }
-                        Step.Major -> StepFrame("어느 전공 공지를 받을까요?", "공지 탭과 홈에 이 전공 게시판 글을 먼저 보여 드려요.") {
-                            Group {
-                                Majors.entries.forEachIndexed { i, (code, name) ->
-                                    ListRow(
-                                        name, "$code.catholic.ac.kr 게시판",
-                                        divider = i < Majors.size - 1,
-                                        trailing = { if (code == major) Icon(Icons.Default.Check, "선택됨", tint = c.accent) },
-                                        onClick = { major = code },
-                                    )
-                                }
-                            }
+                        Step.Major -> StepFrame("전공이 무엇인가요?", "단과대학과 상관없이 2개까지 고를 수 있어요 (주전공 + 복수·부전공). 내 전공 게시판 공지를 먼저 보여 드려요.") {
+                            DepartmentPicker(departments, majors) { picked = it }
                         }
                         Step.Tracks -> TracksStep(catalog, tracks, grade) { tracks = it }
                         Step.Modules -> StepFrame("어떤 기능을 쓸까요?", "필요한 기능만 골라 앱을 가볍게 써요. 나중에 한눈에 → 모듈 추가·관리에서 바꿀 수 있어요.") {

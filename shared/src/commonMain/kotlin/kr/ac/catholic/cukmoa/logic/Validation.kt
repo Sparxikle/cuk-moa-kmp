@@ -1,6 +1,8 @@
 package kr.ac.catholic.cukmoa.logic
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.int
@@ -65,5 +67,18 @@ fun decodeStudentState(text: String): StudentState? = runCatching {
 
 fun encodeStudentState(state: StudentState): String = ApiJson.encodeToString(StudentState.serializer(), state)
 
-/** v → v+1 conversions. Add one line here whenever the format changes. Example: 2 to { it + ("newField" to JsonPrimitive(0)) } */
-private val migrations: Map<Int, (JsonObject) -> JsonObject> = emptyMap()
+/** v → v+1 conversions. Add one line here whenever the format changes. */
+private val migrations: Map<Int, (JsonObject) -> JsonObject> = mapOf(
+    // v1 → v2: single major (major, department) → up to 2 majors (majors, departments)
+    1 to { old ->
+        val major = (old["major"] as? JsonPrimitive)?.contentOrNull
+        val department = (old["department"] as? JsonPrimitive)?.contentOrNull
+        JsonObject(
+            old - "major" - "department" + mapOf(
+                "schemaVersion" to JsonPrimitive(2),
+                "majors" to JsonArray(listOfNotNull(major).map(::JsonPrimitive)),
+                "departments" to JsonArray(listOfNotNull(department).map(::JsonPrimitive)),
+            ),
+        )
+    },
+)

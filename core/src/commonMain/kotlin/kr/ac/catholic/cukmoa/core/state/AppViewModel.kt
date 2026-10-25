@@ -19,7 +19,10 @@ import kr.ac.catholic.cukmoa.model.Announcement
 import kr.ac.catholic.cukmoa.model.AnnouncementQuery
 import kr.ac.catholic.cukmoa.model.AnnouncementSource
 import kr.ac.catholic.cukmoa.model.ApiJson
+import kr.ac.catholic.cukmoa.model.CalendarResponse
 import kr.ac.catholic.cukmoa.model.Catalog
+import kr.ac.catholic.cukmoa.model.Department
+import kr.ac.catholic.cukmoa.model.DepartmentList
 import kr.ac.catholic.cukmoa.model.ExamState
 import kr.ac.catholic.cukmoa.model.HomeCardId
 import kr.ac.catholic.cukmoa.model.StudentState
@@ -52,22 +55,26 @@ sealed interface CatalogStatus {
  */
 enum class StorageStatus { Ok, Unreadable, SaveFailed }
 
-enum class AnnouncementFilter(val label: String) {
-    Mine("내 학과"),
-    School("학교"),
-    Outside("공모·대외"),
-    All("전체");
+/** Picks one announcement filter. null means all. */
+enum class AnnouncementFilter(val label: String, val sources: List<String>) {
+    Mine("내 학과", listOf(AnnouncementSource.DEPT)),
+    School("학교", listOf(AnnouncementSource.MAIN, AnnouncementSource.LMS)),
+    Events("행사", listOf(AnnouncementSource.EVENT)),
+    Outside("공모·대외", listOf(AnnouncementSource.OUTSIDE));
 
-    fun toQuery(major: String?): AnnouncementQuery = when (this) {
-        Mine -> AnnouncementQuery(source = listOf(AnnouncementSource.DEPT), major = listOfNotNull(major))
-        School -> AnnouncementQuery(source = listOf(AnnouncementSource.MAIN, AnnouncementSource.LMS, AnnouncementSource.EVENT))
-        Outside -> AnnouncementQuery(source = listOf(AnnouncementSource.OUTSIDE))
-        All -> AnnouncementQuery()
+    companion object {
+        /** "My department" shows the boards of both majors together. */
+        fun query(filter: AnnouncementFilter?, majors: List<String>): AnnouncementQuery = when (filter) {
+            null -> AnnouncementQuery()
+            Mine -> AnnouncementQuery(source = Mine.sources, major = majors)
+            else -> AnnouncementQuery(source = filter.sources)
+        }
     }
 }
 
 data class AnnouncementsState(
-    val filter: AnnouncementFilter = AnnouncementFilter.Mine,
+    /** null = all */
+    val filter: AnnouncementFilter? = AnnouncementFilter.Mine,
     val search: String = "",
     val items: List<Announcement> = emptyList(),
     val total: Long = 0,
@@ -81,6 +88,8 @@ data class AnnouncementsState(
 
 private const val STUDENT_KEY = "student"
 private const val CATALOG_KEY = "catalog.live"
+private const val DEPARTMENTS_KEY = "departments.live"
+private const val CALENDAR_KEY = "calendar.live"
 private const val PAGE = 20
 
 class AppViewModel(private val platform: Platform) : ViewModel() {
@@ -102,7 +111,19 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     val roadmapTrack: StateFlow<TrackId?> = _roadmapTrack.asStateFlow()
     fun requestRoadmap(track: TrackId) { _roadmapTrack.value = track }
 
-    private val _announcements = MutableStateFlow(AnnouncementsState())
+    /** School department list (bundled snapshot → latest from the server) */
+    private val _departments = MutableStateFlow<DepartmentList?>(null)
+    val departments: StateFlow<DepartmentList?> = _departments.asStateFlow()
+
+    /** Real academic calendar (server). null until received → screens use the catalog's sample schedule. */
+    private val _calendar = MutableStateFlow<CalendarResponse?>(
+        store.read(CALENDAR_KEY)?.let { runCatching { ApiJson.decodeFromString(CalendarResponse.serializer(), it) }.getOrNull() },
+    )
+    val calendar: StateFlow<CalendarResponse?> = _calendar.asStateFlow()
+
+    private val _announcements = MutableStateFlow(
+        AnnouncementsState(filter = if (_student.value.majors.isNotEmpty()) AnnouncementFilter.Mine else null),
+    )
     val announcements: StateFlow<AnnouncementsState> = _announcements.asStateFlow()
     private var announcementsJob: Job? = null
 
@@ -113,7 +134,27 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
             _catalog.value = cached ?: parseCatalog(Res.readBytes("files/sample-catalog.json").decodeToString())
             refreshCatalog()
         }
+        viewModelScope.launch {
+            val cached = store.read(DEPARTMENTS_KEY)?.let { runCatching { ApiJson.decodeFromString(DepartmentList.serializer(), it) }.getOrNull() }
+            _departments.value = cached
+                ?: ApiJson.decodeFromString(DepartmentList.serializer(), Res.readBytes("files/departments.json").decodeToString())
+            runCatching { api.departments() }.onSuccess {
+                _departments.value = it
+                store.write(DEPARTMENTS_KEY, ApiJson.encodeToString(DepartmentList.serializer(), it))
+            }
+        }
+        refreshCalendar()
         refreshAnnouncements()
+    }
+
+    fun refreshCalendar() {
+        viewModelScope.launch {
+            runCatching { api.calendar() }.onSuccess {
+                if (it.events.isEmpty()) return@onSuccess
+                _calendar.value = it
+                store.write(CALENDAR_KEY, ApiJson.encodeToString(CalendarResponse.serializer(), it))
+            }
+        }
     }
 
     // ---- Catalog ----
@@ -162,7 +203,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
 
     fun completeOnboarding(grade: Int, trackIds: List<TrackId>, homeCards: List<HomeCardId>) = update { s ->
         // When the year changes, swap in that year's sample course record. If the year is unchanged, the user's checkmarks are kept.
-        val base = if (grade == s.grade) s else sampleStudent(grade, trackIds).copy(major = s.major)
+        val base = if (grade == s.grade) s else sampleStudent(grade, trackIds).copy(majors = s.majors, departments = s.departments)
         base.copy(onboarded = true, grade = grade, trackIds = trackIds, homeCards = homeCards)
     }
 
@@ -183,14 +224,35 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     fun setTracks(trackIds: List<TrackId>) = update { it.copy(trackIds = trackIds) }
     fun setExam(transform: (ExamState) -> ExamState) = update { it.copy(exam = transform(it.exam)) }
 
-    fun setMajor(major: String?) {
-        update { it.copy(major = major) }
+    /** Sets the majors (up to 2; the first is the primary major). For departments with collected announcements, also sets the board codes. */
+    fun setDepartments(list: List<Department>) {
+        val picked = list.take(StudentState.MAX_MAJORS)
+        update { it.copy(departments = picked.map { d -> d.id }, majors = picked.mapNotNull { d -> d.board }) }
+        _announcements.update { it.copy(filter = if (picked.any { d -> d.board != null }) AnnouncementFilter.Mine else null) }
         refreshAnnouncements()
+    }
+
+    fun setGrade(grade: Int, resetRecords: Boolean) = update { s ->
+        if (resetRecords) sampleStudent(grade, s.trackIds).copy(
+            onboarded = true, homeCards = s.homeCards, departments = s.departments, majors = s.majors,
+            modules = s.modules, announcementsSeenAt = s.announcementsSeenAt,
+        ) else s.copy(grade = grade, currentSemester = kr.ac.catholic.cukmoa.model.SemesterKey.of(grade, 2))
+    }
+
+    fun setHomeCards(cards: List<HomeCardId>) = update { it.copy(homeCards = cards) }
+
+    /** Resets the course record to the sample for the current year (Settings → Data). */
+    fun resetRecords() = setGrade(_student.value.grade, resetRecords = true)
+
+    fun resetAnnouncementsSeen() {
+        update { it.copy(announcementsSeenAt = null) }
+        _announcements.update { it.copy(newCount = 0) }
     }
 
     // ---- Announcements ----
 
-    fun setAnnouncementFilter(filter: AnnouncementFilter) {
+    /** null = all */
+    fun setAnnouncementFilter(filter: AnnouncementFilter?) {
         _announcements.update { it.copy(filter = filter) }
         loadAnnouncements(reset = true)
     }
@@ -208,12 +270,13 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     fun refreshAnnouncements() {
         loadAnnouncements(reset = true)
         viewModelScope.launch {
-            val major = _student.value.major
+            val majors = _student.value.majors
+            val highlightFilter = if (majors.isNotEmpty()) AnnouncementFilter.Mine else AnnouncementFilter.School
             runCatching {
-                val mine = api.announcements(AnnouncementFilter.Mine.toQuery(major).copy(limit = 3, pinnedFirst = false))
+                val mine = api.announcements(AnnouncementFilter.query(highlightFilter, majors).copy(limit = 3, pinnedFirst = false))
                 val seenAt = _student.value.announcementsSeenAt
                 val fresh = if (seenAt == null) 0
-                else api.announcements(AnnouncementQuery(source = listOf(AnnouncementSource.DEPT), major = listOfNotNull(major), since = seenAt, limit = 1)).total
+                else api.announcements(AnnouncementFilter.query(highlightFilter, majors).copy(since = seenAt, limit = 1)).total
                 _announcements.update { it.copy(highlights = mine.items, newCount = fresh) }
             }
         }
@@ -237,7 +300,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         _announcements.update { it.copy(loading = true, error = null) }
         announcementsJob = viewModelScope.launch {
             try {
-                val query = s.filter.toQuery(_student.value.major).copy(
+                val query = AnnouncementFilter.query(s.filter, _student.value.majors).copy(
                     q = s.search.takeIf { it.isNotBlank() },
                     limit = PAGE,
                     offset = offset,

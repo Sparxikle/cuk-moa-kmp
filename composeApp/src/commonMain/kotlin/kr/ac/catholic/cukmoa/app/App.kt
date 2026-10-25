@@ -29,6 +29,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.ac.catholic.cukmoa.app.ui.HomeScreen
 import kr.ac.catholic.cukmoa.app.ui.ModulesScreen
 import kr.ac.catholic.cukmoa.app.ui.OnboardingScreen
+import kr.ac.catholic.cukmoa.app.ui.SettingsScreen
+import kr.ac.catholic.cukmoa.core.ui.AppBackHandler
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.LocalNavigator
 import kr.ac.catholic.cukmoa.core.Navigator
@@ -62,8 +64,8 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
 
         var route by rememberSaveable { mutableStateOf(initialRoute) }
         var sheet by remember { mutableStateOf<Sheet?>(null) }
-        var editing by remember { mutableStateOf<Boolean?>(null) } // null: closed, true: start from the home cards step
         var managing by rememberSaveable { mutableStateOf(initialRoute == Routes.MODULES) }
+        var settings by rememberSaveable { mutableStateOf(initialRoute == Routes.SETTINGS) }
 
         val navigator = remember {
             fun enabled(id: String) = currentModules.any { it.id == id }
@@ -80,7 +82,7 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
                     vm.requestRoadmap(track)
                     if (enabled(Routes.ROADMAP)) route = Routes.ROADMAP else managing = true
                 },
-                editProfile = { editing = it },
+                openSettings = { settings = true },
                 manageModules = { managing = true },
                 isEnabled = ::enabled,
             )
@@ -90,20 +92,21 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
         val c = catalog ?: return@AppTheme Box(Modifier.fillMaxSize().background(AppTheme.colors.bg))
 
         CompositionLocalProvider(LocalNavigator provides navigator, LocalAppViewModel provides vm) {
-            if (!student.onboarded || editing != null) {
-                OnboardingScreen(
-                    catalog = c,
-                    student = student,
-                    editing = student.onboarded,
-                    startAtCards = editing == true,
-                    onClose = { editing = null },
-                )
+            if (!student.onboarded) {
+                OnboardingScreen(catalog = c, student = student, editing = false, startAtCards = false, onClose = {})
+                return@CompositionLocalProvider
+            }
+            if (settings) {
+                SettingsScreen(c, student, platform.apiBaseUrl, onBack = { settings = false })
                 return@CompositionLocalProvider
             }
             if (managing) {
+                AppBackHandler { managing = false }
                 ModulesScreen(modules.map { it.id }, vm::setModules, onBack = { managing = false })
                 return@CompositionLocalProvider
             }
+            // Back: on another tab, go to the dashboard; on the dashboard, close the app (system default)
+            AppBackHandler(enabled = route != Routes.HOME && sheet == null) { route = Routes.HOME }
 
             // If the current tab's module was turned off, go home
             if (route != Routes.HOME && modules.none { it.id == route }) route = Routes.HOME

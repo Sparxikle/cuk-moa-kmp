@@ -55,6 +55,9 @@ object Routes {
 
     /** Module manager screen (a shell screen, not a module) */
     const val MODULES = "modules"
+
+    /** Settings screen */
+    const val SETTINGS = "settings"
 }
 
 /** Navigation actions usable from any screen. Navigating to a disabled module makes the shell open the module manager. */
@@ -63,7 +66,7 @@ class Navigator(
     val openCourse: (String) -> Unit,
     val openProfessor: (String) -> Unit,
     val openRoadmap: (TrackId) -> Unit,
-    val editProfile: (startAtCards: Boolean) -> Unit,
+    val openSettings: () -> Unit,
     val manageModules: () -> Unit,
     /** Whether a module is enabled (e.g. hide the "로드맵" link when the roadmap is off) */
     val isEnabled: (moduleId: String) -> Boolean,
