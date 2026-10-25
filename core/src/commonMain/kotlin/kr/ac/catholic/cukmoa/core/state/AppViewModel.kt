@@ -219,10 +219,14 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         }
     }
 
-    /** Opening the announcements tab marks all announcements received so far as "seen". */
+    /**
+     * Opening the announcements tab marks all announcements so far as "seen".
+     * Using the newest post on screen would miss newer posts, since pinned posts sort first → use the current time.
+     */
+    @OptIn(kotlin.time.ExperimentalTime::class)
     fun markAnnouncementsSeen() {
-        val newest = (_announcements.value.items + _announcements.value.highlights).maxOfOrNull { it.firstSeen } ?: return
-        update { it.copy(announcementsSeenAt = newest) }
+        val now = kotlin.time.Clock.System.now().toString()
+        update { it.copy(announcementsSeenAt = now) }
         _announcements.update { it.copy(newCount = 0) }
     }
 

@@ -137,7 +137,8 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
                     }
                 },
             ) { padding ->
-                Box(Modifier.padding(padding)) {
+                // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
+                Box(Modifier.padding(bottom = padding.calculateBottomPadding())) {
                     val module = ModuleRegistry.byId(route)
                     if (module == null) HomeScreen(c, student, modules) else module.Screen(c, student)
                 }

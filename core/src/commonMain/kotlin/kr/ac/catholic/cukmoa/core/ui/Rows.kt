@@ -63,7 +63,14 @@ fun StatusBanners() {
     val storage by vm.storage.collectAsStateWithLifecycle()
     Column(Modifier.contentWidth(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
         if (status is CatalogStatus.Offline) {
-            Banner("서버에 연결하지 못해 저장된 데이터로 보여 드려요.", "다시 연결", vm::refreshCatalog)
+            Banner(
+                "서버에 연결하지 못해 저장된 데이터로 보여 드려요.",
+                "다시 연결",
+                onAction = {
+                    vm.refreshCatalog()
+                    vm.refreshAnnouncements()
+                },
+            )
         }
         when (storage) {
             StorageStatus.Unreadable ->
