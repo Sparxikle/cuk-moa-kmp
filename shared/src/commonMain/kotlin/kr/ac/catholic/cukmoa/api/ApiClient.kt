@@ -14,6 +14,7 @@ import kr.ac.catholic.cukmoa.model.AnnouncementMeta
 import kr.ac.catholic.cukmoa.model.CalendarResponse
 import kr.ac.catholic.cukmoa.model.DepartmentList
 import kr.ac.catholic.cukmoa.model.FacultyList
+import kr.ac.catholic.cukmoa.model.MajorRoadmapList
 import kr.ac.catholic.cukmoa.model.AnnouncementPage
 import kr.ac.catholic.cukmoa.model.AnnouncementQuery
 import kr.ac.catholic.cukmoa.model.ApiJson
@@ -60,6 +61,10 @@ class ApiClient(baseUrl: String, timeoutMs: Long = 5_000) {
     suspend fun announcementMeta(): AnnouncementMeta = get("/api/v1/announcements/meta")
 
     suspend fun departments(): DepartmentList = get("/api/v1/departments")
+
+    suspend fun roadmaps(majors: List<String> = emptyList()): MajorRoadmapList = get("/api/v1/roadmaps") {
+        if (majors.isNotEmpty()) parameter("major", majors.joinToString(","))
+    }
 
     suspend fun professors(majors: List<String> = emptyList()): FacultyList = get("/api/v1/professors") {
         if (majors.isNotEmpty()) parameter("major", majors.joinToString(","))

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -83,7 +84,18 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
     val listState = rememberLazyListState()
     LaunchedEffect(track.id) { listState.animateScrollToItem(catalog.tracks.indexOf(track).coerceAtLeast(0)) }
 
-    ScreenList(title = "로드맵", eyebrow = "선배들이 실제로 들은 순서") {
+    val roadmaps by vm.roadmaps.collectAsStateWithLifecycle()
+    val ui = rememberRoadmapUiState(student, roadmaps)
+    // Opening a specific track's senior records from home switches to the seniors' course records view
+    LaunchedEffect(requestedTrack) { if (requestedTrack != null) ui.official = false }
+    val official = ui.official && roadmaps != null
+
+    ScreenList(title = "로드맵", eyebrow = if (official) "학과가 안내하는 학기별 전공 과목" else "선배들이 실제로 들은 순서") {
+        if (roadmaps != null) item { Column(Modifier.contentWidth()) { RoadmapModeChips(ui.official) { ui.official = it } } }
+        if (official) {
+            officialRoadmap(roadmaps!!, catalog, student, ui.major) { ui.major = it }
+            return@ScreenList
+        }
         item {
             LazyRow(state = listState, horizontalArrangement = Arrangement.spacedBy(Space.m), contentPadding = PaddingValues(end = Space.l), modifier = Modifier.contentWidth()) {
                 items(catalog.tracks, key = { it.id.name }) { t ->

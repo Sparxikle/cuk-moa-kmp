@@ -24,6 +24,7 @@ import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.Department
 import kr.ac.catholic.cukmoa.model.DepartmentList
 import kr.ac.catholic.cukmoa.model.FacultyList
+import kr.ac.catholic.cukmoa.model.MajorRoadmapList
 import kr.ac.catholic.cukmoa.model.ExamState
 import kr.ac.catholic.cukmoa.model.HomeCardId
 import kr.ac.catholic.cukmoa.model.StudentState
@@ -92,6 +93,7 @@ private const val CATALOG_KEY = "catalog.live"
 private const val DEPARTMENTS_KEY = "departments.live"
 private const val CALENDAR_KEY = "calendar.live"
 private const val FACULTY_KEY = "faculty.live"
+private const val ROADMAPS_KEY = "roadmaps.live"
 private const val PAGE = 20
 
 class AppViewModel(private val platform: Platform) : ViewModel() {
@@ -139,6 +141,22 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         }
     }
 
+    /** Official department major roadmaps (College of AI, Electronics & Information Convergence). null until received → the roadmap tab shows only seniors' records (sample). */
+    private val _roadmaps = MutableStateFlow<MajorRoadmapList?>(
+        store.read(ROADMAPS_KEY)?.let { runCatching { ApiJson.decodeFromString(MajorRoadmapList.serializer(), it) }.getOrNull() },
+    )
+    val roadmaps: StateFlow<MajorRoadmapList?> = _roadmaps.asStateFlow()
+
+    fun refreshRoadmaps() {
+        viewModelScope.launch {
+            runCatching { api.roadmaps() }.onSuccess {
+                if (it.items.isEmpty()) return@onSuccess
+                _roadmaps.value = it
+                store.write(ROADMAPS_KEY, ApiJson.encodeToString(MajorRoadmapList.serializer(), it))
+            }
+        }
+    }
+
     private val _announcements = MutableStateFlow(
         AnnouncementsState(filter = if (_student.value.majors.isNotEmpty()) AnnouncementFilter.Mine else null),
     )
@@ -163,6 +181,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         }
         refreshCalendar()
         refreshFaculty()
+        refreshRoadmaps()
         refreshAnnouncements()
     }
 
