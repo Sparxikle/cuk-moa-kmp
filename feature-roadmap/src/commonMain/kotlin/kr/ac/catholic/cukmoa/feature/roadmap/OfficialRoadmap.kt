@@ -80,12 +80,17 @@ fun LazyListScope.officialRoadmap(
         return
     }
 
-    // Recent semesters on top (toSortedMap is JVM-only, so common code uses a sorted list)
-    val bySemester = roadmap.entries.groupBy { it.semester }.entries.sortedByDescending { it.key.ordinal }
-    bySemester.forEach { (semester, entries) ->
-        item(key = "official-${roadmap.major}-$semester") {
-            val now = semester == student.currentSemester
-            Section(semester.label + if (now) " · 지금" else "", "${entries.size}과목") {
+    // If the data was transcribed from an image, say so and link to the original image too
+    if (roadmap.note != null) item { TranscribedNotice(roadmap.note!!, roadmap.url) }
+
+    // Recent semesters (years) on top. Departments with only years and no semesters are grouped like "3학년".
+    // (toSortedMap is JVM-only, so common code uses a sorted list)
+    val byPeriod = roadmap.entries.groupBy { it.order }.entries.sortedByDescending { it.key }
+    byPeriod.forEach { (order, entries) ->
+        item(key = "official-${roadmap.major}-$order") {
+            val first = entries.first()
+            val now = if (first.semester != null) first.semester == student.currentSemester else first.yearLevel == student.grade
+            Section(first.periodLabel + if (now) " · 지금" else "", "${entries.size}과목") {
                 Group {
                     entries.forEachIndexed { i, e ->
                         val course = catalogByKey[courseKey(e.name)]
@@ -120,6 +125,15 @@ private fun OfficialRow(name: String, track: String, marks: List<String>, course
             }
         },
     )
+}
+
+@Composable
+private fun TranscribedNotice(note: String, url: String) {
+    val uri = LocalUriHandler.current
+    Card {
+        Txt(note, AppTheme.type.callout, tone = Tone.Ink2)
+        PrimaryButton("학과 홈페이지의 원본 로드맵 보기", onClick = { runCatching { uri.openUri(url) } }, tinted = true)
+    }
 }
 
 @Composable
