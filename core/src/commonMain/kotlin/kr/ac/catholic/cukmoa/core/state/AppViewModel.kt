@@ -23,6 +23,7 @@ import kr.ac.catholic.cukmoa.model.CalendarResponse
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.Department
 import kr.ac.catholic.cukmoa.model.DepartmentList
+import kr.ac.catholic.cukmoa.model.FacultyList
 import kr.ac.catholic.cukmoa.model.ExamState
 import kr.ac.catholic.cukmoa.model.HomeCardId
 import kr.ac.catholic.cukmoa.model.StudentState
@@ -90,6 +91,7 @@ private const val STUDENT_KEY = "student"
 private const val CATALOG_KEY = "catalog.live"
 private const val DEPARTMENTS_KEY = "departments.live"
 private const val CALENDAR_KEY = "calendar.live"
+private const val FACULTY_KEY = "faculty.live"
 private const val PAGE = 20
 
 class AppViewModel(private val platform: Platform) : ViewModel() {
@@ -121,6 +123,22 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     )
     val calendar: StateFlow<CalendarResponse?> = _calendar.asStateFlow()
 
+    /** Real professor profiles (College of AI, Electronics & Information Convergence). null until received → screens use the catalog's sample professors. */
+    private val _faculty = MutableStateFlow<FacultyList?>(
+        store.read(FACULTY_KEY)?.let { runCatching { ApiJson.decodeFromString(FacultyList.serializer(), it) }.getOrNull() },
+    )
+    val faculty: StateFlow<FacultyList?> = _faculty.asStateFlow()
+
+    fun refreshFaculty() {
+        viewModelScope.launch {
+            runCatching { api.professors() }.onSuccess {
+                if (it.items.isEmpty()) return@onSuccess
+                _faculty.value = it
+                store.write(FACULTY_KEY, ApiJson.encodeToString(FacultyList.serializer(), it))
+            }
+        }
+    }
+
     private val _announcements = MutableStateFlow(
         AnnouncementsState(filter = if (_student.value.majors.isNotEmpty()) AnnouncementFilter.Mine else null),
     )
@@ -144,6 +162,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
             }
         }
         refreshCalendar()
+        refreshFaculty()
         refreshAnnouncements()
     }
 

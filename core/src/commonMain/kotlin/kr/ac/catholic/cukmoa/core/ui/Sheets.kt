@@ -43,7 +43,7 @@ import kr.ac.catholic.cukmoa.model.StudentState
 private fun DetailSheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), // One back press closes it
         containerColor = AppTheme.colors.bg,
     ) {
         Column(

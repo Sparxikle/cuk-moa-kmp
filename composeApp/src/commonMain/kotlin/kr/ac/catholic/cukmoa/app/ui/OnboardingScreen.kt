@@ -96,7 +96,7 @@ internal val homeCardInfo = listOf(
     CardInfo(HomeCardId.Saved, "담은 과목", "책갈피로 모아 둔 다음 학기 후보", Icons.Default.Bookmark),
     CardInfo(HomeCardId.Events, "다가오는 학사일정", "시험·신청 기간을 D-day로", Icons.Default.CalendarMonth),
     CardInfo(HomeCardId.Story, "선배 한마디", "같은 진로 선배의 수강 경험", Icons.Default.FormatQuote),
-    CardInfo(HomeCardId.Professors, "관련 교수님", "관심 분야 과목을 맡는 교수님", Icons.Default.Group),
+    CardInfo(HomeCardId.Professors, "내 전공 교수님", "내 전공 학과의 교수님과 연구분야", Icons.Default.Group),
 )
 
 @Composable

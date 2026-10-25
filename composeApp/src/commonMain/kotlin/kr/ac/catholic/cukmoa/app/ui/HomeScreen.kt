@@ -101,7 +101,7 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
                     HomeCardId.Saved -> SavedCard(catalog, student)
                     HomeCardId.Story -> StoryCard(catalog, student)
                     HomeCardId.Events -> EventsCard(catalog)
-                    HomeCardId.Professors -> ProfessorsCard(catalog, student)
+                    HomeCardId.Professors -> provider?.HomeCard(id, catalog, student)
                     HomeCardId.Explore -> ExploreCard(catalog)
                 }
             }
@@ -232,18 +232,6 @@ private fun EventsCard(catalog: Catalog) {
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ProfessorsCard(catalog: Catalog, student: StudentState) {
-    val nav = LocalNavigator.current
-    val track = catalog.findTrack(student.trackIds.firstOrNull())
-    val keys = track?.keyCourseIds.orEmpty().toSet()
-    val related = catalog.professors.filter { p -> p.courseIds.any { it in keys } }
-    val list = related.ifEmpty { catalog.professors }.take(3)
-    Section(track?.let { "${it.shortName} 관련 교수님" } ?: "교수님", action = ("전체" to { nav.open(Routes.PROFESSORS) }).takeIf { nav.isEnabled(Routes.PROFESSORS) }) {
-        Group { list.forEachIndexed { i, p -> ProfessorRow(p, divider = i < list.lastIndex) } }
     }
 }
 

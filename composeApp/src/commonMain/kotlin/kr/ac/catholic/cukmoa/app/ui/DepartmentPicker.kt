@@ -6,6 +6,7 @@ import kr.ac.catholic.cukmoa.core.ui.Chips
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.foundation.verticalScroll
@@ -196,7 +197,8 @@ fun DepartmentList?.findAll(ids: List<String>, boards: List<String>): List<Depar
 fun DepartmentSheet(department: Department, order: Int, highlight: String, onToggle: () -> Unit, onDismiss: () -> Unit) {
     val d = department
     val hits = d.subjectHits(highlight).toSet()
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = AppTheme.colors.bg) {
+    // Opens without the half-expanded state, so one back press closes it
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = AppTheme.colors.bg) {
         Column(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Space.l).padding(bottom = Space.xxl).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(Space.xl),
