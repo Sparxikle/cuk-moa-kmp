@@ -2,7 +2,9 @@ package kr.ac.catholic.cukmoa.core.state
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -121,13 +123,13 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
 
     /** Real academic calendar (server). null until received → screens use the catalog's sample schedule. */
     private val _calendar = MutableStateFlow<CalendarResponse?>(
-        store.read(CALENDAR_KEY)?.let { runCatching { ApiJson.decodeFromString(CalendarResponse.serializer(), it) }.getOrNull() },
+        null, // Stored values are read in the background in init (so startup isn't blocked)
     )
     val calendar: StateFlow<CalendarResponse?> = _calendar.asStateFlow()
 
     /** Real professor profiles (College of AI, Electronics & Information Convergence). null until received → screens use the catalog's sample professors. */
     private val _faculty = MutableStateFlow<FacultyList?>(
-        store.read(FACULTY_KEY)?.let { runCatching { ApiJson.decodeFromString(FacultyList.serializer(), it) }.getOrNull() },
+        null, // Stored values are read in the background in init (so startup isn't blocked)
     )
     val faculty: StateFlow<FacultyList?> = _faculty.asStateFlow()
 
@@ -136,14 +138,14 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
             runCatching { api.professors() }.onSuccess {
                 if (it.items.isEmpty()) return@onSuccess
                 _faculty.value = it
-                store.write(FACULTY_KEY, ApiJson.encodeToString(FacultyList.serializer(), it))
+                saveCache(FACULTY_KEY) { ApiJson.encodeToString(FacultyList.serializer(), it) }
             }
         }
     }
 
     /** Official department major roadmaps (College of AI, Electronics & Information Convergence). null until received → the roadmap tab shows only seniors' records (sample). */
     private val _roadmaps = MutableStateFlow<MajorRoadmapList?>(
-        store.read(ROADMAPS_KEY)?.let { runCatching { ApiJson.decodeFromString(MajorRoadmapList.serializer(), it) }.getOrNull() },
+        null, // Stored values are read in the background in init (so startup isn't blocked)
     )
     val roadmaps: StateFlow<MajorRoadmapList?> = _roadmaps.asStateFlow()
 
@@ -152,7 +154,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
             runCatching { api.roadmaps() }.onSuccess {
                 if (it.items.isEmpty()) return@onSuccess
                 _roadmaps.value = it
-                store.write(ROADMAPS_KEY, ApiJson.encodeToString(MajorRoadmapList.serializer(), it))
+                saveCache(ROADMAPS_KEY) { ApiJson.encodeToString(MajorRoadmapList.serializer(), it) }
             }
         }
     }
@@ -163,20 +165,34 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     val announcements: StateFlow<AnnouncementsState> = _announcements.asStateFlow()
     private var announcementsJob: Job? = null
 
+    /** Encodes server responses to JSON in the background and stores them (large lists would make the UI stutter on the main thread). */
+    private fun saveCache(key: String, encode: () -> String) {
+        viewModelScope.launch(Dispatchers.Default) { runCatching { store.write(key, encode()) } }
+    }
+
+    /** Reads stored JSON in the background. Reading on the main thread delays the first screen. */
+    private suspend fun <T> cached(key: String, decode: (String) -> T): T? =
+        withContext(Dispatchers.Default) { store.read(key)?.let { runCatching { decode(it) }.getOrNull() } }
+
     init {
         viewModelScope.launch {
             // Even offline, use the last server catalog first; otherwise, the bundled sample.
-            val cached = store.read(CATALOG_KEY)?.let { runCatching { parseCatalog(it) }.getOrNull() }
-            _catalog.value = cached ?: parseCatalog(Res.readBytes("files/sample-catalog.json").decodeToString())
+            _catalog.value = cached(CATALOG_KEY, ::parseCatalog)
+                ?: withContext(Dispatchers.Default) { parseCatalog(Res.readBytes("files/sample-catalog.json").decodeToString()) }
             refreshCatalog()
         }
         viewModelScope.launch {
-            val cached = store.read(DEPARTMENTS_KEY)?.let { runCatching { ApiJson.decodeFromString(DepartmentList.serializer(), it) }.getOrNull() }
+            cached(CALENDAR_KEY) { ApiJson.decodeFromString(CalendarResponse.serializer(), it) }?.let { if (_calendar.value == null) _calendar.value = it }
+            cached(FACULTY_KEY) { ApiJson.decodeFromString(FacultyList.serializer(), it) }?.let { if (_faculty.value == null) _faculty.value = it }
+            cached(ROADMAPS_KEY) { ApiJson.decodeFromString(MajorRoadmapList.serializer(), it) }?.let { if (_roadmaps.value == null) _roadmaps.value = it }
+        }
+        viewModelScope.launch {
+            val cached = cached(DEPARTMENTS_KEY) { ApiJson.decodeFromString(DepartmentList.serializer(), it) }
             _departments.value = cached
-                ?: ApiJson.decodeFromString(DepartmentList.serializer(), Res.readBytes("files/departments.json").decodeToString())
+                ?: withContext(Dispatchers.Default) { ApiJson.decodeFromString(DepartmentList.serializer(), Res.readBytes("files/departments.json").decodeToString()) }
             runCatching { api.departments() }.onSuccess {
                 _departments.value = it
-                store.write(DEPARTMENTS_KEY, ApiJson.encodeToString(DepartmentList.serializer(), it))
+                saveCache(DEPARTMENTS_KEY) { ApiJson.encodeToString(DepartmentList.serializer(), it) }
             }
         }
         refreshCalendar()
@@ -190,7 +206,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
             runCatching { api.calendar() }.onSuccess {
                 if (it.events.isEmpty()) return@onSuccess
                 _calendar.value = it
-                store.write(CALENDAR_KEY, ApiJson.encodeToString(CalendarResponse.serializer(), it))
+                saveCache(CALENDAR_KEY) { ApiJson.encodeToString(CalendarResponse.serializer(), it) }
             }
         }
     }
@@ -204,7 +220,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
                 val live = api.catalog()
                 _catalog.value = live
                 _catalogStatus.value = CatalogStatus.Live
-                store.write(CATALOG_KEY, ApiJson.encodeToString(Catalog.serializer(), live))
+                saveCache(CATALOG_KEY) { ApiJson.encodeToString(Catalog.serializer(), live) }
             } catch (e: ApiException) {
                 _catalogStatus.value = CatalogStatus.Offline(e.message ?: "서버에 연결하지 못했습니다.")
             }

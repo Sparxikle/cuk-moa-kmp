@@ -82,7 +82,7 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
     val eyebrow = listOf("${student.grade}학년", track?.shortName ?: "진로 탐색 중", catalog.term.label).joinToString(" · ")
 
     ScreenList(
-        title = "오늘",
+        title = "대시보드",
         eyebrow = eyebrow,
         trailing = {
             Box(

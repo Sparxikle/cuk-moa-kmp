@@ -254,7 +254,7 @@ private fun SettingsPageContent(
                     ListRow("학사일정", calendar?.source?.label?.let { "$it · ${calendar?.source?.asOf} 기준" } ?: "예시 일정 (서버 연결 전)")
                     ListRow("학과 목록", departments?.source?.label ?: "불러오는 중")
                     ListRow("공지", "학교·LMS·행사·외부 공모·AI전자정보융합대학 학과 게시판 (서버가 30분마다 수집)")
-                    ListRow("서체", "Pretendard (SIL Open Font License)", divider = false)
+                    ListRow("서체", "CUK Moa Sans (Pretendard 기반, SIL Open Font License)", divider = false)
                 }
             }
         }

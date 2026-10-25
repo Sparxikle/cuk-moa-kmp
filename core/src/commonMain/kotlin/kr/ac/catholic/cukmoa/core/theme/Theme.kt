@@ -16,10 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import kr.ac.catholic.cukmoa.core.resources.Res
-import kr.ac.catholic.cukmoa.core.resources.pretendard_bold
-import kr.ac.catholic.cukmoa.core.resources.pretendard_medium
-import kr.ac.catholic.cukmoa.core.resources.pretendard_regular
-import kr.ac.catholic.cukmoa.core.resources.pretendard_semibold
+import kr.ac.catholic.cukmoa.core.resources.moasans_bold
+import kr.ac.catholic.cukmoa.core.resources.moasans_medium
+import kr.ac.catholic.cukmoa.core.resources.moasans_regular
+import kr.ac.catholic.cukmoa.core.resources.moasans_semibold
 import org.jetbrains.compose.resources.Font
 
 // Direction: a single blue (Songsim blue) on a calm off-white background. Status colors (completed, warning) are separate from the accent.
@@ -120,10 +120,10 @@ data class TypeScale(
 @Composable
 private fun typeScale(): TypeScale {
     val pretendard = FontFamily(
-        Font(Res.font.pretendard_regular, FontWeight.Normal),
-        Font(Res.font.pretendard_medium, FontWeight.Medium),
-        Font(Res.font.pretendard_semibold, FontWeight.SemiBold),
-        Font(Res.font.pretendard_bold, FontWeight.Bold),
+        Font(Res.font.moasans_regular, FontWeight.Normal),
+        Font(Res.font.moasans_medium, FontWeight.Medium),
+        Font(Res.font.moasans_semibold, FontWeight.SemiBold),
+        Font(Res.font.moasans_bold, FontWeight.Bold),
     )
     fun style(size: Int, line: Int, weight: FontWeight, tracking: Double = 0.0) =
         TextStyle(fontFamily = pretendard, fontSize = size.sp, lineHeight = line.sp, fontWeight = weight, letterSpacing = (tracking / size).em)

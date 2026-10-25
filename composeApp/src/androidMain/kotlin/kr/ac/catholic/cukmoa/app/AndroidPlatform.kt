@@ -5,11 +5,23 @@ import androidx.core.content.edit
 import kr.ac.catholic.cukmoa.core.state.LocalStore
 import kr.ac.catholic.cukmoa.core.state.Platform
 
-/** Android: stores data in SharedPreferences. */
+/**
+ * Android: stores data in SharedPreferences.
+ * Server response caches (keys ending in ".live", hundreds of KB) live in a separate file. SharedPreferences reads the whole file at once,
+ * so if they shared a file, reading the (small) student state at startup would also have to read the large caches.
+ */
 class SharedPreferencesStore(context: Context) : LocalStore {
     private val prefs = context.getSharedPreferences("cuk-moa", Context.MODE_PRIVATE)
-    override fun read(key: String): String? = prefs.getString(key, null)
-    override fun write(key: String, value: String) = prefs.edit { putString(key, value) }
+    private val cache = context.getSharedPreferences("cuk-moa-cache", Context.MODE_PRIVATE)
+    private fun of(key: String) = if (key.endsWith(".live")) cache else prefs
+
+    init {
+        // Older versions kept caches in the same file → delete them (they are fetched from the server again)
+        val old = prefs.all.keys.filter { it.endsWith(".live") }
+        if (old.isNotEmpty()) prefs.edit { old.forEach(::remove) }
+    }
+    override fun read(key: String): String? = of(key).getString(key, null)
+    override fun write(key: String, value: String) = of(key).edit { putString(key, value) }
 }
 
 /** On the emulator, 10.0.2.2 is the dev PC's localhost. Release builds pass an HTTPS address as apiBaseUrl. */

@@ -20,6 +20,16 @@ android {
         val apiBaseUrl = providers.gradleProperty("apiBaseUrl").getOrElse("http://10.0.2.2:8080")
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
+    buildTypes {
+        // Release build: R8 shrinks and optimizes the code (2–3x faster startup).
+        // Without a store signing key, sign with the debug key (for device testing). Change signingConfig when publishing to the store.
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -33,4 +43,6 @@ android {
 dependencies {
     implementation(projects.composeApp)
     implementation(libs.androidx.activity.compose)
+    // Apply the startup (baseline) profiles bundled in the Compose libraries at install time → precompiled code from the very first launch
+    implementation(libs.androidx.profileinstaller)
 }
