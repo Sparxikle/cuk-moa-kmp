@@ -2,21 +2,29 @@ package kr.ac.catholic.cukmoa.app.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.outlined.Campaign
+import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -25,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -36,6 +45,8 @@ import kr.ac.catholic.cukmoa.core.state.StorageStatus
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.core.ui.AppBackHandler
+import kr.ac.catholic.cukmoa.core.ui.Card
+import kr.ac.catholic.cukmoa.core.ui.IconBadge
 import kr.ac.catholic.cukmoa.core.ui.screenPop
 import kr.ac.catholic.cukmoa.core.ui.Chip
 import kr.ac.catholic.cukmoa.core.ui.ChipTone
@@ -44,7 +55,6 @@ import kr.ac.catholic.cukmoa.core.ui.FilterChip
 import kr.ac.catholic.cukmoa.core.ui.Group
 import kr.ac.catholic.cukmoa.core.ui.ListRow
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
-import kr.ac.catholic.cukmoa.core.ui.Section
 import kr.ac.catholic.cukmoa.core.ui.Tone
 import kr.ac.catholic.cukmoa.core.ui.Txt
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
@@ -56,18 +66,23 @@ import kr.ac.catholic.cukmoa.model.ThemeMode
 const val APP_NAME = "가대모아"
 const val APP_VERSION = "0.2.0"
 
-private enum class SettingsPage { Main, Department }
+/** Settings pages. Main lists the categories; each category is its own screen, 전공 opens from 내 정보. */
+private enum class SettingsPage(val parent: SettingsPage?) {
+    Main(null), Me(Main), Department(Me), Home(Main), Modules(Main), Announcements(Main), Appearance(Main), Data(Main), About(Main);
 
-/** Settings: my info · dashboard · feature modules · announcements · data · about */
+    val depth: Int get() = generateSequence(parent) { it.parent }.count()
+}
+
+/** Settings: a profile card (내 정보) and categories — home screen · features · announcements · appearance · data · about */
 @Composable
 fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, onBack: () -> Unit) {
     var page by rememberSaveable { mutableStateOf(SettingsPage.Main) }
-    AppBackHandler { if (page == SettingsPage.Main) onBack() else page = SettingsPage.Main }
-    // Settings ↔ major picker: screen open/close transition
+    AppBackHandler { page.parent?.let { page = it } ?: onBack() }
+    // Moving between pages: screen open/close transition by depth
     AnimatedContent(
         targetState = page,
         modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg),
-        transitionSpec = { screenPop(forward = targetState.ordinal > initialState.ordinal) },
+        transitionSpec = { screenPop(forward = targetState.depth > initialState.depth) },
         label = "settings",
     ) { p -> SettingsPageContent(p, catalog, student, apiBaseUrl, onBack) { page = it } }
 }
@@ -81,33 +96,69 @@ private fun SettingsPageContent(
     onBack: () -> Unit,
     go: (SettingsPage) -> Unit,
 ) {
-
     val vm = LocalAppViewModel.current
     val departments by vm.departments.collectAsStateWithLifecycle()
-    val majors = departments.findAll(student.departments, student.majors)
-
-    if (page == SettingsPage.Department) {
-        ScreenList(title = "전공", eyebrow = "설정 · 최대 2개", onBack = { go(SettingsPage.Main) }) {
-            item {
-                Column(Modifier.contentWidth()) {
-                    DepartmentPicker(departments, majors) { vm.setDepartments(it) }
-                }
-            }
-        }
-        return
-    }
-
     val calendar by vm.calendar.collectAsStateWithLifecycle()
     val catalogStatus by vm.catalogStatus.collectAsStateWithLifecycle()
     val storage by vm.storage.collectAsStateWithLifecycle()
+    val majors = departments.findAll(student.departments, student.majors)
     var pendingGrade by remember { mutableStateOf<Int?>(null) }
     var confirmReset by remember { mutableStateOf(false) }
-    val c = AppTheme.colors
+    val back = { page.parent?.let(go) ?: onBack() }
+    val majorSummary = majors.mapIndexed { i, d -> "${majorLabel(i)} ${d.name}" }.joinToString(" · ").ifEmpty { "고르지 않음" }
+    val tracks = student.trackIds.mapNotNull { id -> catalog.tracks.firstOrNull { it.id == id }?.shortName }
+    val serverSummary = when (val s = catalogStatus) {
+        CatalogStatus.Live -> "연결됨 · $apiBaseUrl"
+        CatalogStatus.Loading -> "연결 중… · $apiBaseUrl"
+        is CatalogStatus.Offline -> "${s.message} · 저장된 데이터로 보여 드려요"
+    }
 
-    ScreenList(title = "설정", eyebrow = APP_NAME, onBack = onBack) {
-        // ---- My info ----
-        item {
-            Section("내 정보") {
+    when (page) {
+        SettingsPage.Main -> ScreenList(title = "설정", eyebrow = APP_NAME, onBack = onBack) {
+            item {
+                Card(onClick = { go(SettingsPage.Me) }) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.l)) {
+                        Box(Modifier.size(56.dp).clip(CircleShape).background(AppTheme.colors.accentSoft), contentAlignment = Alignment.Center) {
+                            Txt("${student.grade}", AppTheme.type.title, tone = Tone.Accent)
+                        }
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Txt("${student.grade}학년 · ${majors.firstOrNull()?.name ?: "전공 고르지 않음"}", AppTheme.type.headline)
+                            Txt(
+                                listOfNotNull(majors.getOrNull(1)?.let { "${majorLabel(1)} ${it.name}" }, tracks.joinToString(" · ").ifEmpty { "관심 진로 없음" })
+                                    .joinToString(" · "),
+                                AppTheme.type.footnote,
+                                tone = Tone.Ink2,
+                            )
+                        }
+                        Icon(Icons.Default.ChevronRight, null, tint = AppTheme.colors.ink2)
+                    }
+                }
+            }
+            item {
+                Group {
+                    val rows = listOf(
+                        Triple(SettingsPage.Home, Icons.Outlined.Dashboard, "홈 화면" to "카드 ${student.homeCards.size}개 켬"),
+                        Triple(SettingsPage.Modules, Icons.Outlined.Extension, "기능" to ModuleRegistry.enabled(student).joinToString(" · ") { it.title }),
+                        Triple(SettingsPage.Announcements, Icons.Outlined.Campaign, "공지" to "전공 게시판 · 새 글 표시"),
+                        Triple(SettingsPage.Appearance, Icons.Outlined.Palette, "화면" to themeLabel(student.theme) + if (student.dynamicColor) " · 배경화면 색" else ""),
+                        Triple(SettingsPage.Data, Icons.Outlined.Storage, "데이터" to serverSummary),
+                        Triple(SettingsPage.About, Icons.Outlined.Info, "앱 정보" to "버전 $APP_VERSION · 데이터 출처"),
+                    )
+                    rows.forEachIndexed { i, (target, icon, text) ->
+                        ListRow(
+                            text.first, text.second,
+                            leading = { IconBadge(icon) },
+                            chevron = true,
+                            divider = i < rows.lastIndex,
+                            onClick = { go(target) },
+                        )
+                    }
+                }
+            }
+        }
+
+        SettingsPage.Me -> ScreenList(title = "내 정보", eyebrow = "학년 · 전공 · 관심 진로", onBack = back) {
+            item {
                 Group {
                     Column(Modifier.fillMaxWidth().padding16(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
                         Txt("학년", AppTheme.type.callout)
@@ -121,12 +172,7 @@ private fun SettingsPageContent(
                             }
                         }
                     }
-                    ListRow(
-                        "전공",
-                        majors.mapIndexed { i, d -> "${majorLabel(i)} ${d.name}" }.joinToString(" · ").ifEmpty { "고르지 않음" },
-                        chevron = true,
-                        onClick = { go(SettingsPage.Department) },
-                    )
+                    ListRow("전공", majorSummary, chevron = true, onClick = { go(SettingsPage.Department) })
                     Column(Modifier.fillMaxWidth().padding16(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
                         Txt("관심 진로", AppTheme.type.callout)
                         Txt("두 개까지 · 첫 번째가 추천 기준", AppTheme.type.footnote, tone = Tone.Ink2)
@@ -146,9 +192,16 @@ private fun SettingsPageContent(
             }
         }
 
-        // ---- Dashboard ----
-        item {
-            Section("홈 화면", "켠 카드가 위에서부터 이 순서로 나와요.") {
+        SettingsPage.Department -> ScreenList(title = "전공", eyebrow = "최대 2개", onBack = back) {
+            item {
+                Column(Modifier.contentWidth()) {
+                    DepartmentPicker(departments, majors) { vm.setDepartments(it) }
+                }
+            }
+        }
+
+        SettingsPage.Home -> ScreenList(title = "홈 화면", eyebrow = "켠 카드가 위에서부터 이 순서로 나와요", onBack = back) {
+            item {
                 Group {
                     homeCardInfo.forEachIndexed { i, info ->
                         val provider = ModuleRegistry.all.firstOrNull { info.id in it.homeCards }
@@ -165,7 +218,6 @@ private fun SettingsPageContent(
                                         val next = if (on) student.homeCards + info.id else student.homeCards - info.id
                                         vm.setHomeCards(homeCardInfo.map { it.id }.filter { it in next })
                                     },
-                                    colors = SwitchDefaults.colors(checkedTrackColor = c.accent),
                                 )
                             },
                         )
@@ -174,16 +226,12 @@ private fun SettingsPageContent(
             }
         }
 
-        // ---- Feature modules ----
-        item {
-            Section("기능", "켠 기능만 아래 탭과 홈 카드에 나와요.") {
-                ModuleList(ModuleRegistry.enabled(student).map { it.id }, vm::setModules)
-            }
+        SettingsPage.Modules -> ScreenList(title = "기능", eyebrow = "켠 기능만 아래 탭과 홈 카드에 나와요", onBack = back) {
+            item { ModuleList(ModuleRegistry.enabled(student).map { it.id }, vm::setModules) }
         }
 
-        // ---- Announcements ----
-        item {
-            Section("공지") {
+        SettingsPage.Announcements -> ScreenList(title = "공지", eyebrow = "전공 게시판과 새 글 표시", onBack = back) {
+            item {
                 Group {
                     if (majors.isEmpty()) ListRow("내 전공 게시판", "전공을 고르면 전공 공지를 먼저 보여 드려요")
                     majors.forEachIndexed { i, d ->
@@ -204,21 +252,42 @@ private fun SettingsPageContent(
             }
         }
 
-        // ---- Data ----
-        item {
-            Section("데이터") {
+        SettingsPage.Appearance -> ScreenList(title = "화면", eyebrow = "테마와 색", onBack = back) {
+            item {
+                Group {
+                    Column(Modifier.fillMaxWidth().padding16(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
+                        Txt("테마", AppTheme.type.callout)
+                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            val modes = ThemeMode.entries
+                            modes.forEachIndexed { i, mode ->
+                                SegmentedButton(
+                                    selected = student.theme == mode,
+                                    onClick = { vm.setTheme(mode) },
+                                    shape = SegmentedButtonDefaults.itemShape(i, modes.size),
+                                ) { Text(themeLabel(mode), style = AppTheme.type.subhead) }
+                            }
+                        }
+                    }
+                    if (vm.dynamicScheme != null) {
+                        ListRow(
+                            "배경화면 색 사용",
+                            "Android 배경화면에 맞춘 색으로 바꿔요 (Material You)",
+                            divider = false,
+                            onClick = { vm.setDynamicColor(!student.dynamicColor) },
+                            trailing = { Switch(checked = student.dynamicColor, onCheckedChange = { vm.setDynamicColor(it) }) },
+                        )
+                    }
+                }
+            }
+        }
+
+        SettingsPage.Data -> ScreenList(title = "데이터", eyebrow = "서버 연결과 기기 저장", onBack = back) {
+            item {
                 Group {
                     ListRow(
-                        "서버 연결",
-                        when (val s = catalogStatus) {
-                            CatalogStatus.Live -> "연결됨 · $apiBaseUrl"
-                            CatalogStatus.Loading -> "연결 중… · $apiBaseUrl"
-                            is CatalogStatus.Offline -> "${s.message} · 저장된 데이터로 보여 드려요"
-                        },
+                        "서버 연결", serverSummary,
                         trailing = {
-                            Txt("다시 연결", AppTheme.type.subhead, Modifier.clip(RoundedCornerShape(8.dp)).clickable {
-                                vm.refreshCatalog(); vm.refreshAnnouncements(); vm.refreshCalendar()
-                            }, tone = Tone.Accent)
+                            TextButton(onClick = { vm.refreshCatalog(); vm.refreshAnnouncements(); vm.refreshCalendar() }) { Text("다시 연결") }
                         },
                     )
                     ListRow(
@@ -239,38 +308,8 @@ private fun SettingsPageContent(
             }
         }
 
-        // ---- Appearance ----
-        item {
-            Section("화면") {
-                Group {
-                    Column(Modifier.fillMaxWidth().padding16(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
-                        Txt("테마", AppTheme.type.callout)
-                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                            val modes = listOf(ThemeMode.System to "시스템", ThemeMode.Light to "라이트", ThemeMode.Dark to "다크")
-                            modes.forEachIndexed { i, (mode, label) ->
-                                SegmentedButton(
-                                    selected = student.theme == mode,
-                                    onClick = { vm.setTheme(mode) },
-                                    shape = SegmentedButtonDefaults.itemShape(i, modes.size),
-                                ) { Text(label, style = AppTheme.type.subhead) }
-                            }
-                        }
-                    }
-                    if (vm.dynamicScheme != null) {
-                        ListRow(
-                            "배경화면 색 사용",
-                            "Android 배경화면에 맞춘 색으로 바꿔요 (Material You)",
-                            divider = false,
-                            onClick = { vm.setDynamicColor(!student.dynamicColor) },
-                            trailing = { Switch(checked = student.dynamicColor, onCheckedChange = { vm.setDynamicColor(it) }) },
-                        )
-                    }
-                }
-            }
-        }
-        // ---- About ----
-        item {
-            Section("앱 정보") {
+        SettingsPage.About -> ScreenList(title = "앱 정보", eyebrow = APP_NAME, onBack = back) {
+            item {
                 Group {
                     ListRow("버전", APP_VERSION)
                     ListRow("졸업요건", "${catalog.graduation.source.label} · ${catalog.graduation.label}")
@@ -306,6 +345,12 @@ private fun SettingsPageContent(
             dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("취소") } },
         )
     }
+}
+
+private fun themeLabel(mode: ThemeMode) = when (mode) {
+    ThemeMode.System -> "시스템"
+    ThemeMode.Light -> "라이트"
+    ThemeMode.Dark -> "다크"
 }
 
 private fun Modifier.padding16() = this.padding(horizontal = Space.l, vertical = Space.m)

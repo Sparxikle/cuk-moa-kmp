@@ -48,12 +48,12 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -102,7 +102,7 @@ fun Txt(
 ) = Text(text, modifier, color = tone.color(), style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
 
 /**
- * Scrolling screen under an M3 large top app bar: the title collapses into a small bar on scroll,
+ * Scrolling screen under an M3 top app bar (64dp; tinted once content scrolls under it).
  * eyebrow is a second line under the title, onBack adds a back arrow and trailing goes into the bar's actions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,14 +114,14 @@ fun ScreenList(
     trailing: (@Composable () -> Unit)? = null,
     content: LazyListScope.() -> Unit,
 ) {
-    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scroll = TopAppBarDefaults.pinnedScrollBehavior()
     val c = AppTheme.colors
     Column(Modifier.fillMaxSize().background(c.bg).nestedScroll(scroll.nestedScrollConnection)) {
-        LargeTopAppBar(
+        TopAppBar(
             title = {
                 Column {
-                    Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    eyebrow?.let { Text(it, color = c.ink2, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    eyebrow?.let { Text(it, color = c.ink2, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
             },
             navigationIcon = {

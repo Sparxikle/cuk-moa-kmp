@@ -61,7 +61,7 @@ fun main(args: Array<String>): Unit = runBlocking(Dispatchers.Main) {
     shoot("05-graduation", 1900, mapOf("student" to demo), Routes.GRADUATION)
     shoot("06-professors", 1100, mapOf("student" to demo), Routes.PROFESSORS)
     shoot("07-modules", 1100, mapOf("student" to demo), Routes.MODULES)
-    shoot("08-settings", 2600, mapOf("student" to demo), Routes.SETTINGS)
+    shoot("08-settings", 1000, mapOf("student" to demo), Routes.SETTINGS)
     shoot("09-home-dark", 1900, mapOf("student" to demoDark))
     shoot("10-graduation-dark", 1900, mapOf("student" to demoDark), Routes.GRADUATION)
     kotlin.system.exitProcess(0)
