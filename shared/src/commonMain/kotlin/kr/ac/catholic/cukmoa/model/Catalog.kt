@@ -57,15 +57,18 @@ data class Track(
 
 @Serializable
 enum class CourseCategory(val label: String) {
-    @SerialName("liberal-required") LiberalRequired("교양 기초필수"),
-    @SerialName("liberal-core") LiberalCore("중핵교양"),
+    @SerialName("liberal-required") LiberalRequired("기초교양필수"),
+    @SerialName("liberal-core") LiberalCore("중핵교양선택필수"),
+    @SerialName("liberal-elective") LiberalElective("교양선택"),
     @SerialName("major-basic") MajorBasic("전공기초"),
     @SerialName("major") Major("전공"),
     @SerialName("general") General("일반선택");
 
     val bucket: BucketId
         get() = when (this) {
-            LiberalRequired, LiberalCore -> BucketId.Liberal
+            LiberalRequired -> BucketId.LiberalBasic
+            LiberalCore -> BucketId.LiberalCore
+            LiberalElective -> BucketId.LiberalElective
             MajorBasic -> BucketId.MajorBasic
             Major -> BucketId.Major
             General -> BucketId.General
@@ -137,53 +140,6 @@ data class Professor(
 )
 
 @Serializable
-enum class BucketId {
-    @SerialName("liberal") Liberal,
-    @SerialName("major-basic") MajorBasic,
-    @SerialName("major") Major,
-    @SerialName("general") General,
-}
-
-@Serializable
-data class GraduationBucket(
-    val id: BucketId,
-    val label: String,
-    val requiredCredits: Int,
-    val checklistCourseIds: List<String>? = null,
-    val note: String? = null,
-)
-
-@Serializable
-enum class ExamProgramId {
-    @SerialName("deep") Deep,
-    @SerialName("double") Double,
-}
-
-@Serializable
-data class ExamProgram(val id: ExamProgramId, val label: String, val subjectCount: Int)
-
-@Serializable
-data class EnglishWaiver(val level: Int, val label: String)
-
-@Serializable
-data class ExamRules(
-    val programs: List<ExamProgram>,
-    val englishWaivers: List<EnglishWaiver>,
-    val alternativeNote: String,
-    val subjectCourseIds: List<String>,
-)
-
-@Serializable
-data class GraduationRuleSet(
-    val id: String,
-    val label: String,
-    val totalCredits: Int,
-    val buckets: List<GraduationBucket>,
-    val exam: ExamRules,
-    val source: DataSource,
-)
-
-@Serializable
 enum class EventKind {
     @SerialName("exam") Exam,
     @SerialName("registration") Registration,
@@ -216,7 +172,7 @@ data class Catalog(
     val roadmaps: List<Roadmap>,
     val stories: List<SeniorStory>,
     val professors: List<Professor>,
-    val graduation: GraduationRuleSet,
+    val graduation: GraduationGuide,
     val events: List<AcademicEvent>,
     val source: DataSource,
 )

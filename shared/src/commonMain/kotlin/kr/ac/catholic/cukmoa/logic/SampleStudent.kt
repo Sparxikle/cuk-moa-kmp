@@ -11,9 +11,8 @@ import kr.ac.catholic.cukmoa.model.TrackId
 // Sample course records per year. Until real transcripts are linked, shows roughly "what a student in this year looks like".
 // otherCredits is the total credits filled with courses not in the catalog (core liberal arts, major electives, general electives).
 
-private val LIBERAL_1 = listOf("humanity-1", "cap-1", "global-comm-1")
-private val LIBERAL_2 = listOf("humanity-2", "cap-2", "global-comm-2")
 private val BASIC = listOf("calculus-1", "calculus-2", "programming-1", "programming-2", "natural-science")
+private val DESIGN = listOf("i-design", "career-design")
 private val MAJOR_2 = listOf("data-structures", "oop", "data-communication")
 private val MAJOR_2B = listOf("file-processing", "automata", "programming-languages")
 
@@ -25,37 +24,41 @@ private class Preset(
     val exam: ExamState = ExamState(),
 )
 
-private fun credits(liberal: Int, major: Int, general: Int) =
-    mapOf(BucketId.Liberal to liberal, BucketId.MajorBasic to 0, BucketId.Major to major, BucketId.General to general)
+private fun credits(core: Int = 0, elective: Int, major: Int, general: Int) = mapOf(
+    BucketId.LiberalBasic to 0, BucketId.LiberalCore to core, BucketId.LiberalElective to elective,
+    BucketId.MajorBasic to 0, BucketId.Major to major, BucketId.General to general,
+)
 
+// Semesters follow the 컴퓨터정보공학부 plan of the 2026 guide (인간학 1-1·1-2, 그리스도교사상과문화 2-1, 키스톤디자인 2-2, 사랑나누기 3-2).
 private val presets: Map<Int, Preset> = mapOf(
     1 to Preset(
-        completed = LIBERAL_1 + listOf("calculus-1", "programming-1"),
-        inProgress = LIBERAL_2 + listOf("calculus-2", "programming-2", "natural-science"),
+        completed = listOf("humanity-1", "i-design", "calculus-1", "programming-1"),
+        inProgress = listOf("humanity-2", "career-design", "calculus-2", "programming-2", "natural-science"),
         saved = emptyList(),
-        otherCredits = credits(liberal = 3, major = 0, general = 3),
+        otherCredits = credits(elective = 3, major = 0, general = 3),
     ),
     2 to Preset(
-        completed = LIBERAL_1 + LIBERAL_2 + BASIC + MAJOR_2,
-        inProgress = MAJOR_2B + listOf("core-humanities", "general-elective"),
+        completed = listOf("humanity-1", "humanity-2", "christian-thought") + DESIGN + BASIC + MAJOR_2,
+        inProgress = listOf("keystone-design", "core-humanities", "general-elective") + MAJOR_2B,
         saved = listOf("operating-systems"),
-        otherCredits = credits(liberal = 6, major = 6, general = 6),
+        otherCredits = credits(core = 3, elective = 6, major = 0, general = 6),
     ),
     3 to Preset(
-        completed = listOf("humanity-1", "humanity-2", "cap-1", "global-comm-1", "global-comm-2", "spirituality") +
-            BASIC + MAJOR_2 + listOf("file-processing", "automata", "operating-systems", "computer-networks"),
+        completed = listOf("humanity-1", "humanity-2", "christian-thought", "keystone-design", "core-humanities", "core-science") +
+            DESIGN + BASIC + MAJOR_2 + listOf("file-processing", "automata", "operating-systems", "computer-networks"),
         inProgress = listOf(
-            "database-design", "algorithm-design", "software-engineering", "data-mining", "core-humanities", "general-elective",
+            "sharing-love", "database-design", "algorithm-design", "software-engineering", "data-mining", "core-humantech",
         ),
         saved = listOf("information-systems"),
-        otherCredits = credits(liberal = 9, major = 18, general = 11),
+        otherCredits = credits(elective = 10, major = 12, general = 7),
     ),
     4 to Preset(
-        completed = LIBERAL_1 + LIBERAL_2 + listOf("spirituality", "sharing-love") + BASIC + MAJOR_2 + MAJOR_2B +
+        completed = listOf("humanity-1", "humanity-2", "christian-thought", "keystone-design", "sharing-love") + DESIGN +
+            listOf("core-humanities", "core-science", "core-humantech", "core-global") + BASIC + MAJOR_2 + MAJOR_2B +
             listOf("operating-systems", "computer-networks", "software-engineering", "database-design", "algorithm-design"),
         inProgress = listOf("information-systems", "web-services", "system-security", "data-mining", "general-elective"),
         saved = emptyList(),
-        otherCredits = credits(liberal = 9, major = 24, general = 18),
+        otherCredits = credits(elective = 10, major = 18, general = 14),
         exam = ExamState(programId = ExamProgramId.Deep, englishWaiver = 1, passed = 2),
     ),
 )

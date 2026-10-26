@@ -39,8 +39,20 @@ fun catalogProblems(c: Catalog): List<String> {
         if (s.trackId !in tracks) problems += "story ${s.id} has unknown track"
         s.courseIds.forEach { course(it, "story ${s.id}") }
     }
-    c.graduation.buckets.forEach { b -> b.checklistCourseIds?.forEach { course(it, "bucket ${b.id}") } }
-    c.graduation.exam.subjectCourseIds.forEach { course(it, "exam subjects") }
+    val g = c.graduation
+    val plans = g.liberalPlans.map { it.id }.toSet()
+    g.liberalPlans.forEach { p -> p.steps.forEach { course(it.courseId, "liberal plan ${p.id}") } }
+    if (g.departments.map { it.name }.toSet().size != g.departments.size) problems += "duplicate department rules"
+    (g.departments + g.fallback).forEach { d ->
+        if (d.liberalPlan !in plans) problems += "unknown liberal plan ${d.liberalPlan} (${d.name})"
+        (d.majorBasicCourseIds + d.liberalElectiveCourseIds).forEach { course(it, "rules ${d.name}") }
+        d.test?.exam?.subjectCourseIds?.forEach { course(it, "exam subjects ${d.name}") }
+        d.test?.groups?.flatMap { it.options }?.let { opts ->
+            if (opts.map { it.id }.toSet().size != opts.size) problems += "duplicate test option ids (${d.name})"
+            if (opts.any { it.exam } && d.test.exam == null) problems += "exam option without exam rules (${d.name})"
+        }
+        if (d.major > d.majorDeep || d.majorRequired > d.major) problems += "major credits out of order (${d.name})"
+    }
     return problems
 }
 
@@ -80,5 +92,11 @@ private val migrations: Map<Int, (JsonObject) -> JsonObject> = mapOf(
                 "departments" to JsonArray(listOfNotNull(department).map(::JsonPrimitive)),
             ),
         )
+    },
+    // v2 → v3: the single "liberal" bucket split into 기초교양 · 중핵교양 · 교양선택; old liberal credits go to 중핵교양
+    2 to { old ->
+        val credits = (old["otherCredits"] as? JsonObject).orEmpty()
+        val moved = credits - "liberal" + credits["liberal"]?.let { mapOf("liberal-core" to it) }.orEmpty()
+        JsonObject(old + mapOf("schemaVersion" to JsonPrimitive(3), "otherCredits" to JsonObject(moved)))
     },
 )

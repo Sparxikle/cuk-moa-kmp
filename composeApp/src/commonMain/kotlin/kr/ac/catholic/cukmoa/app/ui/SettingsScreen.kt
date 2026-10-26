@@ -250,7 +250,8 @@ private fun SettingsPageContent(
             Section("앱 정보") {
                 Group {
                     ListRow("버전", APP_VERSION)
-                    ListRow("과목·졸업요건·선배 기록", catalog.source.label + if (catalog.source.isSample) " (예시)" else "")
+                    ListRow("졸업요건", "${catalog.graduation.source.label} · ${catalog.graduation.label}")
+                    ListRow("과목·선배 기록", catalog.source.label + if (catalog.source.isSample) " (예시)" else "")
                     ListRow("학사일정", calendar?.source?.label?.let { "$it · ${calendar?.source?.asOf} 기준" } ?: "예시 일정 (서버 연결 전)")
                     ListRow("학과 목록", departments?.source?.label ?: "불러오는 중")
                     ListRow("공지", "학교·LMS·행사·외부 공모·AI전자정보융합대학 학과 게시판 (서버가 30분마다 수집)")

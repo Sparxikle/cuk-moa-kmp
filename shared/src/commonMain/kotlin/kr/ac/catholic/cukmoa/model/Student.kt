@@ -23,7 +23,6 @@ data class ExamState(
     /** 0–3: number of courses replaced per TOEIC score band */
     val englishWaiver: Int = 0,
     val passed: Int = 0,
-    val alternative: Boolean = false,
 )
 
 @Serializable
@@ -39,7 +38,7 @@ data class StudentState(
     val homeCards: List<HomeCardId>,
     val completedCourseIds: List<String>,
     val inProgressCourseIds: List<String>,
-    /** Saved courses (next-semester candidates) */
+    /** Saved courses (next semester candidates) */
     val savedCourseIds: List<String>,
     /** Credits completed outside the catalog (stand-in for the transcript total) */
     val otherCredits: Map<BucketId, Int>,
@@ -55,9 +54,13 @@ data class StudentState(
     val announcementsSeenAt: String? = null,
     /** Enabled feature module IDs (order = tab order). null means the app default (all). Older stored values don't have it, hence the default. */
     val modules: List<String>? = null,
+    /** Graduation test options the student has met, as "<department>:<option id>" (TestOption.id) */
+    val graduationChecks: List<String> = emptyList(),
+    /** Foreign-language lecture credits earned (not tracked per course) */
+    val foreignCredits: Int = 0,
 ) {
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 2
+        const val CURRENT_SCHEMA_VERSION = 3
         const val MAX_MAJORS = 2
     }
 }

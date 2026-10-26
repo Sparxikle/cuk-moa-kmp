@@ -73,7 +73,7 @@
       "name": "인간학1",
       "category": "liberal-required",
       "credits": 2,
-      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "summary": "기초교양필수. 인간학1을 들어야 인간학2를 들을 수 있어요.",
       "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
@@ -83,18 +83,288 @@
       "name": "인간학2",
       "category": "liberal-required",
       "credits": 2,
+      "summary": "기초교양필수. 인간학1 다음에 들어요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "christian-thought",
+      "name": "그리스도교사상과문화",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "기초교양필수. 학기 중 1박 2일 수도원 체험이 있어요 (외국인 학생은 서양사상과문화로 대체).",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "2-1"
+    },
+    {
+      "id": "keystone-design",
+      "name": "키스톤디자인",
+      "category": "liberal-required",
+      "credits": 3,
+      "summary": "기초교양필수 (3학점).",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "2-2"
+    },
+    {
+      "id": "sharing-love",
+      "name": "사랑나누기",
+      "category": "liberal-required",
+      "credits": 2,
+      "summary": "기초교양필수 P/F. 이론 4시간 + 봉사활동 36시간. 인간학1·2 뒤에 듣기를 권해요. 사랑나누기+(선택사회봉사)와는 다른 과목이에요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "3-2"
+    },
+    {
+      "id": "career-strategy",
+      "name": "핵심취업전략",
+      "category": "liberal-elective",
+      "credits": 1,
+      "summary": "글로벌경영대학 필수 자유선택교양 (1학점).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "i-design",
+      "name": "I-DESIGN",
+      "category": "liberal-core",
+      "credits": 3,
+      "summary": "중핵교양 DESIGN 영역 필수. 1학기 개설.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "career-design",
+      "name": "Career DESIGN",
+      "category": "liberal-core",
+      "credits": 3,
+      "summary": "중핵교양 DESIGN 영역 필수. 2학기 개설.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "core-humanities",
+      "name": "중핵교양: 인문·사회 영역",
+      "category": "liberal-core",
+      "credits": 3,
+      "summary": "인문·사회 영역 과목 중 하나 (3학점).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "core-science",
+      "name": "중핵교양: 자연·과학 영역",
+      "category": "liberal-core",
+      "credits": 3,
+      "summary": "자연·과학 영역 과목 중 하나 (3학점).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "core-humantech",
+      "name": "중핵교양: 휴먼·테크 영역",
+      "category": "liberal-core",
+      "credits": 3,
+      "summary": "휴먼·테크 영역 과목 중 하나 (3학점).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "core-global",
+      "name": "중핵교양: 글로벌·외국어 영역",
+      "category": "liberal-core",
+      "credits": 3,
+      "summary": "글로벌·외국어 영역 과목 중 하나 (3학점). 외국어강의 인정 여부는 수강신청 때 과목별로 확인해요.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "ling-or-lit",
+      "name": "언어학개론 · 문학개론 중 1과목",
+      "category": "major-basic",
+      "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
       "professorIds": [],
       "isExamSubject": false,
-      "recommendedSemester": "1-2",
-      "prerequisiteIds": [
-        "humanity-1"
-      ]
+      "recommendedSemester": "1-1"
     },
     {
-      "id": "cap-1",
-      "name": "CAP1",
-      "category": "liberal-required",
+      "id": "french-intro",
+      "name": "프랑스언어와 문화입문",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "chinese-culture",
+      "name": "중국문화의이해",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "korean-history-intro",
+      "name": "한국사학입문",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "anglo-culture",
+      "name": "영미문화의이해",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "english-lit",
+      "name": "영문학의 이해",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "japanese-intro",
+      "name": "일본어학입문",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "philosophy-flow",
+      "name": "철학의 흐름",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "korean-edu-intro",
+      "name": "한국어교육개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "korean-culture",
+      "name": "한국어와문화",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "media-tech-culture",
+      "name": "미디어테크놀로지와문화",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "art-culture",
+      "name": "예술과문화:창조와해석",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "sight-singing-1",
+      "name": "시창1",
+      "category": "major-basic",
+      "credits": 1,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "sight-singing-2",
+      "name": "시창2",
+      "category": "major-basic",
+      "credits": 1,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "sight-singing-3",
+      "name": "시창3",
+      "category": "major-basic",
+      "credits": 1,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "2-1"
+    },
+    {
+      "id": "sight-singing-4",
+      "name": "시창4",
+      "category": "major-basic",
+      "credits": 1,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "2-2"
+    },
+    {
+      "id": "ear-training-1",
+      "name": "청음1",
+      "category": "major-basic",
+      "credits": 1,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "ear-training-2",
+      "name": "청음2",
+      "category": "major-basic",
+      "credits": 1,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "solfege-1",
+      "name": "시창과청음1",
+      "category": "major-basic",
       "credits": 2,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
       "professorIds": [],
@@ -102,9 +372,9 @@
       "recommendedSemester": "1-1"
     },
     {
-      "id": "cap-2",
-      "name": "CAP2",
-      "category": "liberal-required",
+      "id": "solfege-2",
+      "name": "시창과청음2",
+      "category": "major-basic",
       "credits": 2,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
       "professorIds": [],
@@ -112,52 +382,586 @@
       "recommendedSemester": "1-2"
     },
     {
-      "id": "global-comm-1",
-      "name": "글로벌커뮤니케이션1",
-      "category": "liberal-required",
+      "id": "solfege-3",
+      "name": "시창과청음3",
+      "category": "major-basic",
       "credits": 2,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "2-1"
+    },
+    {
+      "id": "social-welfare-intro",
+      "name": "사회복지학개론",
+      "category": "major-basic",
+      "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
       "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
     {
-      "id": "global-comm-2",
-      "name": "글로벌커뮤니케이션2",
-      "category": "liberal-required",
-      "credits": 2,
+      "id": "human-behavior",
+      "name": "인간행동과사회환경",
+      "category": "major-basic",
+      "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
       "professorIds": [],
       "isExamSubject": false,
-      "recommendedSemester": "1-2",
-      "prerequisiteIds": [
-        "global-comm-1"
-      ]
+      "recommendedSemester": "1-2"
     },
     {
-      "id": "spirituality",
-      "name": "영성",
-      "category": "liberal-required",
-      "credits": 2,
-      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
-      "isExamSubject": false
-    },
-    {
-      "id": "sharing-love",
-      "name": "사랑나누기",
-      "category": "liberal-required",
-      "credits": 2,
-      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
-      "isExamSubject": false
-    },
-    {
-      "id": "core-humanities",
-      "name": "중핵교양 (인문 영역)",
-      "category": "liberal-core",
+      "id": "psychology-intro",
+      "name": "심리학개론",
+      "category": "major-basic",
       "credits": 3,
-      "summary": "중핵교양 영역 중 하나를 대표하는 예시 항목이에요.",
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "sociology-intro",
+      "name": "사회학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "disability-intro",
+      "name": "장애의이해와재활",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "business-principles",
+      "name": "경영학원론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "accounting-principles",
+      "name": "회계학원론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "law-intro",
+      "name": "법학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "economics-intro",
+      "name": "경제학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "public-admin-intro",
+      "name": "행정학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "economics-principles",
+      "name": "경제학원론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "business-intro",
+      "name": "경영학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "accounting-intro",
+      "name": "회계학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "tax-law",
+      "name": "조세법의이해",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "digital-ai",
+      "name": "디지털환경과인공지능",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "finance-basic",
+      "name": "기초파이낸스",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "global-business",
+      "name": "글로벌경영학원론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "global-accounting",
+      "name": "글로벌회계학원론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "chemistry-1",
+      "name": "일반화학및실험 1",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "chemistry-2",
+      "name": "일반화학및실험 2",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "calculus-1",
+      "name": "일반수학1 및 연습",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "calculus-2",
+      "name": "일반수학2 및 연습",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "physics-1",
+      "name": "일반물리학 및 실험1",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "physics-2",
+      "name": "일반물리학 및 실험2",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "biology-1",
+      "name": "일반생물학1",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "biology-2",
+      "name": "일반생물학2",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "biomed-intro",
+      "name": "의생명과학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "consumer-or-space",
+      "name": "소비자학의이해 · 공간디자인의이해 중 1과목",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "child-intro",
+      "name": "아동학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "clothing-body",
+      "name": "의복과 인체",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "food-nutrition",
+      "name": "식품영양의 이론과 실제",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "general-chemistry",
+      "name": "일반화학및실험",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "organic-chemistry",
+      "name": "유기화학",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "pharm-chemistry-1",
+      "name": "약품기초화학1",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "pharm-chemistry-2",
+      "name": "약품기초화학2",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "env-eng-intro",
+      "name": "환경공학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "energy-eng-intro",
+      "name": "에너지공학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "biotech-intro",
+      "name": "생명공학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "bio-intro",
+      "name": "바이오입문",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "programming-1",
+      "name": "컴퓨터와 프로그래밍1",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "programming-2",
+      "name": "컴퓨터와 프로그래밍2",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "ice-programming-1",
+      "name": "프로그래밍 및 실습1",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "ice-programming-2",
+      "name": "프로그래밍 및 실습2",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "digital-content",
+      "name": "디지털콘텐츠창작입문",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "media-programming",
+      "name": "미디어정보처리프로그래밍",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "bmce-eng-intro",
+      "name": "BMCE 공학입문",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "bmce-intro",
+      "name": "BMCE 개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "biologics-intro",
+      "name": "바이오로직스공학개론",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "biologics-math",
+      "name": "바이오로직스기초수학",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "natural-science",
+      "name": "일반화학·물리학·생물학 및 실험 중 3학점",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "일반화학및실험1·2, 일반물리학및실험1·2, 일반생물학1·2 중에서 3학점 이상.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "science-one",
+      "name": "일반화학및실험1 · 일반물리학및실험1 · 일반생물학1 중 1과목",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-2"
+    },
+    {
+      "id": "science-6",
+      "name": "일반화학·일반수학·일반생물학 중 6학점",
+      "category": "major-basic",
+      "credits": 6,
+      "summary": "일반화학및실험1·2, 일반수학1·2및연습, 일반생물학1·2 중 6학점 (1·2 연속 수강 의무 면제).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "science-12",
+      "name": "일반수학·생물·물리·화학 중 4과목 (12학점)",
+      "category": "major-basic",
+      "credits": 12,
+      "summary": "일반수학1·2및연습, 일반생물학1·2, 일반물리학및실험1·2, 일반화학및실험1·2 중 4과목 (1·2 연속 수강 의무 면제).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "science-bio-9",
+      "name": "일반화학·일반생물학·컴퓨터와프로그래밍1 중 9학점",
+      "category": "major-basic",
+      "credits": 9,
+      "summary": "일반화학및실험1·2, 일반생물학1·2, 컴퓨터와프로그래밍1 중 9학점 이상.",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "science-pair-a",
+      "name": "다른 기초과학 1·2 연속 수강 (첫 번째)",
+      "category": "major-basic",
+      "credits": 6,
+      "summary": "일반화학및실험·일반수학및연습·일반물리학및실험·일반생물학 중 1·2를 연속으로 (모두 3과목 이상).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "science-pair-b",
+      "name": "다른 기초과학 1·2 연속 수강 (두 번째)",
+      "category": "major-basic",
+      "credits": 6,
+      "summary": "일반화학및실험·일반수학및연습·일반물리학및실험·일반생물학 중 1·2를 연속으로 (모두 3과목 이상).",
+      "professorIds": [],
+      "isExamSubject": false
+    },
+    {
+      "id": "chemistry-one",
+      "name": "일반화학및실험1 · 2 중 1과목",
+      "category": "major-basic",
+      "credits": 3,
+      "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
+      "professorIds": [],
+      "isExamSubject": false,
+      "recommendedSemester": "1-1"
+    },
+    {
+      "id": "mtc-other-6",
+      "name": "트랙별 전공기초 6학점",
+      "category": "major-basic",
+      "credits": 6,
+      "summary": "문화콘텐츠·테크니컬아티스트 트랙: 공학영역 외 전공기초 6학점. 미디어공학 트랙: 기초과학·공학영역 6학점.",
       "professorIds": [],
       "isExamSubject": false
     },
@@ -169,66 +973,6 @@
       "summary": "전공·교양 밖에서 자유롭게 고른 과목을 대표하는 예시 항목이에요.",
       "professorIds": [],
       "isExamSubject": false
-    },
-    {
-      "id": "calculus-1",
-      "name": "일반수학1 및 연습",
-      "category": "major-basic",
-      "credits": 3,
-      "summary": "미분과 적분의 기본 개념을 연습 문제와 함께 익혀요.",
-      "professorIds": [],
-      "isExamSubject": false,
-      "recommendedSemester": "1-1"
-    },
-    {
-      "id": "calculus-2",
-      "name": "일반수학2 및 연습",
-      "category": "major-basic",
-      "credits": 3,
-      "summary": "다변수 함수와 급수 등 일반수학1 다음 단계를 다뤄요.",
-      "professorIds": [],
-      "isExamSubject": false,
-      "recommendedSemester": "1-2",
-      "prerequisiteIds": [
-        "calculus-1"
-      ]
-    },
-    {
-      "id": "programming-1",
-      "name": "컴퓨터와 프로그래밍1",
-      "category": "major-basic",
-      "credits": 3,
-      "summary": "변수, 조건문, 반복문부터 시작해 프로그램을 직접 짜 봐요.",
-      "professorIds": [
-        "prof-jeong"
-      ],
-      "isExamSubject": false,
-      "recommendedSemester": "1-1"
-    },
-    {
-      "id": "programming-2",
-      "name": "컴퓨터와 프로그래밍2",
-      "category": "major-basic",
-      "credits": 3,
-      "summary": "함수, 배열, 포인터를 다루며 더 큰 프로그램을 만들어요.",
-      "professorIds": [
-        "prof-jeong"
-      ],
-      "isExamSubject": false,
-      "recommendedSemester": "1-2",
-      "prerequisiteIds": [
-        "programming-1"
-      ]
-    },
-    {
-      "id": "natural-science",
-      "name": "기초과학 실험 (화학·물리·생물 중)",
-      "category": "major-basic",
-      "credits": 3,
-      "summary": "일반화학·물리·생물 및 실험 중 3학점 이상을 들어야 해요.",
-      "professorIds": [],
-      "isExamSubject": false,
-      "recommendedSemester": "1-2"
     },
     {
       "id": "data-structures",
@@ -1454,132 +2198,1100 @@
     }
   ],
   "graduation": {
-    "id": "cse-2018",
-    "label": "2018학년도 입학자 기준 (예시)",
-    "totalCredits": 130,
-    "buckets": [
+    "label": "2026학년도 입학자 기준",
+    "liberalPlans": [
       {
-        "id": "liberal",
-        "label": "교양",
-        "requiredCredits": 25,
-        "checklistCourseIds": [
-          "humanity-1",
-          "humanity-2",
-          "cap-1",
-          "cap-2",
-          "global-comm-1",
-          "global-comm-2",
-          "spirituality",
-          "sharing-love"
-        ],
-        "note": "기초필수 16학점 + 중핵교양 9학점. 인간학·글로벌커뮤니케이션은 1 → 2 순서로 들어요."
+        "id": "a",
+        "steps": [
+          {
+            "courseId": "humanity-1",
+            "semester": "1-1"
+          },
+          {
+            "courseId": "humanity-2",
+            "semester": "1-2"
+          },
+          {
+            "courseId": "christian-thought",
+            "semester": "2-1"
+          },
+          {
+            "courseId": "keystone-design",
+            "semester": "2-2"
+          },
+          {
+            "courseId": "sharing-love",
+            "semester": "3-2"
+          }
+        ]
       },
       {
-        "id": "major-basic",
-        "label": "전공기초",
-        "requiredCredits": 15,
-        "checklistCourseIds": [
-          "calculus-1",
-          "calculus-2",
-          "programming-1",
-          "programming-2",
-          "natural-science"
-        ],
-        "note": "공학 영역 6학점 이상 + 본계열 외 선택 9학점 이상."
+        "id": "b",
+        "steps": [
+          {
+            "courseId": "humanity-1",
+            "semester": "1-1"
+          },
+          {
+            "courseId": "humanity-2",
+            "semester": "1-2"
+          },
+          {
+            "courseId": "keystone-design",
+            "semester": "2-1"
+          },
+          {
+            "courseId": "christian-thought",
+            "semester": "2-2"
+          },
+          {
+            "courseId": "sharing-love",
+            "semester": "3-1"
+          }
+        ]
       },
       {
-        "id": "major",
-        "label": "전공",
-        "requiredCredits": 66,
-        "checklistCourseIds": [
-          "data-structures",
-          "oop",
-          "data-communication",
-          "file-processing",
-          "automata",
-          "programming-languages",
-          "operating-systems",
-          "computer-networks",
-          "software-engineering",
-          "system-security",
-          "information-systems",
-          "database-design",
-          "algorithm-design",
-          "artificial-intelligence",
-          "microprocessors",
-          "embedded-mobile",
-          "computer-graphics",
-          "data-mining",
-          "web-services"
-        ],
-        "note": "전공심화 기준 66학점 (단일전공 36학점)."
-      },
-      {
-        "id": "general",
-        "label": "일반선택",
-        "requiredCredits": 24,
-        "note": "졸업 학점 130에서 나머지 영역을 뺀 값이에요."
+        "id": "gbs",
+        "steps": [
+          {
+            "courseId": "humanity-1",
+            "semester": "1-1"
+          },
+          {
+            "courseId": "humanity-2",
+            "semester": "1-2"
+          },
+          {
+            "courseId": "christian-thought",
+            "semester": "2-1"
+          },
+          {
+            "courseId": "keystone-design",
+            "semester": "2-2"
+          }
+        ]
       }
     ],
-    "exam": {
-      "programs": [
-        {
-          "id": "deep",
-          "label": "심화전공",
-          "subjectCount": 4
-        },
-        {
-          "id": "double",
-          "label": "타 계열 복수전공",
-          "subjectCount": 3
+    "departments": [
+      {
+        "name": "국어국문학과",
+        "liberalPlan": "a",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "ling-or-lit"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "철학과",
+        "liberalPlan": "a",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "philosophy-flow"
+        ],
+        "majorRequired": 3,
+        "major": 36,
+        "majorRequiredDeep": 3,
+        "majorDeep": 66,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "국사학과",
+        "liberalPlan": "a",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "korean-history-intro"
+        ],
+        "majorRequired": 3,
+        "major": 36,
+        "majorRequiredDeep": 3,
+        "majorDeep": 66,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "영어영문학부",
+        "liberalPlan": "a",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "anglo-culture",
+          "english-lit"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 12
+      },
+      {
+        "name": "중국언어문화학과",
+        "liberalPlan": "a",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "chinese-culture"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 21
+      },
+      {
+        "name": "일어일본문화학과",
+        "liberalPlan": "a",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "japanese-intro"
+        ],
+        "majorRequired": 3,
+        "major": 36,
+        "majorRequiredDeep": 3,
+        "majorDeep": 66,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 18
+      },
+      {
+        "name": "프랑스어문화학과",
+        "liberalPlan": "a",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "french-intro"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 12,
+        "majorDeep": 66,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 18
+      },
+      {
+        "name": "음악과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "sight-singing-1",
+          "sight-singing-2",
+          "sight-singing-3",
+          "sight-singing-4",
+          "ear-training-1",
+          "ear-training-2"
+        ],
+        "majorRequired": 15,
+        "major": 36,
+        "majorRequiredDeep": 20,
+        "majorDeep": 56,
+        "majorBasicNote": "인문과학 6학점 이상 (음악과 전공기초 반드시 이수) + 본계열 외 3학점 이상",
+        "foreignCredits": 5,
+        "coreDesign": false
+      },
+      {
+        "name": "사회복지학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "social-welfare-intro",
+          "human-behavior"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "심리학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "psychology-intro"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 60,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "사회학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "sociology-intro"
+        ],
+        "majorRequired": 9,
+        "major": 36,
+        "majorRequiredDeep": 9,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "경영학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "business-principles",
+          "accounting-principles"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 12,
+        "majorDeep": 54,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 9
+      },
+      {
+        "name": "회계학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "business-principles",
+          "accounting-principles"
+        ],
+        "majorRequired": 6,
+        "major": 36,
+        "majorRequiredDeep": 6,
+        "majorDeep": 54,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 12
+      },
+      {
+        "name": "국제학부",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상. 지역연구 입문 · 국제관계학 입문 · 국제통상학 입문 등",
+        "foreignCredits": 27
+      },
+      {
+        "name": "법학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "law-intro"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 18,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "경제학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "economics-intro"
+        ],
+        "majorRequired": 6,
+        "major": 36,
+        "majorRequiredDeep": 6,
+        "majorDeep": 72,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 18
+      },
+      {
+        "name": "행정학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "public-admin-intro"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 54,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 9
+      },
+      {
+        "name": "아동학과",
+        "liberalPlan": "b",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "child-intro"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 63,
+        "majorBasicNote": "자연과학 9학점 이상 + 본계열 외 6학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "특수교육과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "disability-intro"
+        ],
+        "majorRequired": 0,
+        "major": 42,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 6,
+        "liberalElective": 0,
+        "coreDesign": false,
+        "note": "교직과정 22학점"
+      },
+      {
+        "name": "국제경영학과",
+        "liberalPlan": "gbs",
+        "majorBasic": 6,
+        "majorBasicCourseIds": [
+          "economics-principles",
+          "business-intro"
+        ],
+        "majorRequired": 9,
+        "major": 36,
+        "majorRequiredDeep": 9,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상",
+        "foreignCredits": 5,
+        "liberalBasic": 9,
+        "liberalCore": 12,
+        "liberalElective": 1,
+        "coreDesign": false,
+        "liberalElectiveCourseIds": [
+          "career-strategy"
+        ],
+        "note": "교양 22학점 이상 (핵심취업전략 1학점 포함)"
+      },
+      {
+        "name": "세무회계금융학과",
+        "liberalPlan": "gbs",
+        "majorBasic": 6,
+        "majorBasicCourseIds": [
+          "accounting-intro",
+          "tax-law"
+        ],
+        "majorRequired": 9,
+        "major": 36,
+        "majorRequiredDeep": 9,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상",
+        "foreignCredits": 5,
+        "liberalBasic": 9,
+        "liberalCore": 12,
+        "liberalElective": 1,
+        "coreDesign": false,
+        "liberalElectiveCourseIds": [
+          "career-strategy"
+        ],
+        "note": "교양 22학점 이상 (핵심취업전략 1학점 포함)"
+      },
+      {
+        "name": "IT파이낸스학과",
+        "liberalPlan": "gbs",
+        "majorBasic": 6,
+        "majorBasicCourseIds": [
+          "digital-ai",
+          "finance-basic"
+        ],
+        "majorRequired": 9,
+        "major": 36,
+        "majorRequiredDeep": 9,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상",
+        "foreignCredits": 5,
+        "liberalBasic": 9,
+        "liberalCore": 12,
+        "liberalElective": 1,
+        "coreDesign": false,
+        "liberalElectiveCourseIds": [
+          "career-strategy"
+        ],
+        "note": "교양 22학점 이상 (핵심취업전략 1학점 포함)"
+      },
+      {
+        "name": "약학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "pharm-chemistry-1",
+          "pharm-chemistry-2",
+          "biology-1",
+          "biology-2"
+        ],
+        "majorRequired": 171,
+        "major": 193,
+        "majorRequiredDeep": 171,
+        "majorDeep": 193,
+        "majorBasicNote": "자연과학 12학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 5,
+        "liberalElective": 0,
+        "coreDesign": false,
+        "totalCredits": 237,
+        "note": "통합 6년제. 전공필수 171 · 전공선택 22. 복수전공·부전공 불허"
+      },
+      {
+        "name": "화학과",
+        "liberalPlan": "a",
+        "majorBasic": 21,
+        "majorBasicCourseIds": [
+          "chemistry-1",
+          "chemistry-2",
+          "science-pair-a",
+          "science-pair-b"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 15,
+        "majorDeep": 66,
+        "majorBasicNote": "자연과학 18학점 이상 (1·2 연속 3과목 이상) + 본계열 외 3학점 이상. 복수전공을 해도 전공필수 15학점",
+        "foreignCredits": 9
+      },
+      {
+        "name": "수학과",
+        "liberalPlan": "a",
+        "majorBasic": 21,
+        "majorBasicCourseIds": [
+          "calculus-1",
+          "calculus-2",
+          "science-pair-a",
+          "science-pair-b"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 12,
+        "majorDeep": 66,
+        "majorBasicNote": "자연과학 18학점 이상 (1·2 연속 3과목 이상) + 본계열 외 3학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "물리학과",
+        "liberalPlan": "a",
+        "majorBasic": 21,
+        "majorBasicCourseIds": [
+          "physics-1",
+          "physics-2",
+          "science-pair-a",
+          "science-pair-b"
+        ],
+        "majorRequired": 13,
+        "major": 36,
+        "majorRequiredDeep": 13,
+        "majorDeep": 60,
+        "majorBasicNote": "자연과학 18학점 이상 (1·2 연속 3과목 이상) + 본계열 외 3학점 이상",
+        "foreignCredits": 9
+      },
+      {
+        "name": "공간디자인·소비자학과",
+        "liberalPlan": "b",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "consumer-or-space"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "자연과학 9학점 이상 + 본계열 외 6학점 이상",
+        "foreignCredits": 12
+      },
+      {
+        "name": "의류학과",
+        "liberalPlan": "b",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "clothing-body"
+        ],
+        "majorRequired": 6,
+        "major": 36,
+        "majorRequiredDeep": 6,
+        "majorDeep": 69,
+        "majorBasicNote": "자연과학 9학점 이상 + 본계열 외 6학점 이상",
+        "foreignCredits": 6
+      },
+      {
+        "name": "식품영양학과",
+        "liberalPlan": "b",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "food-nutrition",
+          "general-chemistry",
+          "organic-chemistry"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 69,
+        "majorBasicNote": "자연과학 12학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 9
+      },
+      {
+        "name": "컴퓨터정보공학부",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "programming-1",
+          "programming-2",
+          "calculus-1",
+          "calculus-2",
+          "natural-science"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 9학점 이상",
+        "foreignCredits": 18,
+        "test": {
+          "summary": "졸업종합시험, 또는 졸업논문·자격증·IT 대회 입상 중 하나",
+          "groups": [
+            {
+              "label": "다음 중 하나",
+              "options": [
+                {
+                  "id": "exam",
+                  "label": "졸업종합시험",
+                  "detail": "심화전공 4과목 · 타 계열 복수전공 3과목 선택. 영어 점수로 1~3과목 대체",
+                  "exam": true
+                },
+                {
+                  "id": "thesis",
+                  "label": "졸업논문",
+                  "detail": "학부 교수 지도로 공식 인정 학회 발표 논문을 내거나, 학술연구논문 장학생 심사를 통과 (논문 제출·최종 발표까지)"
+                },
+                {
+                  "id": "cert",
+                  "label": "자격증",
+                  "detail": "국가 공인 1급 또는 국제 공인 자격증 (정보처리기사, OCP, 빅데이터분석기사, 정보보안기사 등)"
+                },
+                {
+                  "id": "contest",
+                  "label": "IT 대회 입상",
+                  "detail": "IT 관련 전국·교내외 대회 입상 (ACM ICPC 등)"
+                }
+              ]
+            }
+          ],
+          "exam": {
+            "programs": [
+              {
+                "id": "deep",
+                "label": "심화전공",
+                "subjectCount": 4
+              },
+              {
+                "id": "double",
+                "label": "타 계열 복수전공",
+                "subjectCount": 3
+              }
+            ],
+            "englishWaivers": [
+              {
+                "level": 0,
+                "label": "없음"
+              },
+              {
+                "level": 1,
+                "label": "TOEIC 601~700 · TOEIC Speaking 110~129 · NEW TEPS 227~265 · TOEFL iBT 62~76 · OPIc IL·NH · IELTS 6 → 1과목 대체"
+              },
+              {
+                "level": 2,
+                "label": "TOEIC 701~800 · TOEIC Speaking 130~159 · NEW TEPS 266~310 · TOEFL iBT 77~85 · OPIc AL·IH·IM · IELTS 6.5 → 2과목 대체"
+              },
+              {
+                "level": 3,
+                "label": "TOEIC 801 이상 · TOEIC Speaking 160 이상 · NEW TEPS 311 이상 · TOEFL iBT 86 이상 · IELTS 7 이상 → 3과목 대체"
+              }
+            ],
+            "subjectCourseIds": [
+              "data-structures",
+              "oop",
+              "data-communication",
+              "file-processing",
+              "automata",
+              "programming-languages",
+              "operating-systems",
+              "computer-networks",
+              "software-engineering",
+              "system-security",
+              "information-systems",
+              "database-design",
+              "algorithm-design",
+              "artificial-intelligence",
+              "microprocessors",
+              "embedded-mobile",
+              "computer-graphics",
+              "data-mining",
+              "web-services"
+            ],
+            "note": "신청한 과목은 모두 합격해야 해요. 1차 통과는 A, 2차 통과는 B. 2차 시험은 1차에 떨어진 과목만 봐요."
+          },
+          "note": "졸업논문·자격증·IT 대회 입상은 졸업시험 점수 등급 A로 인정해요. 그 밖에 학부회의 심사로 인정되기도 해요.",
+          "source": {
+            "label": "컴퓨터정보공학부 학사정보",
+            "asOf": "2026-10-26",
+            "isSample": false,
+            "url": "https://csie.catholic.ac.kr/csie/course/academic.do"
+          }
         }
-      ],
-      "englishWaivers": [
-        {
-          "level": 0,
-          "label": "없음"
-        },
-        {
-          "level": 1,
-          "label": "TOEIC 601~700 · 1과목 대체"
-        },
-        {
-          "level": 2,
-          "label": "TOEIC 701~800 · 2과목 대체"
-        },
-        {
-          "level": 3,
-          "label": "TOEIC 801 이상 · 3과목 대체"
+      },
+      {
+        "name": "미디어기술콘텐츠학과",
+        "liberalPlan": "a",
+        "majorBasic": 12,
+        "majorBasicCourseIds": [
+          "digital-content",
+          "media-programming",
+          "mtc-other-6"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 6학점 이상 (트랙에 따라 다름)",
+        "foreignCredits": 9,
+        "test": {
+          "summary": "졸업논문·어학성적·공모전 입상·졸업작품·자격증 중 하나",
+          "groups": [
+            {
+              "label": "다음 중 하나",
+              "options": [
+                {
+                  "id": "thesis",
+                  "label": "졸업논문",
+                  "detail": "졸업 예정 학기 전까지 지도교수 주제 승인. 개별 작성이 원칙 (미디어공학 주제는 지도교수와 협의해 팀 작성 가능)"
+                },
+                {
+                  "id": "language",
+                  "label": "어학성적",
+                  "detail": "TOEIC 700 · TOEIC Speaking 130 · OPIc IM3 · TOEFL iBT 80 · NEW TEPS 300 · JPT 740 · JLPT N1 · 신HSK 6급 · DELF B1 이상 중 하나"
+                },
+                {
+                  "id": "contest",
+                  "label": "교외 공모전 입상",
+                  "detail": "학과 심의 필요. 제출 전에 교수님께 인정 여부를 꼭 확인해요"
+                },
+                {
+                  "id": "work",
+                  "label": "졸업작품",
+                  "detail": "졸업 예정 학기 전까지 지도교수 주제 승인. 문화콘텐츠: 3D 애니메이션·모션그래픽·영상기획·시나리오·디자인 포트폴리오 중 하나 / 미디어공학: 응용소프트웨어 작품 개발"
+                },
+                {
+                  "id": "cert",
+                  "label": "자격증 (미디어공학 트랙)",
+                  "detail": "정보처리기사, Oracle OCP · OCM"
+                }
+              ]
+            }
+          ],
+          "note": "트랙(문화콘텐츠 · 미디어공학 · 테크니컬아티스트)과 관계없이 같아요. 트랙을 못 마쳐도 졸업할 수 있어요.",
+          "source": {
+            "label": "미디어기술콘텐츠학과 학사정보",
+            "asOf": "2026-10-26",
+            "isSample": false,
+            "url": "https://mtc.catholic.ac.kr/mtc/course/academic.do"
+          }
         }
+      },
+      {
+        "name": "정보통신전자공학부",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "ice-programming-1",
+          "ice-programming-2",
+          "calculus-1",
+          "calculus-2",
+          "natural-science"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 9학점 이상",
+        "foreignCredits": 12,
+        "test": {
+          "summary": "졸업논문·자격증·대회 입상·종합설계보고서·기술보고서 중 하나",
+          "groups": [
+            {
+              "label": "다음 중 하나",
+              "options": [
+                {
+                  "id": "thesis",
+                  "label": "졸업논문 (등급 A)",
+                  "detail": "학술연구논문 장학생 (논문 제출·최종 발표까지), 또는 공식 인정 학회 발표 논문"
+                },
+                {
+                  "id": "cert",
+                  "label": "자격증 (등급 A)",
+                  "detail": "국가 공인 1급 또는 국제 공인 자격증 (전자기사, 전기기사, 정보처리기사 등)"
+                },
+                {
+                  "id": "contest",
+                  "label": "대회 입상 (등급 A)",
+                  "detail": "전공 관련 전국·교내외 대회 입상 (해당 여부는 학부 검토 후 결정)"
+                },
+                {
+                  "id": "capstone",
+                  "label": "종합설계보고서",
+                  "detail": "캡스톤디자인·종합설계 교과목 중 1과목 수강 후 개인별 보고서(A4 2쪽 이내)를 포함한 종합설계보고서 제출"
+                },
+                {
+                  "id": "tech-report",
+                  "label": "기술보고서 (등급 B)",
+                  "detail": "학기 초 프로젝트 제안서 → 프로젝트 진행 → 학기 말 기술보고서 제출"
+                }
+              ]
+            }
+          ],
+          "note": "종합시험과 어학성적은 2025년 2월 졸업자까지만 인정했어요. 그 밖의 사항은 학부회의 결정을 따라요.",
+          "source": {
+            "label": "정보통신전자공학부 학사정보",
+            "asOf": "2026-10-26",
+            "isSample": false,
+            "url": "https://ice.catholic.ac.kr/ice/course/academic.do"
+          }
+        }
+      },
+      {
+        "name": "생명공학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "biotech-intro",
+          "bio-intro",
+          "science-6"
+        ],
+        "majorRequired": 3,
+        "major": 36,
+        "majorRequiredDeep": 3,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 9학점 이상 + 본계열 외 6학점 이상",
+        "foreignCredits": 24
+      },
+      {
+        "name": "에너지환경공학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "env-eng-intro",
+          "energy-eng-intro",
+          "science-6"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 9학점 이상 + 본계열 외 6학점 이상",
+        "foreignCredits": 18
+      },
+      {
+        "name": "바이오메디컬화학공학과",
+        "liberalPlan": "a",
+        "majorBasic": 18,
+        "majorBasicCourseIds": [
+          "bmce-eng-intro",
+          "bmce-intro",
+          "science-12"
+        ],
+        "majorRequired": 0,
+        "major": 42,
+        "majorRequiredDeep": 0,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 12학점 이상",
+        "foreignCredits": 24
+      },
+      {
+        "name": "의생명과학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "biology-1",
+          "biology-2",
+          "biomed-intro",
+          "chemistry-one"
+        ],
+        "majorRequired": 0,
+        "major": 42,
+        "majorRequiredDeep": 0,
+        "majorDeep": 72,
+        "majorBasicNote": "자연과학 12학점 이상 + 본계열 외 3학점 이상",
+        "foreignCredits": 24
+      },
+      {
+        "name": "인공지능학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "programming-1",
+          "programming-2",
+          "calculus-1",
+          "calculus-2",
+          "science-one"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 12,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 9학점 이상",
+        "foreignCredits": 27,
+        "test": {
+          "summary": "어학성적 + 졸업논문·인턴십·졸업작품 중 하나",
+          "groups": [
+            {
+              "label": "어학성적",
+              "options": [
+                {
+                  "id": "language",
+                  "label": "어학성적",
+                  "detail": "TOEIC 700 · NEW TEPS 300 · TOEFL iBT 80 · TOEIC Speaking 130 · OPIc IM2 이상 중 하나"
+                }
+              ]
+            },
+            {
+              "label": "다음 중 하나",
+              "options": [
+                {
+                  "id": "thesis",
+                  "label": "졸업논문",
+                  "detail": "지도교수 지도로 학사학위 논문 제출 (지도교수 최종 승인). 인공지능경험랩1·2로 논문 쓰기를 권해요"
+                },
+                {
+                  "id": "internship",
+                  "label": "인턴십",
+                  "detail": "지도교수 지도로 인공지능학 현장실습 Ⅰ~Ⅴ를 통해 장기 산업체 현장실습"
+                },
+                {
+                  "id": "capstone",
+                  "label": "졸업작품",
+                  "detail": "인공지능학 캡스톤디자인1·2 수강 후 졸업작품전시회 입선 이상"
+                }
+              ]
+            }
+          ],
+          "source": {
+            "label": "인공지능학과 학사정보",
+            "asOf": "2026-10-26",
+            "isSample": false,
+            "url": "https://ai.catholic.ac.kr/ai/course/academic.do"
+          }
+        }
+      },
+      {
+        "name": "데이터사이언스학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "programming-1",
+          "programming-2",
+          "calculus-1",
+          "calculus-2",
+          "science-one"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 12,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 9학점 이상",
+        "foreignCredits": 27,
+        "test": {
+          "summary": "어학성적 + 졸업논문·인턴십·졸업작품 중 하나",
+          "groups": [
+            {
+              "label": "어학성적",
+              "options": [
+                {
+                  "id": "language",
+                  "label": "어학성적",
+                  "detail": "TOEIC 700 · NEW TEPS 266 · TOEFL iBT 80 · TOEIC Speaking 6등급 · OPIc IM2 이상 중 하나"
+                }
+              ]
+            },
+            {
+              "label": "다음 중 하나",
+              "options": [
+                {
+                  "id": "thesis",
+                  "label": "졸업논문",
+                  "detail": "공식 인정 학회 발표 논문 (학과 검토), 또는 지도교수 지도로 학사학위 논문 제출 (지도교수 최종 승인)"
+                },
+                {
+                  "id": "internship",
+                  "label": "인턴십",
+                  "detail": "지도교수 지도로 데이터사이언스학 현장실습 Ⅰ~Ⅴ를 통해 장기 산업체 현장실습"
+                },
+                {
+                  "id": "capstone",
+                  "label": "졸업작품",
+                  "detail": "데이터사이언스학 캡스톤디자인1·2 수강 후 졸업작품전시회 입선 이상"
+                }
+              ]
+            }
+          ],
+          "source": {
+            "label": "데이터사이언스학과 학사정보",
+            "asOf": "2026-10-26",
+            "isSample": false,
+            "url": "https://datascience.catholic.ac.kr/datascience/course/academic.do"
+          }
+        }
+      },
+      {
+        "name": "바이오메디컬소프트웨어학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "programming-1",
+          "programming-2",
+          "calculus-1",
+          "calculus-2",
+          "natural-science"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 12,
+        "majorDeep": 66,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 9학점 이상",
+        "foreignCredits": 27
+      },
+      {
+        "name": "바이오로직스공학부",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "biologics-intro",
+          "biologics-math",
+          "science-bio-9"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 54,
+        "majorBasicNote": "공학 6학점 이상 + 본계열 외 9학점 이상"
+      },
+      {
+        "name": "AI의공학과",
+        "liberalPlan": "a",
+        "majorBasic": 15,
+        "majorBasicCourseIds": [
+          "programming-1",
+          "programming-2",
+          "calculus-1",
+          "calculus-2",
+          "natural-science"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 54,
+        "majorBasicNote": "자연과학 6학점 이상 + 공학 6학점 이상 + 본계열 외 3학점 이상"
+      },
+      {
+        "name": "글로벌경영학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "global-business",
+          "global-accounting"
+        ],
+        "majorRequired": 12,
+        "major": 36,
+        "majorRequiredDeep": 12,
+        "majorDeep": 66,
+        "majorBasicNote": "사회과학 6학점 이상 + 본계열 외 3학점 이상",
+        "coreAreas": false,
+        "coreDesign": false
+      },
+      {
+        "name": "성악과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "solfege-1",
+          "solfege-2",
+          "solfege-3"
+        ],
+        "majorRequired": 15,
+        "major": 36,
+        "majorRequiredDeep": 20,
+        "majorDeep": 56,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "coreAreas": false,
+        "coreDesign": false
+      },
+      {
+        "name": "한국어문화학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "korean-edu-intro",
+          "korean-culture"
+        ],
+        "majorRequired": 3,
+        "major": 36,
+        "majorRequiredDeep": 3,
+        "majorDeep": 57,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "coreAreas": false,
+        "coreDesign": false
+      },
+      {
+        "name": "예술미디어융합학과",
+        "liberalPlan": "b",
+        "majorBasic": 9,
+        "majorBasicCourseIds": [
+          "media-tech-culture",
+          "art-culture"
+        ],
+        "majorRequired": 0,
+        "major": 36,
+        "majorRequiredDeep": 0,
+        "majorDeep": 42,
+        "majorBasicNote": "인문과학 6학점 이상 + 본계열 외 3학점 이상",
+        "coreAreas": false,
+        "coreDesign": false
+      }
+    ],
+    "fallback": {
+      "name": "공통 기준",
+      "liberalPlan": "a",
+      "majorBasic": 9,
+      "majorBasicCourseIds": [],
+      "majorRequired": 0,
+      "major": 36,
+      "majorRequiredDeep": 0,
+      "majorDeep": 66,
+      "majorBasicNote": "학부(과)마다 다르므로 학과에 확인하세요",
+      "note": "이 학과의 기준은 학사제도 안내에 없어 성심교정 공통 기준(교양·졸업 130학점)으로 보여 줘요"
+    },
+    "liberalForeignCredits": 5,
+    "thesis": {
+      "creditsBy7th": 105,
+      "conditions": [
+        "제8차 학기를 등록하고 재학 중",
+        "제7차 학기까지 105학점 이상 취득",
+        "졸업논문 제목 신청서 · 졸업종합시험 응시원 제출 (학부(과)에서 정한 기한까지)"
       ],
-      "alternativeNote": "졸업논문, 1급·공인 자격증, IT 대회 입상 중 하나가 있으면 졸업시험 점수 등급 A로 인정돼요.",
-      "subjectCourseIds": [
-        "data-structures",
-        "oop",
-        "data-communication",
-        "file-processing",
-        "automata",
-        "programming-languages",
-        "operating-systems",
-        "computer-networks",
-        "software-engineering",
-        "system-security",
-        "information-systems",
-        "database-design",
-        "algorithm-design",
-        "artificial-intelligence",
-        "microprocessors",
-        "embedded-mobile",
-        "computer-graphics",
-        "data-mining",
-        "web-services"
+      "notes": [
+        "통과(P)는 A·B·C·D, 부적격(F)이면 졸업할 수 없어요.",
+        "복수전공을 하면 전공마다 따로 졸업논문을 내거나 졸업종합시험을 봐요."
       ]
     },
     "source": {
-      "label": "컴퓨터정보공학부 학사정보 · 2018학년도 입학자 기준표",
-      "asOf": "2026-10-08",
-      "isSample": true,
-      "url": "https://csie.catholic.ac.kr"
+      "label": "2026학년도 학사제도 안내 (학사지원팀 · 학부대학운영팀)",
+      "asOf": "2026-10-26",
+      "isSample": false,
+      "url": "https://www.catholic.ac.kr"
     }
   },
   "events": [

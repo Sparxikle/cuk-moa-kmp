@@ -7,7 +7,7 @@ import kr.ac.catholic.cukmoa.model.SemesterKey
 import kr.ac.catholic.cukmoa.model.StudentState
 import kr.ac.catholic.cukmoa.model.courseKey
 
-// Builds "다음 학기 추천" (next-semester recommendations) and saving from the official department roadmaps.
+// Builds "다음 학기 추천" (next semester recommendations) and saving from the official department roadmaps.
 // So courses missing from the (sample) catalog can be saved too, roadmap courses are stored with the ID "rm:courseKey".
 
 const val ROADMAP_COURSE_PREFIX = "rm:"

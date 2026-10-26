@@ -63,6 +63,7 @@ import kr.ac.catholic.cukmoa.logic.dDay
 import kr.ac.catholic.cukmoa.logic.daysUntil
 import kr.ac.catholic.cukmoa.logic.findCourse
 import kr.ac.catholic.cukmoa.logic.findTrack
+import kr.ac.catholic.cukmoa.logic.graduationPlan
 import kr.ac.catholic.cukmoa.logic.nextRecommendations
 import kr.ac.catholic.cukmoa.logic.officialRecommendations
 import kr.ac.catholic.cukmoa.logic.courseName
@@ -119,7 +120,7 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
             Column(Modifier.contentWidth(), verticalArrangement = Arrangement.spacedBy(Space.m)) {
                 PrimaryButton("설정 · 홈 화면 편집", onClick = nav.openSettings, tinted = true)
                 PrimaryButton("기능 켜고 끄기", onClick = nav.manageModules, tinted = true)
-                DataNotice("학점·과목·선배 기록은 시연용 예시예요. 공지·학사일정은 학교 사이트에서 실시간으로 모아요.")
+                DataNotice("졸업요건은 2026학년도 학사제도 안내 기준이에요. 이수 기록과 선배 기록은 시연용 예시이고, 공지·학사일정은 학교 사이트에서 실시간으로 모아요.")
             }
         }
     }
@@ -129,10 +130,11 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
 private fun ProgressCard(catalog: Catalog, student: StudentState) {
     val nav = LocalNavigator.current
     val s = creditSummary(catalog, student)
+    val plan = graduationPlan(catalog, student)
     Card(onClick = { nav.open(Routes.GRADUATION) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Txt("졸업까지", AppTheme.type.subhead, Modifier.weight(1f), tone = Tone.Ink2)
-            Chip(catalog.graduation.label)
+            Chip(if (plan.isFallback) catalog.graduation.label else plan.rules.name)
         }
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {

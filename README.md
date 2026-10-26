@@ -48,7 +48,7 @@ iOS: create an iOS app project in macOS + Xcode and show `MainViewController()` 
 ./gradlew :shared:jvmTest
 ```
 
-Covers credit calculation (demo: 3rd-year backend track = 44 credits left), next-semester recommendations, graduation exam calculation, referential integrity of the sample catalog, and reading/rejecting the saved-state format.
+Covers credit calculation (demo: 3rd-year backend track = 44 credits left), next semester recommendations, graduation exam calculation, referential integrity of the sample catalog, and reading/rejecting the saved-state format.
 
 ## Relationship to the server repo
 

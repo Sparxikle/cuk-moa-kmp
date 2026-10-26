@@ -21,6 +21,7 @@ import kr.ac.catholic.cukmoa.model.Announcement
 import kr.ac.catholic.cukmoa.model.AnnouncementQuery
 import kr.ac.catholic.cukmoa.model.AnnouncementSource
 import kr.ac.catholic.cukmoa.model.ApiJson
+import kr.ac.catholic.cukmoa.model.BucketId
 import kr.ac.catholic.cukmoa.model.CalendarResponse
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.Department
@@ -277,6 +278,16 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
 
     fun setTracks(trackIds: List<TrackId>) = update { it.copy(trackIds = trackIds) }
     fun setExam(transform: (ExamState) -> ExamState) = update { it.copy(exam = transform(it.exam)) }
+
+    /** Credits earned in an area outside the catalog's checklist (entered by hand from the transcript) */
+    fun setOtherCredits(bucket: BucketId, credits: Int) = update { it.copy(otherCredits = it.otherCredits + (bucket to maxOf(0, credits))) }
+
+    fun setForeignCredits(credits: Int) = update { it.copy(foreignCredits = maxOf(0, credits)) }
+
+    /** key = testKey(department rules, option id) */
+    fun toggleGraduationCheck(key: String) = update { s ->
+        s.copy(graduationChecks = if (key in s.graduationChecks) s.graduationChecks - key else s.graduationChecks + key)
+    }
 
     /** Sets the majors (up to 2; the first is the 1st major). For departments with collected announcements, also sets the board codes. */
     fun setDepartments(list: List<Department>) {

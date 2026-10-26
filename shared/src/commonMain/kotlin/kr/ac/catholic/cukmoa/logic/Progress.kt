@@ -3,7 +3,6 @@ package kr.ac.catholic.cukmoa.logic
 import kr.ac.catholic.cukmoa.model.BucketId
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.Course
-import kr.ac.catholic.cukmoa.model.ExamState
 import kr.ac.catholic.cukmoa.model.Roadmap
 import kr.ac.catholic.cukmoa.model.RoadmapItem
 import kr.ac.catholic.cukmoa.model.SemesterKey
@@ -44,7 +43,8 @@ fun creditSummary(catalog: Catalog, student: StudentState): CreditSummary {
     fun sum(ids: List<String>, bucket: BucketId) =
         ids.sumOf { id -> index[id]?.takeIf { it.category.bucket == bucket }?.credits ?: 0 }
 
-    val buckets = catalog.graduation.buckets.map { b ->
+    val plan = graduationPlan(catalog, student)
+    val buckets = plan.buckets.map { b ->
         BucketProgress(
             id = b.id,
             label = b.label,
@@ -54,7 +54,7 @@ fun creditSummary(catalog: Catalog, student: StudentState): CreditSummary {
             note = b.note,
         )
     }
-    val total = catalog.graduation.totalCredits
+    val total = plan.totalCredits
     val earned = buckets.sumOf { it.earned }
     val inProgress = buckets.sumOf { it.inProgress }
     return CreditSummary(
@@ -65,11 +65,6 @@ fun creditSummary(catalog: Catalog, student: StudentState): CreditSummary {
         remainingAfterTerm = maxOf(0, total - earned - inProgress),
         buckets = buckets,
     )
-}
-
-fun examRemaining(catalog: Catalog, exam: ExamState): Int {
-    val count = catalog.graduation.exam.programs.firstOrNull { it.id == exam.programId }?.subjectCount ?: 4
-    return maxOf(0, count - exam.englishWaiver - exam.passed)
 }
 
 enum class CourseStatus { Completed, InProgress, Saved, None }
@@ -90,7 +85,7 @@ data class Recommendation(
 
 data class Recommendations(val semester: SemesterKey?, val track: Track?, val items: List<Recommendation>)
 
-/** Next-semester recommendations: the next-semester column of the chosen career track's roadmap. Without a track, based on the school's recommended semester. */
+/** Next semester recommendations: the next semester column of the chosen career track's roadmap. Without a track, based on the school's recommended semester. */
 fun nextRecommendations(catalog: Catalog, student: StudentState): Recommendations {
     val semester = student.currentSemester.next ?: return Recommendations(null, null, emptyList())
     val track = catalog.findTrack(student.trackIds.firstOrNull())
