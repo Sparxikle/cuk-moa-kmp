@@ -15,6 +15,7 @@ import kr.ac.catholic.cukmoa.core.state.LocalStore
 import kr.ac.catholic.cukmoa.core.state.Platform
 import kr.ac.catholic.cukmoa.logic.encodeStudentState
 import kr.ac.catholic.cukmoa.logic.sampleStudent
+import kr.ac.catholic.cukmoa.model.ThemeMode
 import org.jetbrains.skia.EncodedImageFormat
 
 // Screen captures for submissions and docs. Renders screens to PNG without opening a window.
@@ -34,6 +35,7 @@ fun main(args: Array<String>): Unit = runBlocking(Dispatchers.Main) {
     val api = System.getenv("CUK_MOA_API") ?: "http://localhost:8080"
     // Proposal demo order: 3rd year · backend
     val demo = encodeStudentState(sampleStudent(3).copy(onboarded = true))
+    val demoDark = encodeStudentState(sampleStudent(3).copy(onboarded = true, theme = ThemeMode.Dark))
 
     suspend fun shoot(name: String, heightDp: Int, store: Map<String, String>, route: String = Routes.HOME) {
         val owner = object : ViewModelStoreOwner { override val viewModelStore = ViewModelStore() }
@@ -60,5 +62,7 @@ fun main(args: Array<String>): Unit = runBlocking(Dispatchers.Main) {
     shoot("06-professors", 1100, mapOf("student" to demo), Routes.PROFESSORS)
     shoot("07-modules", 1100, mapOf("student" to demo), Routes.MODULES)
     shoot("08-settings", 2600, mapOf("student" to demo), Routes.SETTINGS)
+    shoot("09-home-dark", 1900, mapOf("student" to demoDark))
+    shoot("10-graduation-dark", 1900, mapOf("student" to demoDark), Routes.GRADUATION)
     kotlin.system.exitProcess(0)
 }

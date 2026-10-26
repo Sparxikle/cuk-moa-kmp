@@ -17,6 +17,14 @@ enum class HomeCardId {
     @SerialName("announcements") Announcements,
 }
 
+/** Light/dark appearance: follow the system, or always light/dark */
+@Serializable
+enum class ThemeMode {
+    @SerialName("system") System,
+    @SerialName("light") Light,
+    @SerialName("dark") Dark,
+}
+
 @Serializable
 data class ExamState(
     val programId: ExamProgramId = ExamProgramId.Deep,
@@ -58,6 +66,9 @@ data class StudentState(
     val graduationChecks: List<String> = emptyList(),
     /** Foreign-language lecture credits earned (not tracked per course) */
     val foreignCredits: Int = 0,
+    val theme: ThemeMode = ThemeMode.System,
+    /** Use the wallpaper's colors (Android 12+) instead of the app's blue */
+    val dynamicColor: Boolean = false,
 ) {
     companion object {
         const val CURRENT_SCHEMA_VERSION = 3

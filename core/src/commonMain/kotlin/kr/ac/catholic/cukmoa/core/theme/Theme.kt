@@ -1,9 +1,11 @@
 package kr.ac.catholic.cukmoa.core.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -13,7 +15,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import kr.ac.catholic.cukmoa.core.resources.Res
 import kr.ac.catholic.cukmoa.core.resources.moasans_bold
@@ -22,12 +23,27 @@ import kr.ac.catholic.cukmoa.core.resources.moasans_regular
 import kr.ac.catholic.cukmoa.core.resources.moasans_semibold
 import org.jetbrains.compose.resources.Font
 
-// Direction: a single blue (Songsim blue) on a calm off-white background. Status colors (completed, warning) are separate from the accent.
+// Material 3: every color comes from a ColorScheme (ColorSchemes.kt, or the wallpaper's dynamic colors on Android 12+).
+// Palette keeps short names for the roles screens use; status colors (completed, warning) are M3 extended colors.
 // Tracks don't get their own colors — they are told apart by icon and name.
 
 @Immutable
+data class ExtendedColors(
+    val good: Color,
+    val onGood: Color,
+    val goodContainer: Color,
+    val onGoodContainer: Color,
+    val warn: Color,
+    val onWarn: Color,
+    val warnContainer: Color,
+    val onWarnContainer: Color,
+)
+
+@Immutable
 data class Palette(
+    /** Screen background (surface) */
     val bg: Color,
+    /** Cards and grouped lists (surfaceContainerLow) */
     val surface: Color,
     val fill: Color,
     val fillStrong: Color,
@@ -37,54 +53,40 @@ data class Palette(
     val line: Color,
     val accent: Color,
     val accentSoft: Color,
+    val onAccentSoft: Color,
     /** Cells being filled, such as this semester's. They must be clearly distinct from empty cells (cell). */
     val accentMuted: Color,
     val onAccent: Color,
     val good: Color,
     val goodSoft: Color,
+    val onGoodSoft: Color,
     val warn: Color,
     val warnSoft: Color,
+    val onWarnSoft: Color,
     val cell: Color,
 )
 
-val LightPalette = Palette(
-    bg = Color(0xFFF3F4F7),
-    surface = Color(0xFFFFFFFF),
-    fill = Color(0xFFECEEF2),
-    fillStrong = Color(0xFFDFE2E8),
-    ink = Color(0xFF12141B),
-    ink2 = Color(0xFF5C6170),
-    ink3 = Color(0xFF969BA8),
-    line = Color(0x1412141B),
-    accent = Color(0xFF2F4FD8),
-    accentSoft = Color(0x1A2F4FD8),
-    accentMuted = Color(0x522F4FD8),
-    onAccent = Color(0xFFFFFFFF),
-    good = Color(0xFF17855A),
-    goodSoft = Color(0x1F17855A),
-    warn = Color(0xFFB26600),
-    warnSoft = Color(0x1FB26600),
-    cell = Color(0xFFE1E4EA),
-)
-
-val DarkPalette = Palette(
-    bg = Color(0xFF0A0B0F),
-    surface = Color(0xFF17191F),
-    fill = Color(0xFF23262E),
-    fillStrong = Color(0xFF2F333C),
-    ink = Color(0xFFF1F2F6),
-    ink2 = Color(0xFFA2A7B5),
-    ink3 = Color(0xFF6B7180),
-    line = Color(0x14FFFFFF),
-    accent = Color(0xFF8299FF),
-    accentSoft = Color(0x298299FF),
-    accentMuted = Color(0x6B8299FF),
-    onAccent = Color(0xFF0A0B0F),
-    good = Color(0xFF45C98D),
-    goodSoft = Color(0x2945C98D),
-    warn = Color(0xFFF0A43A),
-    warnSoft = Color(0x29F0A43A),
-    cell = Color(0xFF2A2D36),
+fun palette(s: ColorScheme, x: ExtendedColors) = Palette(
+    bg = s.surface,
+    surface = s.surfaceContainerLow,
+    fill = s.surfaceContainerHigh,
+    fillStrong = s.surfaceContainerHighest,
+    ink = s.onSurface,
+    ink2 = s.onSurfaceVariant,
+    ink3 = s.outline,
+    line = s.outlineVariant,
+    accent = s.primary,
+    accentSoft = s.secondaryContainer,
+    onAccentSoft = s.onSecondaryContainer,
+    accentMuted = s.primary.copy(alpha = 0.38f),
+    onAccent = s.onPrimary,
+    good = x.good,
+    goodSoft = x.goodContainer,
+    onGoodSoft = x.onGoodContainer,
+    warn = x.warn,
+    warnSoft = x.warnContainer,
+    onWarnSoft = x.onWarnContainer,
+    cell = s.surfaceContainerHighest,
 )
 
 object Space {
@@ -97,10 +99,11 @@ object Space {
     val xxxl = 32.dp
 }
 
+/** M3 shape scale: cards and lists use large (16dp), controls are fully rounded. */
 object Radius {
-    val card = 22.dp
-    val group = 14.dp
-    val control = 12.dp
+    val card = 16.dp
+    val group = 16.dp
+    val control = 20.dp
 }
 
 @Immutable
@@ -116,31 +119,59 @@ data class TypeScale(
     val numeral: TextStyle,
 )
 
-// Larger sizes get tighter letter spacing and a smaller line-height ratio.
+// M3 type scale (headline · title · body · label) with the app font. Korean text gets a little less letter spacing
+// than the Latin defaults, and titles one weight step heavier so Hangul stays crisp.
 @Composable
-private fun typeScale(): TypeScale {
-    val pretendard = FontFamily(
-        Font(Res.font.moasans_regular, FontWeight.Normal),
-        Font(Res.font.moasans_medium, FontWeight.Medium),
-        Font(Res.font.moasans_semibold, FontWeight.SemiBold),
-        Font(Res.font.moasans_bold, FontWeight.Bold),
-    )
-    fun style(size: Int, line: Int, weight: FontWeight, tracking: Double = 0.0) =
-        TextStyle(fontFamily = pretendard, fontSize = size.sp, lineHeight = line.sp, fontWeight = weight, letterSpacing = (tracking / size).em)
-    return TypeScale(
-        largeTitle = style(32, 38, FontWeight.Bold, -0.7),
-        title = style(22, 28, FontWeight.Bold, -0.4),
-        headline = style(17, 22, FontWeight.SemiBold, -0.25),
-        body = style(16, 23, FontWeight.Normal, -0.1),
-        callout = style(15, 21, FontWeight.Normal, -0.1),
-        subhead = style(14, 19, FontWeight.Medium, -0.05),
-        footnote = style(13, 18, FontWeight.Normal),
-        caption = style(12, 16, FontWeight.Medium, 0.1),
-        numeral = TextStyle(fontFamily = pretendard, fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
-    )
-}
+private fun appFont() = FontFamily(
+    Font(Res.font.moasans_regular, FontWeight.Normal),
+    Font(Res.font.moasans_medium, FontWeight.Medium),
+    Font(Res.font.moasans_semibold, FontWeight.SemiBold),
+    Font(Res.font.moasans_bold, FontWeight.Bold),
+)
 
-val LocalPalette = staticCompositionLocalOf { LightPalette }
+private fun style(font: FontFamily, size: Int, line: Int, weight: FontWeight, tracking: Double = 0.0) =
+    TextStyle(fontFamily = font, fontSize = size.sp, lineHeight = line.sp, fontWeight = weight, letterSpacing = tracking.sp)
+
+private fun typography(f: FontFamily) = Typography(
+    displayLarge = style(f, 57, 64, FontWeight.Normal, -0.25),
+    displayMedium = style(f, 45, 52, FontWeight.Normal),
+    displaySmall = style(f, 36, 44, FontWeight.Normal),
+    headlineLarge = style(f, 32, 40, FontWeight.SemiBold),
+    headlineMedium = style(f, 28, 36, FontWeight.SemiBold),
+    headlineSmall = style(f, 24, 32, FontWeight.SemiBold),
+    titleLarge = style(f, 22, 28, FontWeight.SemiBold),
+    titleMedium = style(f, 16, 24, FontWeight.SemiBold, 0.1),
+    titleSmall = style(f, 14, 20, FontWeight.SemiBold, 0.1),
+    bodyLarge = style(f, 16, 24, FontWeight.Normal, 0.15),
+    bodyMedium = style(f, 14, 20, FontWeight.Normal, 0.1),
+    bodySmall = style(f, 12, 16, FontWeight.Normal, 0.2),
+    labelLarge = style(f, 14, 20, FontWeight.Medium, 0.1),
+    labelMedium = style(f, 12, 16, FontWeight.Medium, 0.3),
+    labelSmall = style(f, 11, 16, FontWeight.Medium, 0.3),
+)
+
+/** The app's short style names, mapped onto the M3 type scale. */
+private fun typeScale(t: Typography, f: FontFamily) = TypeScale(
+    largeTitle = t.headlineMedium,
+    title = t.titleLarge,
+    headline = t.titleMedium,
+    body = t.bodyLarge,
+    callout = t.bodyLarge,
+    subhead = t.labelLarge,
+    footnote = t.bodyMedium,
+    caption = t.bodySmall,
+    numeral = TextStyle(fontFamily = f, fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+)
+
+private val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(28.dp),
+)
+
+val LocalPalette = staticCompositionLocalOf { palette(LightScheme, LightExtended) }
 val LocalType = staticCompositionLocalOf<TypeScale> { error("AppTheme 안에서 써야 해요.") }
 
 object AppTheme {
@@ -148,22 +179,22 @@ object AppTheme {
     val type: TypeScale @Composable get() = LocalType.current
 }
 
+/**
+ * dark: light or dark scheme. dynamic: the platform's wallpaper colors (Android 12+), or null for the app's own scheme.
+ */
 @Composable
-fun AppTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val p = if (dark) DarkPalette else LightPalette
-    val scheme = (if (dark) darkColorScheme() else lightColorScheme()).copy(
-        primary = p.accent,
-        onPrimary = p.onAccent,
-        background = p.bg,
-        surface = p.surface,
-        onSurface = p.ink,
-        onBackground = p.ink,
-        surfaceContainer = p.surface,
-        secondaryContainer = p.accentSoft,
-        onSecondaryContainer = p.accent,
-        outline = p.line,
-    )
-    CompositionLocalProvider(LocalPalette provides p, LocalType provides typeScale()) {
-        MaterialTheme(colorScheme = scheme, content = content)
+fun AppTheme(
+    dark: Boolean = isSystemInDarkTheme(),
+    dynamic: ColorScheme? = null,
+    content: @Composable () -> Unit,
+) {
+    val scheme = dynamic ?: if (dark) DarkScheme else LightScheme
+    val font = appFont()
+    val typography = typography(font)
+    CompositionLocalProvider(
+        LocalPalette provides palette(scheme, if (dark) DarkExtended else LightExtended),
+        LocalType provides typeScale(typography, font),
+    ) {
+        MaterialTheme(colorScheme = scheme, typography = typography, shapes = AppShapes, content = content)
     }
 }

@@ -192,7 +192,7 @@ private fun SemesterStep(catalog: Catalog, student: StudentState, step: RoadmapS
                             onClick = { nav.openCourse(course.id) },
                             trailing = {
                                 when (status) {
-                                    CourseStatus.Completed -> CheckCircle(true, 22.dp)
+                                    CourseStatus.Completed -> Chip("이수", ChipTone.Good)
                                     CourseStatus.InProgress -> Chip("수강 중", ChipTone.Accent)
                                     else -> SaveButton(status == CourseStatus.Saved, course.name) { vm.toggleSaved(course.id) }
                                 }

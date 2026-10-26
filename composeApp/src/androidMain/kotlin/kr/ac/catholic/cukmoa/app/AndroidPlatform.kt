@@ -1,6 +1,9 @@
 package kr.ac.catholic.cukmoa.app
 
 import android.content.Context
+import android.os.Build
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.core.content.edit
 import kr.ac.catholic.cukmoa.core.state.LocalStore
 import kr.ac.catholic.cukmoa.core.state.Platform
@@ -25,5 +28,11 @@ class SharedPreferencesStore(context: Context) : LocalStore {
 }
 
 /** On the emulator, 10.0.2.2 is the dev PC's localhost. Release builds pass an HTTPS address as apiBaseUrl. */
-fun androidPlatform(context: Context, apiBaseUrl: String = "http://10.0.2.2:8080") =
-    Platform(SharedPreferencesStore(context.applicationContext), apiBaseUrl)
+fun androidPlatform(context: Context, apiBaseUrl: String = "http://10.0.2.2:8080"): Platform {
+    val app = context.applicationContext
+    // Material You: the wallpaper's colors, Android 12 (S) and later
+    val dynamic = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        { dark: Boolean -> if (dark) dynamicDarkColorScheme(app) else dynamicLightColorScheme(app) }
+    } else null
+    return Platform(SharedPreferencesStore(app), apiBaseUrl, dynamic)
+}

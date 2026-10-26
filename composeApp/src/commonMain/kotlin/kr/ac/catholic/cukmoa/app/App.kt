@@ -12,7 +12,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +43,7 @@ import kr.ac.catholic.cukmoa.core.state.Platform
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.ui.CourseSheet
 import kr.ac.catholic.cukmoa.core.ui.ProfessorSheet
+import kr.ac.catholic.cukmoa.model.ThemeMode
 
 private sealed interface Sheet {
     data class Course(val id: String) : Sheet
@@ -69,7 +70,7 @@ private fun MainTabs(
     Scaffold(
         containerColor = AppTheme.colors.bg,
         bottomBar = {
-            NavigationBar(containerColor = AppTheme.colors.surface) {
+            NavigationBar {
                 tabs.forEach { t ->
                     NavigationBarItem(
                         selected = route == t.route,
@@ -79,14 +80,7 @@ private fun MainTabs(
                                 BadgedBox(badge = { Badge { Text("$newCount") } }) { Icon(t.icon, null) }
                             } else Icon(t.icon, null)
                         },
-                        label = { Text(t.label, style = AppTheme.type.caption) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = AppTheme.colors.accent,
-                            selectedTextColor = AppTheme.colors.accent,
-                            indicatorColor = AppTheme.colors.accentSoft,
-                            unselectedIconColor = AppTheme.colors.ink3,
-                            unselectedTextColor = AppTheme.colors.ink3,
-                        ),
+                        label = { Text(t.label) },
                     )
                 }
             }
@@ -112,9 +106,14 @@ private fun MainTabs(
 @Composable
 fun App(platform: Platform, initialRoute: String = Routes.HOME) {
     val vm = viewModel { AppViewModel(platform) }
-    AppTheme {
+    val student by vm.student.collectAsStateWithLifecycle()
+    val dark = when (student.theme) {
+        ThemeMode.System -> isSystemInDarkTheme()
+        ThemeMode.Light -> false
+        ThemeMode.Dark -> true
+    }
+    AppTheme(dark = dark, dynamic = vm.dynamicScheme?.takeIf { student.dynamicColor }?.invoke(dark)) {
         val catalog by vm.catalog.collectAsStateWithLifecycle()
-        val student by vm.student.collectAsStateWithLifecycle()
         val announcements by vm.announcements.collectAsStateWithLifecycle()
         val modules = ModuleRegistry.enabled(student)
         val currentModules by rememberUpdatedState(modules)

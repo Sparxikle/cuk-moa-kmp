@@ -4,19 +4,14 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -30,10 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kr.ac.catholic.cukmoa.app.ModuleRegistry
@@ -57,6 +50,7 @@ import kr.ac.catholic.cukmoa.core.ui.Txt
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.StudentState
+import kr.ac.catholic.cukmoa.model.ThemeMode
 
 /** App name (가대모아 = "gathering Catholic University info"). The store/launcher name is also set in AndroidManifest and the desktop config. */
 const val APP_NAME = "가대모아"
@@ -93,7 +87,7 @@ private fun SettingsPageContent(
     val majors = departments.findAll(student.departments, student.majors)
 
     if (page == SettingsPage.Department) {
-        ScreenList(title = "전공", eyebrow = "설정 · 최대 2개", trailing = { BackButton { go(SettingsPage.Main) } }) {
+        ScreenList(title = "전공", eyebrow = "설정 · 최대 2개", onBack = { go(SettingsPage.Main) }) {
             item {
                 Column(Modifier.contentWidth()) {
                     DepartmentPicker(departments, majors) { vm.setDepartments(it) }
@@ -110,7 +104,7 @@ private fun SettingsPageContent(
     var confirmReset by remember { mutableStateOf(false) }
     val c = AppTheme.colors
 
-    ScreenList(title = "설정", eyebrow = APP_NAME, trailing = { BackButton(onBack) }) {
+    ScreenList(title = "설정", eyebrow = APP_NAME, onBack = onBack) {
         // ---- My info ----
         item {
             Section("내 정보") {
@@ -245,6 +239,35 @@ private fun SettingsPageContent(
             }
         }
 
+        // ---- Appearance ----
+        item {
+            Section("화면") {
+                Group {
+                    Column(Modifier.fillMaxWidth().padding16(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
+                        Txt("테마", AppTheme.type.callout)
+                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            val modes = listOf(ThemeMode.System to "시스템", ThemeMode.Light to "라이트", ThemeMode.Dark to "다크")
+                            modes.forEachIndexed { i, (mode, label) ->
+                                SegmentedButton(
+                                    selected = student.theme == mode,
+                                    onClick = { vm.setTheme(mode) },
+                                    shape = SegmentedButtonDefaults.itemShape(i, modes.size),
+                                ) { Text(label, style = AppTheme.type.subhead) }
+                            }
+                        }
+                    }
+                    if (vm.dynamicScheme != null) {
+                        ListRow(
+                            "배경화면 색 사용",
+                            "Android 배경화면에 맞춘 색으로 바꿔요 (Material You)",
+                            divider = false,
+                            onClick = { vm.setDynamicColor(!student.dynamicColor) },
+                            trailing = { Switch(checked = student.dynamicColor, onCheckedChange = { vm.setDynamicColor(it) }) },
+                        )
+                    }
+                }
+            }
+        }
         // ---- About ----
         item {
             Section("앱 정보") {
@@ -286,11 +309,3 @@ private fun SettingsPageContent(
 }
 
 private fun Modifier.padding16() = this.padding(horizontal = Space.l, vertical = Space.m)
-
-@Composable
-private fun BackButton(onClick: () -> Unit) {
-    Box(
-        Modifier.size(38.dp).clip(CircleShape).background(AppTheme.colors.surface).clickable(role = Role.Button, onClickLabel = "뒤로", onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "뒤로", tint = AppTheme.colors.ink, modifier = Modifier.size(18.dp)) }
-}

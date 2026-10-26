@@ -17,6 +17,7 @@ import kr.ac.catholic.cukmoa.logic.decodeStudentState
 import kr.ac.catholic.cukmoa.logic.encodeStudentState
 import kr.ac.catholic.cukmoa.logic.parseCatalog
 import kr.ac.catholic.cukmoa.logic.sampleStudent
+import androidx.compose.material3.ColorScheme
 import kr.ac.catholic.cukmoa.model.Announcement
 import kr.ac.catholic.cukmoa.model.AnnouncementQuery
 import kr.ac.catholic.cukmoa.model.AnnouncementSource
@@ -31,6 +32,7 @@ import kr.ac.catholic.cukmoa.model.MajorRoadmapList
 import kr.ac.catholic.cukmoa.model.ExamState
 import kr.ac.catholic.cukmoa.model.HomeCardId
 import kr.ac.catholic.cukmoa.model.StudentState
+import kr.ac.catholic.cukmoa.model.ThemeMode
 import kr.ac.catholic.cukmoa.model.TrackId
 
 /** Key-value store provided by the platform (Android SharedPreferences, iOS NSUserDefaults, desktop files). */
@@ -40,7 +42,11 @@ interface LocalStore {
 }
 
 /** Created by each platform entry point (MainActivity, main(), MainViewController). */
-class Platform(val store: LocalStore, val apiBaseUrl: String)
+/**
+ * dynamicScheme: the platform's wallpaper-based M3 color scheme for light (false) or dark (true), or null where
+ * there is none (desktop, iOS, Android before 12).
+ */
+class Platform(val store: LocalStore, val apiBaseUrl: String, val dynamicScheme: ((dark: Boolean) -> ColorScheme)? = null)
 
 /**
  * Loading: before the first load. Screens draw first from the bundled sample (or the last server catalog).
@@ -100,6 +106,8 @@ private const val ROADMAPS_KEY = "roadmaps.live"
 private const val PAGE = 20
 
 class AppViewModel(private val platform: Platform) : ViewModel() {
+    val dynamicScheme = platform.dynamicScheme
+
     private val api = ApiClient(platform.apiBaseUrl)
     private val store = platform.store
 
@@ -281,6 +289,10 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
 
     /** Credits earned in an area outside the catalog's checklist (entered by hand from the transcript) */
     fun setOtherCredits(bucket: BucketId, credits: Int) = update { it.copy(otherCredits = it.otherCredits + (bucket to maxOf(0, credits))) }
+
+    fun setTheme(mode: ThemeMode) = update { it.copy(theme = mode) }
+
+    fun setDynamicColor(on: Boolean) = update { it.copy(dynamicColor = on) }
 
     fun setForeignCredits(credits: Int) = update { it.copy(foreignCredits = maxOf(0, credits)) }
 

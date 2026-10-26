@@ -1,8 +1,6 @@
 package kr.ac.catholic.cukmoa.core.ui
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,47 +18,65 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.outlined.BookmarkAdd
-import androidx.compose.material.icons.filled.BookmarkAdded
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconToggleButton
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Card as M3Card
+import androidx.compose.material3.FilterChip as M3FilterChip
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
-import kr.ac.catholic.cukmoa.core.theme.Radius
 import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.model.TrackId
 
 // Basic components shared by screens. Colors, spacing and type use only the tokens in theme/Theme.kt.
 
-enum class Tone { Ink, Ink2, Ink3, Accent, OnAccent, Good, Warn }
+enum class Tone { Ink, Ink2, Ink3, Accent, OnAccent, Good, Warn, OnWarnSoft }
 
 @Composable
 fun Tone.color(): Color = with(AppTheme.colors) {
@@ -72,6 +88,7 @@ fun Tone.color(): Color = with(AppTheme.colors) {
         Tone.OnAccent -> onAccent
         Tone.Good -> good
         Tone.Warn -> warn
+        Tone.OnWarnSoft -> onWarnSoft
     }
 }
 
@@ -84,30 +101,46 @@ fun Txt(
     maxLines: Int = Int.MAX_VALUE,
 ) = Text(text, modifier, color = tone.color(), style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
 
-/** Scrolling screen with a large title, a small caption above it (eyebrow) and a button on the right. */
+/**
+ * Scrolling screen under an M3 large top app bar: the title collapses into a small bar on scroll,
+ * eyebrow is a second line under the title, onBack adds a back arrow and trailing goes into the bar's actions.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenList(
     title: String,
     eyebrow: String? = null,
+    onBack: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
     content: LazyListScope.() -> Unit,
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg).statusBarsPadding(),
-        contentPadding = PaddingValues(start = Space.l, end = Space.l, top = Space.l, bottom = 48.dp),
-        verticalArrangement = Arrangement.spacedBy(Space.xxl),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        item {
-            Row(Modifier.widthIn(max = 640.dp).fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                Column(Modifier.weight(1f)) {
-                    eyebrow?.let { Txt(it, AppTheme.type.subhead, tone = Tone.Ink2) }
-                    Txt(title, AppTheme.type.largeTitle)
+    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val c = AppTheme.colors
+    Column(Modifier.fillMaxSize().background(c.bg).nestedScroll(scroll.nestedScrollConnection)) {
+        LargeTopAppBar(
+            title = {
+                Column {
+                    Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    eyebrow?.let { Text(it, color = c.ink2, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
-                trailing?.invoke()
-            }
-        }
-        content()
+            },
+            navigationIcon = {
+                if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "뒤로") }
+            },
+            actions = { trailing?.invoke() },
+            scrollBehavior = scroll,
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = c.bg,
+                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            ),
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = Space.l, end = Space.l, top = Space.s, bottom = 48.dp),
+            verticalArrangement = Arrangement.spacedBy(Space.xxl),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = content,
+        )
     }
 }
 
@@ -124,40 +157,36 @@ fun Section(title: String? = null, detail: String? = null, action: Pair<String, 
 
 @Composable
 fun SectionHeader(title: String, detail: String? = null, action: Pair<String, () -> Unit>? = null) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = Space.xs), verticalAlignment = Alignment.Bottom) {
+    Row(Modifier.fillMaxWidth().padding(start = Space.xs), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Txt(title, AppTheme.type.title.copy(fontSize = AppTheme.type.headline.fontSize * 1.1f))
+            Txt(title, MaterialTheme.typography.titleMedium)
             detail?.let { Txt(it, AppTheme.type.footnote, tone = Tone.Ink2) }
         }
-        action?.let { (label, onClick) ->
-            Txt(label, AppTheme.type.subhead, Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(4.dp), tone = Tone.Accent)
-        }
+        action?.let { (label, onClick) -> TextButton(onClick = onClick) { Text(label) } }
     }
 }
 
+/** M3 filled card (surfaceContainerLow, 16dp corners). */
 @Composable
 fun Card(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier
-            .contentWidth()
-            .clip(RoundedCornerShape(Radius.card))
-            .background(AppTheme.colors.surface)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(Space.xl),
-        verticalArrangement = Arrangement.spacedBy(Space.m),
-        content = content,
-    )
+    val colors = CardDefaults.cardColors(containerColor = AppTheme.colors.surface)
+    val inner: @Composable ColumnScope.() -> Unit = {
+        Column(Modifier.padding(Space.xl), verticalArrangement = Arrangement.spacedBy(Space.m), content = content)
+    }
+    if (onClick != null) M3Card(onClick, modifier.contentWidth(), shape = MaterialTheme.shapes.large, colors = colors, content = inner)
+    else M3Card(modifier.contentWidth(), shape = MaterialTheme.shapes.large, colors = colors, content = inner)
 }
 
-/** Grouped list. Puts a thin divider between rows. */
+/** List container: rows on one surfaceContainerLow card with 16dp corners. */
 @Composable
 fun Group(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Column(
-        modifier.contentWidth().clip(RoundedCornerShape(Radius.group)).background(AppTheme.colors.surface),
+        modifier.contentWidth().clip(MaterialTheme.shapes.large).background(AppTheme.colors.surface),
         content = content,
     )
 }
 
+/** M3 list item (one or two lines) with an optional divider (outlineVariant) below. */
 @Composable
 fun ListRow(
     title: String,
@@ -171,123 +200,99 @@ fun ListRow(
     onClick: (() -> Unit)? = null,
 ) {
     Column {
-        Row(
-            modifier
-                .fillMaxWidth()
-                .heightIn(min = 56.dp)
-                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-                .padding(horizontal = Space.l, vertical = Space.m),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Space.m),
-        ) {
-            leading?.invoke()
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Txt(title, AppTheme.type.callout, maxLines = titleMaxLines)
-                subtitle?.let { Txt(it, AppTheme.type.footnote, tone = Tone.Ink2, maxLines = 2) }
-            }
-            trailing?.invoke()
-            if (chevron) Icon(Icons.Default.ChevronRight, null, tint = AppTheme.colors.ink3, modifier = Modifier.size(18.dp))
-        }
-        if (divider) Box(Modifier.fillMaxWidth().padding(start = Space.l).height(0.5.dp).background(AppTheme.colors.line))
+        ListItem(
+            headlineContent = { Text(title, maxLines = titleMaxLines, overflow = TextOverflow.Ellipsis) },
+            supportingContent = subtitle?.let { { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) } },
+            leadingContent = leading?.let { { it() } },
+            trailingContent = if (trailing != null || chevron) {
+                {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s)) {
+                        trailing?.invoke()
+                        if (chevron) Icon(Icons.Default.ChevronRight, null, tint = AppTheme.colors.ink2, modifier = Modifier.size(20.dp))
+                    }
+                }
+            } else null,
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            modifier = modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        )
+        if (divider) HorizontalDivider(Modifier.padding(horizontal = Space.l), color = AppTheme.colors.line)
     }
 }
 
 enum class ChipTone { Neutral, Accent, Good, Warn }
 
+/** Small status label (8dp corners, container colors). */
 @Composable
 fun Chip(text: String, tone: ChipTone = ChipTone.Neutral, modifier: Modifier = Modifier) {
     val c = AppTheme.colors
     val (bg, fg) = when (tone) {
         ChipTone.Neutral -> c.fill to c.ink2
-        ChipTone.Accent -> c.accentSoft to c.accent
-        ChipTone.Good -> c.goodSoft to c.good
-        ChipTone.Warn -> c.warnSoft to c.warn
+        ChipTone.Accent -> c.accentSoft to c.onAccentSoft
+        ChipTone.Good -> c.goodSoft to c.onGoodSoft
+        ChipTone.Warn -> c.warnSoft to c.onWarnSoft
     }
     Text(
         text,
-        modifier.clip(RoundedCornerShape(999.dp)).background(bg).padding(horizontal = 10.dp, vertical = 4.dp),
+        modifier.clip(MaterialTheme.shapes.small).background(bg).padding(horizontal = 10.dp, vertical = 4.dp),
         color = fg,
-        style = AppTheme.type.caption,
+        style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
     )
 }
 
-/** Selectable chip (filter). check=true adds a selection mark (✓) for multi-select. */
+/** M3 filter chip. check=true shows a check icon when selected (multi-select). */
 @Composable
 fun FilterChip(text: String, selected: Boolean, check: Boolean = false, onClick: () -> Unit) {
-    val c = AppTheme.colors
-    val bg by animateColorAsState(if (selected) c.accent else c.surface)
-    Text(
-        if (check && selected) "✓ $text" else text,
-        Modifier
-            .clip(RoundedCornerShape(999.dp))
-            .background(bg)
-            .clickable(role = if (check) Role.Checkbox else Role.Tab, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        color = if (selected) c.onAccent else c.ink2,
-        style = AppTheme.type.subhead,
+    M3FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(text) },
+        leadingIcon = if (check && selected) { { Icon(Icons.Default.Check, null, Modifier.size(FilterChipDefaults.IconSize)) } } else null,
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = Color.Transparent,
+            selectedContainerColor = AppTheme.colors.accentSoft,
+            selectedLabelColor = AppTheme.colors.onAccentSoft,
+            selectedLeadingIconColor = AppTheme.colors.onAccentSoft,
+        ),
     )
 }
 
+/** M3 full-width button: filled, or filled tonal when tinted. */
 @Composable
 fun PrimaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, tinted: Boolean = false, enabled: Boolean = true) {
-    val c = AppTheme.colors
-    Box(
-        modifier
-            .fillMaxWidth()
-            .heightIn(min = 52.dp)
-            .clip(RoundedCornerShape(Radius.control + 2.dp))
-            .background(if (tinted) c.accentSoft else if (enabled) c.accent else c.fillStrong)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Txt(label, AppTheme.type.headline, tone = if (tinted) Tone.Accent else Tone.OnAccent)
-    }
+    val m = modifier.fillMaxWidth().heightIn(min = 52.dp)
+    val text: @Composable RowScope.() -> Unit = { Text(label, style = MaterialTheme.typography.titleSmall) }
+    if (tinted) FilledTonalButton(onClick, m, enabled = enabled, content = text)
+    else Button(onClick, m, enabled = enabled, content = text)
 }
 
+/** M3 checkbox look for rows whose whole row toggles (the box itself isn't a separate target). */
 @Composable
-fun CheckCircle(checked: Boolean, size: Dp = 26.dp) {
-    val c = AppTheme.colors
-    Box(
-        Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(if (checked) c.accent else Color.Transparent)
-            .then(if (checked) Modifier else Modifier.border(2.dp, c.fillStrong, CircleShape)),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (checked) Icon(Icons.Default.Check, null, tint = c.onAccent, modifier = Modifier.size(size * 0.62f))
-    }
+fun CheckCircle(checked: Boolean) {
+    Checkbox(checked = checked, onCheckedChange = null)
 }
 
+/** M3 tonal icon toggle for saving a course. */
 @Composable
 fun SaveButton(saved: Boolean, label: String, onClick: () -> Unit) {
-    val c = AppTheme.colors
-    Box(
-        Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(if (saved) c.accent else c.accentSoft)
-            .clickable(role = Role.Button, onClickLabel = "$label ${if (saved) "담기 취소" else "담기"}", onClick = onClick),
-        contentAlignment = Alignment.Center,
+    FilledTonalIconToggleButton(
+        checked = saved,
+        onCheckedChange = { onClick() },
+        modifier = Modifier.semantics { contentDescription = if (saved) "$label 담기 취소" else "$label 담기" },
     ) {
-        Icon(
-            if (saved) Icons.Filled.BookmarkAdded else Icons.Outlined.BookmarkAdd,
-            contentDescription = if (saved) "$label 담음" else "$label 담기",
-            tint = if (saved) c.onAccent else c.accent,
-            modifier = Modifier.size(18.dp),
-        )
+        Icon(if (saved) Icons.Filled.BookmarkAdded else Icons.Outlined.BookmarkAdd, null, Modifier.size(20.dp))
     }
 }
 
+/** M3-style linear progress: rounded indicator, a gap, then the track; this semester's credits in a lighter tone. */
 @Composable
 fun ProgressBar(done: Double, total: Double, modifier: Modifier = Modifier, pending: Double = 0.0, height: Dp = 8.dp, complete: Boolean = false) {
     val c = AppTheme.colors
     val doneF = (done / total).coerceIn(0.0, 1.0).toFloat()
     val pendF = ((done + pending) / total).coerceIn(0.0, 1.0).toFloat()
-    Box(modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(height)).background(c.cell)) {
-        if (pendF > 0f) Box(Modifier.fillMaxWidth(pendF).height(height).background(c.accentMuted))
-        if (doneF > 0f) Box(Modifier.fillMaxWidth(doneF).height(height).clip(RoundedCornerShape(height)).background(if (complete) c.good else c.accent))
+    Box(modifier.fillMaxWidth().height(height).clip(CircleShape).background(c.cell)) {
+        if (pendF > 0f) Box(Modifier.fillMaxWidth(pendF).height(height).clip(CircleShape).background(c.accentMuted))
+        if (doneF > 0f) Box(Modifier.fillMaxWidth(doneF).height(height).clip(CircleShape).background(if (complete) c.good else c.accent))
     }
 }
 
@@ -324,24 +329,25 @@ fun GridLegend(done: Int, pending: Int, left: Int) {
 /** Data notice. Keeps sample data from being mistaken for real academic records. */
 @Composable
 fun DataNotice(detail: String) {
-    Row(Modifier.contentWidth().padding(horizontal = Space.xs), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Icon(Icons.Default.Info, null, tint = AppTheme.colors.ink3, modifier = Modifier.size(14.dp).padding(top = 2.dp))
-        Txt(detail, AppTheme.type.caption, tone = Tone.Ink3)
+    Row(Modifier.contentWidth().padding(horizontal = Space.xs), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Icon(Icons.Outlined.Info, null, tint = AppTheme.colors.ink2, modifier = Modifier.size(16.dp).padding(top = 1.dp))
+        Txt(detail, AppTheme.type.caption, tone = Tone.Ink2)
     }
 }
 
+/** Warning banner on the warn container color, with an optional text button. */
 @Composable
 fun Banner(text: String, actionLabel: String? = null, onAction: (() -> Unit)? = null, icon: ImageVector = Icons.Default.CloudOff) {
     val c = AppTheme.colors
     Row(
-        Modifier.contentWidth().clip(RoundedCornerShape(Radius.group)).background(c.warnSoft).padding(horizontal = Space.l, vertical = Space.m),
+        Modifier.contentWidth().clip(MaterialTheme.shapes.large).background(c.warnSoft).padding(start = Space.l, end = Space.s, top = Space.s, bottom = Space.s),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Space.m),
     ) {
-        Icon(icon, null, tint = c.warn, modifier = Modifier.size(18.dp))
-        Txt(text, AppTheme.type.footnote, Modifier.weight(1f), tone = Tone.Warn)
+        Icon(icon, null, tint = c.onWarnSoft, modifier = Modifier.size(20.dp))
+        Txt(text, AppTheme.type.footnote, Modifier.weight(1f).padding(vertical = Space.s), tone = Tone.OnWarnSoft)
         if (actionLabel != null && onAction != null) {
-            Txt(actionLabel, AppTheme.type.subhead, Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onAction).padding(4.dp), tone = Tone.Warn)
+            TextButton(onClick = onAction, colors = ButtonDefaults.textButtonColors(contentColor = c.onWarnSoft)) { Text(actionLabel) }
         }
     }
 }
@@ -356,10 +362,10 @@ fun Chips(content: @Composable RowScope.() -> Unit) {
 fun IconBadge(icon: ImageVector, size: Dp = 40.dp, selected: Boolean = false) {
     val c = AppTheme.colors
     Box(
-        Modifier.size(size).clip(RoundedCornerShape(12.dp)).background(if (selected) c.onAccent.copy(alpha = 0.18f) else c.accentSoft),
+        Modifier.size(size).clip(MaterialTheme.shapes.medium).background(if (selected) c.onAccent.copy(alpha = 0.18f) else c.accentSoft),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, tint = if (selected) c.onAccent else c.accent, modifier = Modifier.size(size * 0.5f))
+        Icon(icon, null, tint = if (selected) c.onAccent else c.onAccentSoft, modifier = Modifier.size(size * 0.5f))
     }
 }
 
