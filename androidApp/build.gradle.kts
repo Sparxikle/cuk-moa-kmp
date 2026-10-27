@@ -14,10 +14,9 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "0.1.0"
-        // Default: on the emulator, 10.0.2.2 = the dev PC.
-        // Real device (USB): adb reverse tcp:8080 tcp:8080, then -PapiBaseUrl=http://localhost:8080
+        // Default: localhost. Forward the phone's port to the dev PC with: adb reverse tcp:8080 tcp:8080
         // Release: -PapiBaseUrl=https://<server address>
-        val apiBaseUrl = providers.gradleProperty("apiBaseUrl").getOrElse("http://10.0.2.2:8080")
+        val apiBaseUrl = providers.gradleProperty("apiBaseUrl").getOrElse("http://localhost:8080")
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
     buildTypes {

@@ -18,17 +18,14 @@ import kr.ac.catholic.cukmoa.model.StudentState
 fun catalogProblems(c: Catalog): List<String> {
     val problems = mutableListOf<String>()
     val courses = c.courses.map { it.id }.toSet()
-    val professors = c.professors.map { it.id }.toSet()
     val tracks = c.tracks.map { it.id }.toSet()
 
     if (courses.size != c.courses.size) problems += "duplicate course ids"
     fun course(id: String, where: String) { if (id !in courses) problems += "missing course $id ($where)" }
 
     c.courses.forEach { co ->
-        co.professorIds.forEach { if (it !in professors) problems += "missing professor $it (course ${co.id})" }
         co.prerequisiteIds?.forEach { course(it, "prerequisite of ${co.id}") }
     }
-    c.professors.forEach { p -> p.courseIds.forEach { course(it, "professor ${p.id}") } }
     c.tracks.forEach { t -> t.keyCourseIds.forEach { course(it, "track ${t.id}") } }
     c.roadmaps.forEach { r ->
         if (r.trackId !in tracks) problems += "roadmap for unknown track ${r.trackId}"

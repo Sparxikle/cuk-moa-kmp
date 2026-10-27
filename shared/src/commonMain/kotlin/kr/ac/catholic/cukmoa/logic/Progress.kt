@@ -49,7 +49,8 @@ fun creditSummary(catalog: Catalog, student: StudentState): CreditSummary {
             id = b.id,
             label = b.label,
             required = b.requiredCredits,
-            earned = (student.otherCredits[b.id] ?: 0) + sum(student.completedCourseIds, b.id),
+            earned = (student.otherCredits[b.id] ?: 0) + sum(student.completedCourseIds, b.id) +
+                student.takenClasses.filter { it.bucket == b.id }.sumOf { it.credits },
             inProgress = sum(student.inProgressCourseIds, b.id),
             note = b.note,
         )

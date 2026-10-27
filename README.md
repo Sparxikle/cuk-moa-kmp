@@ -34,7 +34,7 @@ Requires JDK 21+ and the Android SDK (compileSdk 37). `./gradlew` downloads Grad
 
 ```sh
 ./gradlew :composeApp:run              # Desktop app (server address: CUK_MOA_API, default http://localhost:8080)
-./gradlew :androidApp:assembleDebug    # Android APK (on the emulator, 10.0.2.2:8080 = your dev PC)
+./gradlew :androidApp:assembleDebug    # Android APK (server address: http://localhost:8080; run adb reverse tcp:8080 tcp:8080 first)
 ./gradlew :composeApp:screenshots      # Renders the main screens headlessly to composeApp/build/screenshots/ (real announcements if the server is running)
 ```
 

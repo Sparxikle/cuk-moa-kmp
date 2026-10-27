@@ -82,7 +82,6 @@ data class Course(
     val category: CourseCategory,
     val credits: Int,
     val summary: String,
-    val professorIds: List<String>,
     val isExamSubject: Boolean,
     val recommendedSemester: SemesterKey? = null,
     val prerequisiteIds: List<String>? = null,
@@ -121,25 +120,6 @@ data class SeniorStory(
 )
 
 @Serializable
-enum class ProfessorArea {
-    @SerialName("ai") Ai,
-    @SerialName("system") System,
-    @SerialName("security") Security,
-    @SerialName("software") Software,
-}
-
-@Serializable
-data class Professor(
-    val id: String,
-    val name: String,
-    val field: String,
-    val area: ProfessorArea,
-    val keywords: List<String>,
-    val courseIds: List<String>,
-    val contactNote: String,
-)
-
-@Serializable
 enum class EventKind {
     @SerialName("exam") Exam,
     @SerialName("registration") Registration,
@@ -159,20 +139,17 @@ data class AcademicEvent(
     val kind: EventKind,
 )
 
-/** today: the sample reference date. To switch to real dates, change only today() in logic/Dates.kt. */
-@Serializable
-data class Term(val year: Int, val semester: Int, val label: String, val today: String)
-
-/** Catalog fetched in one request. Every screen draws from this. */
+/**
+ * Catalog fetched in one request. Every screen draws from this.
+ * Professors are not in the catalog: they come from this semester's open classes (GET /api/v1/classes),
+ * with details from department websites where collected (GET /api/v1/professors).
+ */
 @Serializable
 data class Catalog(
-    val term: Term,
     val tracks: List<Track>,
     val courses: List<Course>,
     val roadmaps: List<Roadmap>,
     val stories: List<SeniorStory>,
-    val professors: List<Professor>,
     val graduation: GraduationGuide,
-    val events: List<AcademicEvent>,
     val source: DataSource,
 )

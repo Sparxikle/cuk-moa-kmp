@@ -3,12 +3,11 @@ package kr.ac.catholic.cukmoa.logic
 import kr.ac.catholic.cukmoa.model.BucketId
 import kr.ac.catholic.cukmoa.model.ExamProgramId
 import kr.ac.catholic.cukmoa.model.ExamState
-import kr.ac.catholic.cukmoa.model.HomeCardId
 import kr.ac.catholic.cukmoa.model.SemesterKey
 import kr.ac.catholic.cukmoa.model.StudentState
 import kr.ac.catholic.cukmoa.model.TrackId
 
-// Sample course records per year. Until real transcripts are linked, shows roughly "what a student in this year looks like".
+// Sample course records per year, for tests and screenshots only. The app starts every student from newStudent().
 // otherCredits is the total credits filled with courses not in the catalog (core liberal arts, major electives, general electives).
 
 private val BASIC = listOf("calculus-1", "calculus-2", "programming-1", "programming-2", "natural-science")
@@ -63,10 +62,6 @@ private val presets: Map<Int, Preset> = mapOf(
     ),
 )
 
-fun defaultHomeCards(grade: Int): List<HomeCardId> =
-    if (grade == 1) listOf(HomeCardId.Explore, HomeCardId.Progress, HomeCardId.Announcements, HomeCardId.Story, HomeCardId.Events)
-    else listOf(HomeCardId.Progress, HomeCardId.Announcements, HomeCardId.Next, HomeCardId.Saved, HomeCardId.Events, HomeCardId.Story)
-
 /** Based on the 2nd semester, so a student in year g is taking semester "g-2". */
 fun sampleStudent(grade: Int, trackIds: List<TrackId> = listOf(TrackId.Backend)): StudentState {
     val p = presets.getValue(grade)
@@ -81,5 +76,7 @@ fun sampleStudent(grade: Int, trackIds: List<TrackId> = listOf(TrackId.Backend))
         savedCourseIds = p.saved,
         otherCredits = p.otherCredits,
         exam = p.exam,
+        departments = listOf("성심/컴퓨터정보공학부"),
+        majors = listOf("csie"),
     )
 }

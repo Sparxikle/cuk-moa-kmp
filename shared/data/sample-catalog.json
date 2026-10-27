@@ -1,10 +1,4 @@
 {
-  "term": {
-    "year": 2026,
-    "semester": 2,
-    "label": "2026년 2학기",
-    "today": "2026-10-11"
-  },
   "tracks": [
     {
       "id": "web",
@@ -74,7 +68,6 @@
       "category": "liberal-required",
       "credits": 2,
       "summary": "기초교양필수. 인간학1을 들어야 인간학2를 들을 수 있어요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -84,7 +77,6 @@
       "category": "liberal-required",
       "credits": 2,
       "summary": "기초교양필수. 인간학1 다음에 들어요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -94,7 +86,6 @@
       "category": "liberal-required",
       "credits": 2,
       "summary": "기초교양필수. 학기 중 1박 2일 수도원 체험이 있어요 (외국인 학생은 서양사상과문화로 대체).",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "2-1"
     },
@@ -104,7 +95,6 @@
       "category": "liberal-required",
       "credits": 3,
       "summary": "기초교양필수 (3학점).",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "2-2"
     },
@@ -114,7 +104,6 @@
       "category": "liberal-required",
       "credits": 2,
       "summary": "기초교양필수 P/F. 이론 4시간 + 봉사활동 36시간. 인간학1·2 뒤에 듣기를 권해요. 사랑나누기+(선택사회봉사)와는 다른 과목이에요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "3-2"
     },
@@ -124,7 +113,6 @@
       "category": "liberal-elective",
       "credits": 1,
       "summary": "글로벌경영대학 필수 자유선택교양 (1학점).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -133,7 +121,6 @@
       "category": "liberal-core",
       "credits": 3,
       "summary": "중핵교양 DESIGN 영역 필수. 1학기 개설.",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -142,7 +129,6 @@
       "category": "liberal-core",
       "credits": 3,
       "summary": "중핵교양 DESIGN 영역 필수. 2학기 개설.",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -151,7 +137,6 @@
       "category": "liberal-core",
       "credits": 3,
       "summary": "인문·사회 영역 과목 중 하나 (3학점).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -160,7 +145,6 @@
       "category": "liberal-core",
       "credits": 3,
       "summary": "자연·과학 영역 과목 중 하나 (3학점).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -169,7 +153,6 @@
       "category": "liberal-core",
       "credits": 3,
       "summary": "휴먼·테크 영역 과목 중 하나 (3학점).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -178,7 +161,6 @@
       "category": "liberal-core",
       "credits": 3,
       "summary": "글로벌·외국어 영역 과목 중 하나 (3학점). 외국어강의 인정 여부는 수강신청 때 과목별로 확인해요.",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -187,7 +169,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -197,7 +178,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -207,7 +187,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -217,7 +196,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -227,7 +205,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -237,7 +214,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -247,7 +223,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -257,7 +232,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -267,7 +241,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -277,7 +250,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -287,7 +259,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -297,7 +268,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -307,7 +277,6 @@
       "category": "major-basic",
       "credits": 1,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -317,7 +286,6 @@
       "category": "major-basic",
       "credits": 1,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -327,7 +295,6 @@
       "category": "major-basic",
       "credits": 1,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "2-1"
     },
@@ -337,7 +304,6 @@
       "category": "major-basic",
       "credits": 1,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "2-2"
     },
@@ -347,7 +313,6 @@
       "category": "major-basic",
       "credits": 1,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -357,7 +322,6 @@
       "category": "major-basic",
       "credits": 1,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -367,7 +331,6 @@
       "category": "major-basic",
       "credits": 2,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -377,7 +340,6 @@
       "category": "major-basic",
       "credits": 2,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -387,7 +349,6 @@
       "category": "major-basic",
       "credits": 2,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "2-1"
     },
@@ -397,7 +358,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -407,7 +367,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -417,7 +376,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -427,7 +385,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -437,7 +394,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -447,7 +403,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -457,7 +412,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -467,7 +421,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -477,7 +430,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -487,7 +439,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -497,7 +448,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -507,7 +457,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -517,7 +466,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -527,7 +475,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -537,7 +484,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -547,7 +493,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -557,7 +502,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -567,7 +511,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -577,7 +520,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -587,7 +529,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -597,7 +538,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -607,7 +547,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -617,7 +556,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -627,7 +565,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -637,7 +574,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -647,7 +583,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -657,7 +592,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -667,7 +601,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -677,7 +610,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -687,7 +619,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -697,7 +628,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -707,7 +637,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -717,7 +646,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -727,7 +655,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -737,7 +664,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -747,7 +673,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -757,7 +682,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -767,7 +691,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -777,7 +700,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -787,7 +709,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -797,7 +718,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -807,7 +727,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -817,7 +736,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -827,7 +745,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -837,7 +754,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -847,7 +763,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -857,7 +772,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -867,7 +781,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -877,7 +790,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -887,7 +799,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "일반화학및실험1·2, 일반물리학및실험1·2, 일반생물학1·2 중에서 3학점 이상.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -897,7 +808,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-2"
     },
@@ -907,7 +817,6 @@
       "category": "major-basic",
       "credits": 6,
       "summary": "일반화학및실험1·2, 일반수학1·2및연습, 일반생물학1·2 중 6학점 (1·2 연속 수강 의무 면제).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -916,7 +825,6 @@
       "category": "major-basic",
       "credits": 12,
       "summary": "일반수학1·2및연습, 일반생물학1·2, 일반물리학및실험1·2, 일반화학및실험1·2 중 4과목 (1·2 연속 수강 의무 면제).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -925,7 +833,6 @@
       "category": "major-basic",
       "credits": 9,
       "summary": "일반화학및실험1·2, 일반생물학1·2, 컴퓨터와프로그래밍1 중 9학점 이상.",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -934,7 +841,6 @@
       "category": "major-basic",
       "credits": 6,
       "summary": "일반화학및실험·일반수학및연습·일반물리학및실험·일반생물학 중 1·2를 연속으로 (모두 3과목 이상).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -943,7 +849,6 @@
       "category": "major-basic",
       "credits": 6,
       "summary": "일반화학및실험·일반수학및연습·일반물리학및실험·일반생물학 중 1·2를 연속으로 (모두 3과목 이상).",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -952,7 +857,6 @@
       "category": "major-basic",
       "credits": 3,
       "summary": "과목 소개는 실제 교과 안내 데이터를 연결하면 채워져요.",
-      "professorIds": [],
       "isExamSubject": false,
       "recommendedSemester": "1-1"
     },
@@ -962,7 +866,6 @@
       "category": "major-basic",
       "credits": 6,
       "summary": "문화콘텐츠·테크니컬아티스트 트랙: 공학영역 외 전공기초 6학점. 미디어공학 트랙: 기초과학·공학영역 6학점.",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -971,7 +874,6 @@
       "category": "general",
       "credits": 3,
       "summary": "전공·교양 밖에서 자유롭게 고른 과목을 대표하는 예시 항목이에요.",
-      "professorIds": [],
       "isExamSubject": false
     },
     {
@@ -980,9 +882,6 @@
       "category": "major",
       "credits": 3,
       "summary": "리스트, 스택, 트리, 그래프처럼 데이터를 담는 구조와 그 비용을 배워요.",
-      "professorIds": [
-        "prof-yoon"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "2-1",
       "prerequisiteIds": [
@@ -995,9 +894,6 @@
       "category": "major",
       "credits": 3,
       "summary": "클래스와 객체, 상속과 다형성으로 프로그램을 설계하는 법을 익혀요.",
-      "professorIds": [
-        "prof-jeong"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "2-1"
     },
@@ -1007,9 +903,6 @@
       "category": "major",
       "credits": 3,
       "summary": "신호, 부호화, 전송 매체 등 데이터가 오가는 물리적 바탕을 다뤄요.",
-      "professorIds": [
-        "prof-park"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "2-1"
     },
@@ -1019,9 +912,6 @@
       "category": "major",
       "credits": 3,
       "summary": "파일 구조와 인덱스, 해싱으로 데이터를 저장하고 찾는 방법을 배워요.",
-      "professorIds": [
-        "prof-lee"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "2-2"
     },
@@ -1031,9 +921,6 @@
       "category": "major",
       "credits": 3,
       "summary": "유한 오토마타와 형식 언어로 계산이 무엇인지 따져 봐요.",
-      "professorIds": [
-        "prof-yoon"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "2-2"
     },
@@ -1043,7 +930,6 @@
       "category": "major",
       "credits": 3,
       "summary": "여러 언어의 문법과 의미, 실행 모델을 비교해요.",
-      "professorIds": [],
       "isExamSubject": true,
       "recommendedSemester": "2-2"
     },
@@ -1053,9 +939,6 @@
       "category": "major",
       "credits": 3,
       "summary": "프로세스, 메모리, 파일 시스템을 운영체제가 어떻게 관리하는지 배워요.",
-      "professorIds": [
-        "prof-choi"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-1",
       "prerequisiteIds": [
@@ -1068,9 +951,6 @@
       "category": "major",
       "credits": 3,
       "summary": "인터넷 계층 구조와 TCP/IP, 라우팅을 다뤄요.",
-      "professorIds": [
-        "prof-park"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-1"
     },
@@ -1080,9 +960,6 @@
       "category": "major",
       "credits": 3,
       "summary": "요구사항, 설계, 테스트까지 팀으로 소프트웨어를 만드는 과정을 배워요.",
-      "professorIds": [
-        "prof-jeong"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-1"
     },
@@ -1092,9 +969,6 @@
       "category": "major",
       "credits": 3,
       "summary": "취약점이 생기는 원리와 시스템을 지키는 기법을 다뤄요.",
-      "professorIds": [
-        "prof-choi"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-2",
       "prerequisiteIds": [
@@ -1107,9 +981,6 @@
       "category": "major",
       "credits": 3,
       "summary": "실제 업무를 분석해 정보 시스템으로 옮기는 설계 과정을 익혀요.",
-      "professorIds": [
-        "prof-lee"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "4-1"
     },
@@ -1119,9 +990,6 @@
       "category": "major",
       "credits": 3,
       "summary": "관계형 모델, SQL, 정규화로 데이터베이스를 설계해요.",
-      "professorIds": [
-        "prof-lee"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-2",
       "prerequisiteIds": [
@@ -1134,9 +1002,6 @@
       "category": "major",
       "credits": 3,
       "summary": "분할 정복, 동적 계획법, 그리디로 문제를 푸는 전략을 배워요.",
-      "professorIds": [
-        "prof-yoon"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-1",
       "prerequisiteIds": [
@@ -1149,9 +1014,6 @@
       "category": "major",
       "credits": 3,
       "summary": "탐색, 추론, 기계학습의 기초로 지능적인 프로그램을 만들어요.",
-      "professorIds": [
-        "prof-kim"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-2"
     },
@@ -1161,9 +1023,6 @@
       "category": "major",
       "credits": 3,
       "summary": "프로세서 구조와 어셈블리, 입출력 제어를 실습으로 다뤄요.",
-      "professorIds": [
-        "prof-han"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-1"
     },
@@ -1173,9 +1032,6 @@
       "category": "major",
       "credits": 3,
       "summary": "제한된 자원의 기기에서 돌아가는 소프트웨어를 설계해요.",
-      "professorIds": [
-        "prof-han"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-2",
       "prerequisiteIds": [
@@ -1188,9 +1044,6 @@
       "category": "major",
       "credits": 3,
       "summary": "좌표 변환, 렌더링, 셰이딩으로 화면에 그림이 그려지는 원리를 배워요.",
-      "professorIds": [
-        "prof-kim"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "4-1"
     },
@@ -1200,9 +1053,6 @@
       "category": "major",
       "credits": 3,
       "summary": "대량의 데이터에서 패턴과 규칙을 찾는 기법을 다뤄요.",
-      "professorIds": [
-        "prof-kim"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "3-2"
     },
@@ -1212,9 +1062,6 @@
       "category": "major",
       "credits": 3,
       "summary": "웹 API와 분산 서비스로 시스템을 연결하는 방법을 배워요.",
-      "professorIds": [
-        "prof-jeong"
-      ],
       "isExamSubject": true,
       "recommendedSemester": "4-1"
     },
@@ -1224,9 +1071,6 @@
       "category": "major",
       "credits": 3,
       "summary": "HTML, CSS, 자바스크립트로 동작하는 웹 페이지를 만들어요.",
-      "professorIds": [
-        "prof-jeong"
-      ],
       "isExamSubject": false,
       "recommendedSemester": "3-1"
     }
@@ -2074,127 +1918,6 @@
         "microprocessors",
         "embedded-mobile"
       ]
-    }
-  ],
-  "professors": [
-    {
-      "id": "prof-kim",
-      "name": "김○○",
-      "field": "컴퓨터 비전·딥러닝",
-      "area": "ai",
-      "keywords": [
-        "이미지 인식",
-        "딥러닝",
-        "데이터셋"
-      ],
-      "courseIds": [
-        "artificial-intelligence",
-        "computer-graphics",
-        "data-mining"
-      ],
-      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
-    },
-    {
-      "id": "prof-lee",
-      "name": "이○○",
-      "field": "데이터베이스·빅데이터 처리",
-      "area": "system",
-      "keywords": [
-        "질의 처리",
-        "데이터 모델링",
-        "분산 저장"
-      ],
-      "courseIds": [
-        "database-design",
-        "file-processing",
-        "information-systems"
-      ],
-      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
-    },
-    {
-      "id": "prof-park",
-      "name": "박○○",
-      "field": "네트워크·분산 시스템",
-      "area": "system",
-      "keywords": [
-        "네트워크 프로토콜",
-        "클라우드",
-        "엣지 컴퓨팅"
-      ],
-      "courseIds": [
-        "computer-networks",
-        "data-communication"
-      ],
-      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
-    },
-    {
-      "id": "prof-choi",
-      "name": "최○○",
-      "field": "시스템 보안·암호",
-      "area": "security",
-      "keywords": [
-        "취약점 분석",
-        "암호 프로토콜",
-        "운영체제 보안"
-      ],
-      "courseIds": [
-        "system-security",
-        "operating-systems"
-      ],
-      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
-    },
-    {
-      "id": "prof-jeong",
-      "name": "정○○",
-      "field": "소프트웨어공학·HCI",
-      "area": "software",
-      "keywords": [
-        "사용자 경험",
-        "테스트 자동화",
-        "웹 서비스"
-      ],
-      "courseIds": [
-        "software-engineering",
-        "web-programming",
-        "web-services",
-        "oop",
-        "programming-1",
-        "programming-2"
-      ],
-      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
-    },
-    {
-      "id": "prof-han",
-      "name": "한○○",
-      "field": "임베디드·모바일 시스템",
-      "area": "system",
-      "keywords": [
-        "저전력 설계",
-        "실시간 시스템",
-        "IoT"
-      ],
-      "courseIds": [
-        "microprocessors",
-        "embedded-mobile"
-      ],
-      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
-    },
-    {
-      "id": "prof-yoon",
-      "name": "윤○○",
-      "field": "알고리즘·계산 이론",
-      "area": "software",
-      "keywords": [
-        "그래프 알고리즘",
-        "최적화",
-        "계산 복잡도"
-      ],
-      "courseIds": [
-        "algorithm-design",
-        "automata",
-        "data-structures"
-      ],
-      "contactNote": "면담은 학과 홈페이지 교수 소개의 메일로 미리 약속을 잡아요."
     }
   ],
   "graduation": {
@@ -3294,42 +3017,6 @@
       "url": "https://www.catholic.ac.kr"
     }
   },
-  "events": [
-    {
-      "id": "midterm",
-      "title": "중간고사",
-      "start": "2026-10-20",
-      "end": "2026-10-26",
-      "kind": "exam"
-    },
-    {
-      "id": "withdraw",
-      "title": "수강철회 신청",
-      "start": "2026-10-28",
-      "end": "2026-10-30",
-      "kind": "deadline"
-    },
-    {
-      "id": "wishlist",
-      "title": "2027-1학기 희망과목 담기",
-      "start": "2026-11-16",
-      "end": "2026-11-20",
-      "kind": "registration"
-    },
-    {
-      "id": "final",
-      "title": "기말고사",
-      "start": "2026-12-14",
-      "end": "2026-12-19",
-      "kind": "exam"
-    },
-    {
-      "id": "break",
-      "title": "겨울방학 시작",
-      "start": "2026-12-21",
-      "kind": "holiday"
-    }
-  ],
   "source": {
     "label": "시안용 예시 데이터 (선배 설문 전)",
     "asOf": "2026-10-11",
