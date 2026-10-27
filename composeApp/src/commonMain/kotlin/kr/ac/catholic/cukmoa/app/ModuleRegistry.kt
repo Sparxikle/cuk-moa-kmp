@@ -5,6 +5,7 @@ import kr.ac.catholic.cukmoa.feature.announcements.AnnouncementsModule
 import kr.ac.catholic.cukmoa.feature.graduation.GraduationModule
 import kr.ac.catholic.cukmoa.feature.professors.ProfessorsModule
 import kr.ac.catholic.cukmoa.feature.roadmap.RoadmapModule
+import kr.ac.catholic.cukmoa.feature.timetable.TimetableModule
 import kr.ac.catholic.cukmoa.model.StudentState
 
 /**
@@ -17,6 +18,7 @@ object ModuleRegistry {
         GraduationModule,
         ProfessorsModule,
         AnnouncementsModule,
+        TimetableModule,
     )
 
     /** Bottom tabs are home + up to 4 modules */
@@ -24,7 +26,7 @@ object ModuleRegistry {
 
     fun byId(id: String): FeatureModule? = all.firstOrNull { it.id == id }
 
-    /** Modules the user enabled (all if nothing is stored). IDs not in the current app are skipped. */
+    /** Modules the user enabled (the first MAX_TABS if nothing is stored). IDs not in the current app are skipped. */
     fun enabled(student: StudentState): List<FeatureModule> =
-        (student.modules ?: all.map { it.id }).mapNotNull { byId(it) }
+        (student.modules ?: all.take(MAX_TABS).map { it.id }).mapNotNull { byId(it) }
 }

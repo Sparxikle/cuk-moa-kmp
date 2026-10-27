@@ -24,6 +24,10 @@ object ErrorCodes {
     const val COURSE_NOT_FOUND = "COURSE_NOT_FOUND"
     const val ANNOUNCEMENT_NOT_FOUND = "ANNOUNCEMENT_NOT_FOUND"
     const val INTERNAL_ERROR = "INTERNAL_ERROR"
+    /** 503: AI timetable maker not configured, or no open classes imported */
+    const val AI_UNAVAILABLE = "AI_UNAVAILABLE"
+    /** 429: too many AI timetable requests (free-tier quota) */
+    const val RATE_LIMITED = "RATE_LIMITED"
 }
 
 // ---- GET /health ----

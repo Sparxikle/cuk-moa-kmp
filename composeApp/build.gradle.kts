@@ -33,6 +33,7 @@ kotlin {
             implementation(projects.featureRoadmap)
             implementation(projects.featureGraduation)
             implementation(projects.featureProfessors)
+            implementation(projects.featureTimetable)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.ui)
