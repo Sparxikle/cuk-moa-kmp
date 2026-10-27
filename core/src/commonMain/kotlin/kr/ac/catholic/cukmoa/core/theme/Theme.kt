@@ -17,10 +17,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kr.ac.catholic.cukmoa.core.resources.Res
-import kr.ac.catholic.cukmoa.core.resources.moasans_bold
-import kr.ac.catholic.cukmoa.core.resources.moasans_medium
-import kr.ac.catholic.cukmoa.core.resources.moasans_regular
-import kr.ac.catholic.cukmoa.core.resources.moasans_semibold
+import kr.ac.catholic.cukmoa.core.resources.lgeitext_bold
+import kr.ac.catholic.cukmoa.core.resources.lgeitext_light
+import kr.ac.catholic.cukmoa.core.resources.lgeitext_regular
+import kr.ac.catholic.cukmoa.core.resources.lgeitext_semibold
 import org.jetbrains.compose.resources.Font
 
 // Material 3: every color comes from a ColorScheme (ColorSchemes.kt, or the wallpaper's dynamic colors on Android 12+).
@@ -123,10 +123,11 @@ data class TypeScale(
 // than the Latin defaults, and titles one weight step heavier so Hangul stays crisp.
 @Composable
 private fun appFont() = FontFamily(
-    Font(Res.font.moasans_regular, FontWeight.Normal),
-    Font(Res.font.moasans_medium, FontWeight.Medium),
-    Font(Res.font.moasans_semibold, FontWeight.SemiBold),
-    Font(Res.font.moasans_bold, FontWeight.Bold),
+    // LG EI Text, full character set. It has no Medium weight: Medium (labels) falls back to Regular.
+    Font(Res.font.lgeitext_light, FontWeight.Light),
+    Font(Res.font.lgeitext_regular, FontWeight.Normal),
+    Font(Res.font.lgeitext_semibold, FontWeight.SemiBold),
+    Font(Res.font.lgeitext_bold, FontWeight.Bold),
 )
 
 private fun style(font: FontFamily, size: Int, line: Int, weight: FontWeight, tracking: Double = 0.0) =
