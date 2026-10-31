@@ -3,12 +3,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- usesCleartextTraffic: for reaching the HTTP dev server (10.0.2.2). Switch to HTTPS and turn this off before release. -->
+    <!-- usesCleartextTraffic: for reaching the HTTP dev server (localhost via adb reverse). Switch to HTTPS and turn this off before release. -->
     <application
         android:label="가대모아"
         android:icon="@android:drawable/ic_menu_agenda"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.App">
+        android:theme="@style/Theme.App"
+        android:localeConfig="@xml/locales_config">
         <activity
             android:name=".MainActivity"
             android:exported="true"

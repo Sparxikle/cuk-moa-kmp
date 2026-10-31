@@ -1,5 +1,7 @@
 package kr.ac.catholic.cukmoa.core
 
+import org.jetbrains.compose.resources.StringResource
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,11 +24,11 @@ interface FeatureModule {
     /** Fixed ID used for storage and routing. Changing it breaks users' settings. */
     val id: String
 
-    /** Name shown on the tab */
-    val title: String
+    /** Name shown on the tab (string resource, so it follows the app language) */
+    val title: StringResource
 
     /** One-line description on the module picker */
-    val summary: String
+    val summary: StringResource
 
     val icon: ImageVector
 
@@ -52,6 +54,7 @@ object Routes {
     const val ROADMAP = "roadmap"
     const val GRADUATION = "graduation"
     const val PROFESSORS = "professors"
+    const val TIMETABLE = "timetable"
 
     /** Module manager screen (a shell screen, not a module) */
     const val MODULES = "modules"
