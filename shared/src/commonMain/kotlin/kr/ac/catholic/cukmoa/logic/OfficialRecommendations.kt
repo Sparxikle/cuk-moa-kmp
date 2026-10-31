@@ -48,6 +48,9 @@ data class OfficialRecommendations(
     /** "4학년 1학기", or "4학년" for departments that give only the year */
     val periodLabel: String,
     val items: List<OfficialRecommendation>,
+    /** The semester recommended for; with yearOnly, only its year is meaningful (screens label it in the app's language) */
+    val semester: SemesterKey? = null,
+    val yearOnly: Boolean = false,
 )
 
 /**
@@ -74,5 +77,5 @@ fun officialRecommendations(catalog: Catalog, student: StudentState, roadmaps: L
         .filter { courseKey(it.name) !in done }
         .distinctBy { courseKey(it.name) }
         .sortedBy { if (it.marks.any { m -> "졸업" in m || "필수" in m || "핵심" in m }) 0 else 1 }
-    return OfficialRecommendations(if (yearOnly) "${next.year}학년" else next.label, items)
+    return OfficialRecommendations(if (yearOnly) "${next.year}학년" else next.label, items, next, yearOnly)
 }
