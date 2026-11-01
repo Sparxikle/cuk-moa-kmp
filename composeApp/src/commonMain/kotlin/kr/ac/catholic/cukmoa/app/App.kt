@@ -1,5 +1,8 @@
 package kr.ac.catholic.cukmoa.app
 
+import org.jetbrains.compose.resources.stringResource
+import kr.ac.catholic.cukmoa.core.resources.*
+import org.jetbrains.compose.resources.StringResource
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +54,7 @@ private sealed interface Sheet {
     data class Professor(val id: String) : Sheet
 }
 
-private data class TabItem(val route: String, val label: String, val icon: ImageVector)
+private data class TabItem(val route: String, val label: StringResource, val icon: ImageVector)
 
 private enum class AppScreen(val depth: Int) { Onboarding(0), Main(1), Settings(2), Modules(2) }
 
@@ -64,7 +68,7 @@ private fun MainTabs(
     newCount: Long,
     onTab: (String) -> Unit,
 ) {
-    val tabs = listOf(TabItem(Routes.HOME, "홈", Icons.Default.GridView)) + modules.map { TabItem(it.id, it.title, it.icon) }
+    val tabs = listOf(TabItem(Routes.HOME, Res.string.tab_home, Icons.Default.GridView)) + modules.map { TabItem(it.id, it.title, it.icon) }
     fun index(r: String) = tabs.indexOfFirst { it.route == r }.coerceAtLeast(0)
 
     Scaffold(
@@ -80,7 +84,7 @@ private fun MainTabs(
                                 BadgedBox(badge = { Badge { Text("$newCount") } }) { Icon(t.icon, null) }
                             } else Icon(t.icon, null)
                         },
-                        label = { Text(t.label) },
+                        label = { Text(stringResource(t.label)) },
                     )
                 }
             }
@@ -104,7 +108,7 @@ private fun MainTabs(
  * The shell knows nothing about module internals. Tab screens and home cards are drawn by the modules in ModuleRegistry.
  */
 @Composable
-fun App(platform: Platform, initialRoute: String = Routes.HOME) {
+fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Boolean) -> Unit = {}, onRestart: () -> Unit = {}) {
     val vm = viewModel { AppViewModel(platform) }
     val student by vm.student.collectAsStateWithLifecycle()
     val dark = when (student.theme) {
@@ -112,6 +116,9 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
         ThemeMode.Light -> false
         ThemeMode.Dark -> true
     }
+    // The platform styles the system bars (status bar icon color) from the app's theme, not the system's
+    LaunchedEffect(dark) { onDarkTheme(dark) }
+    kr.ac.catholic.cukmoa.app.i18n.AppLocale(student.language) {
     AppTheme(dark = dark, dynamic = vm.dynamicScheme?.takeIf { student.dynamicColor }?.invoke(dark)) {
         val catalog by vm.catalog.collectAsStateWithLifecycle()
         val announcements by vm.announcements.collectAsStateWithLifecycle()
@@ -166,7 +173,7 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
                     AppScreen.Onboarding ->
                         OnboardingScreen(catalog = c, student = student, editing = false, startAtCards = false, onClose = {})
                     AppScreen.Settings ->
-                        SettingsScreen(c, student, platform.apiBaseUrl, onBack = { settings = false })
+                        SettingsScreen(c, student, platform.apiBaseUrl, onBack = { settings = false }, onRestart = onRestart)
                     AppScreen.Modules -> {
                         AppBackHandler { managing = false }
                         ModulesScreen(modules.map { it.id }, vm::setModules, onBack = { managing = false })
@@ -187,5 +194,6 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME) {
                 null -> Unit
             }
         }
+    }
     }
 }

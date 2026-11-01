@@ -1,139 +1,208 @@
 package kr.ac.catholic.cukmoa.core.ui
 
-import androidx.compose.foundation.clickable
+import org.jetbrains.compose.resources.stringResource
+import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalUriHandler
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.LocalNavigator
-import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.theme.Space
-import kr.ac.catholic.cukmoa.core.ui.Chip
-import kr.ac.catholic.cukmoa.core.ui.ChipTone
-import kr.ac.catholic.cukmoa.core.ui.Chips
-import kr.ac.catholic.cukmoa.core.ui.Group
-import kr.ac.catholic.cukmoa.core.ui.ListRow
-import kr.ac.catholic.cukmoa.core.ui.PrimaryButton
-import kr.ac.catholic.cukmoa.core.ui.ProgressBar
-import kr.ac.catholic.cukmoa.core.ui.Section
-import kr.ac.catholic.cukmoa.core.ui.Tone
-import kr.ac.catholic.cukmoa.core.ui.Txt
 import kr.ac.catholic.cukmoa.logic.CourseStatus
 import kr.ac.catholic.cukmoa.logic.findCourse
+import kr.ac.catholic.cukmoa.logic.ClassProfessor
+import kr.ac.catholic.cukmoa.logic.courseFor
+import kr.ac.catholic.cukmoa.logic.forCourse
+import kr.ac.catholic.cukmoa.logic.profileOf
+import kr.ac.catholic.cukmoa.logic.professors as classProfessors
 import kr.ac.catholic.cukmoa.logic.statusOf
 import kr.ac.catholic.cukmoa.logic.trackShares
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.StudentState
 
+/** M3 modal bottom sheet that opens fully expanded (one back press closes it), with a scrolling column. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DetailSheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+fun DetailSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), // One back press closes it
-        containerColor = AppTheme.colors.bg,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Column(
-            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Space.l).padding(bottom = Space.xxl).navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(Space.xl),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) { content() }
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = Space.l).navigationBarsPadding(),
+            content = content,
+        )
     }
 }
 
-/** Course details: credits · recommended semester · instructor · linked career tracks, save and completion check. */
+/** Sheet title and one line of supporting text. */
+@Composable
+fun SheetHeader(title: String, subtitle: String? = null) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = Space.xxl, vertical = Space.s)) {
+        Txt(title, MaterialTheme.typography.headlineSmall)
+        subtitle?.takeIf { it.isNotBlank() }?.let { Txt(it, MaterialTheme.typography.bodyMedium, tone = Tone.Ink2) }
+    }
+}
+
+/** Padded block inside a sheet. */
+@Composable
+fun SheetBlock(content: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = Space.xxl, vertical = Space.s), content = content)
+}
+
+/** Outlined button that opens a web page. */
+@Composable
+fun LinkButton(label: String, url: String) {
+    val uri = LocalUriHandler.current
+    OutlinedButton(onClick = { runCatching { uri.openUri(url) } }) {
+        Icon(Icons.AutoMirrored.Filled.OpenInNew, null, Modifier.size(ButtonDefaults.IconSize))
+        Text(label, Modifier.padding(start = Space.s))
+    }
+}
+
+/** Course details: credits · recommended semester · this semester's classes · instructor · linked career tracks, save and completion check. */
 @Composable
 fun CourseSheet(catalog: Catalog, student: StudentState, courseId: String, onDismiss: () -> Unit) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
     val course = catalog.findCourse(courseId) ?: return LaunchedEffect(courseId) { onDismiss() }
     val status = student.statusOf(course.id)
-    val professors = catalog.professors.filter { it.id in course.professorIds }
     val shares = trackShares(catalog, course.id)
+    val classesList by vm.classes.collectAsState()
+    val classes = classesList?.items?.forCourse(course).orEmpty()
+    val faculty by vm.faculty.collectAsState()
+    val professors = classes.classProfessors()
 
     DetailSheet(onDismiss) {
-        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
+        SheetHeader(
+            course.name,
+            listOfNotNull(
+                course.category.title(),
+                credits(course.credits),
+                course.recommendedSemester?.title(),
+            ).joinToString(" · "),
+        )
+        SheetBlock {
             Chips {
-                Chip(course.category.label)
-                Chip("${course.credits}학점")
-                course.recommendedSemester?.let { Chip("권장 ${it.label}") }
-                if (course.isExamSubject) Chip("졸업시험 과목", ChipTone.Accent)
+                if (course.isExamSubject) Chip(stringResource(Res.string.exam_subject), ChipTone.Accent)
                 when (status) {
-                    CourseStatus.Completed -> Chip("이수함", ChipTone.Good)
-                    CourseStatus.InProgress -> Chip("수강 중", ChipTone.Accent)
+                    CourseStatus.Completed -> Chip(stringResource(Res.string.status_completed), ChipTone.Good)
+                    CourseStatus.InProgress -> Chip(stringResource(Res.string.status_in_progress), ChipTone.Accent)
                     else -> Unit
                 }
             }
-            Txt(course.name, AppTheme.type.largeTitle)
-            Txt(course.summary, AppTheme.type.body, tone = Tone.Ink2)
+            if (course.summary.isNotBlank()) Txt(course.summary, MaterialTheme.typography.bodyMedium, Modifier.padding(top = Space.s), tone = Tone.Ink2)
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.m)) {
-            PrimaryButton(
-                if (status == CourseStatus.Saved) "담기 취소" else "다음 학기 후보로 담기",
-                { vm.toggleSaved(course.id) },
-                Modifier.weight(1f),
-                tinted = status == CourseStatus.Saved,
+        Row(Modifier.fillMaxWidth().padding(horizontal = Space.xxl, vertical = Space.s), horizontalArrangement = Arrangement.spacedBy(Space.s)) {
+            val saved = status == CourseStatus.Saved
+            FilledTonalButton(
+                onClick = { vm.toggleSaved(course.id) },
+                modifier = Modifier.weight(1f),
                 enabled = status != CourseStatus.Completed && status != CourseStatus.InProgress,
-            )
-            PrimaryButton(
-                if (status == CourseStatus.Completed) "이수 취소" else "이수 체크",
-                { vm.toggleCompleted(course.id) },
-                Modifier.weight(1f),
-                tinted = true,
-            )
+            ) {
+                Icon(if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, null, Modifier.size(ButtonDefaults.IconSize))
+                Text(stringResource(if (saved) Res.string.unsave else Res.string.save_for_next), Modifier.padding(start = Space.s), maxLines = 1)
+            }
+            val done = status == CourseStatus.Completed
+            FilledTonalButton(onClick = { vm.toggleCompleted(course.id) }, modifier = Modifier.weight(1f)) {
+                Icon(Icons.Default.Check, null, Modifier.size(ButtonDefaults.IconSize))
+                Text(stringResource(if (done) Res.string.uncheck_completed else Res.string.check_completed), Modifier.padding(start = Space.s), maxLines = 1)
+            }
         }
-        if (professors.isNotEmpty()) Section("담당 교수") {
-            Group { professors.forEachIndexed { i, p -> ProfessorRow(p, divider = i < professors.lastIndex) } }
+        if (classes.isNotEmpty()) Section(stringResource(Res.string.open_sections)) {
+            classes.forEach { c ->
+                ListRow(
+                    stringResource(Res.string.section_no, c.classNo) + " · " + c.professors.joinToString(", ").ifEmpty { stringResource(Res.string.professor_tba) },
+                    listOfNotNull(
+                        c.times.map { it.text() }.joinToString(", ").ifEmpty { null },
+                        c.foreignLanguage,
+                    ).joinToString(" · ").ifEmpty { null },
+                )
+            }
         }
-        if (shares.isNotEmpty()) Section("이 과목을 들은 선배", "진로별로 가장 많이 들은 학기") {
-            Group {
-                shares.forEachIndexed { i, s ->
-                    Column(Modifier.clickable { onDismiss(); nav.openRoadmap(s.track.id) }.padding(horizontal = Space.l, vertical = Space.m), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Row {
-                            Txt(s.track.name, AppTheme.type.callout, Modifier.weight(1f))
-                            Txt("${(s.ratio * 100).toInt()}% · ${s.semester.label}", AppTheme.type.footnote, tone = Tone.Ink2)
-                        }
-                        ProgressBar(s.ratio, 1.0, height = 4.dp)
-                    }
-                }
+        if (professors.isNotEmpty()) Section(stringResource(Res.string.professors_in_charge)) {
+            professors.forEach { p ->
+                ProfessorRow(p.name, faculty.profileOf(p.name, p.departments)?.field ?: p.departments.joinToString("·"))
+            }
+        }
+        if (shares.isNotEmpty()) Section(stringResource(Res.string.seniors_took)) {
+            shares.forEach { s ->
+                ListRow(
+                    s.track.name,
+                    stringResource(Res.string.percent_semester, (s.ratio * 100).toInt(), s.semester.title()),
+                    leading = { IconBadge(trackIcon(s.track.id)) },
+                    onClick = { onDismiss(); nav.openRoadmap(s.track.id) },
+                )
             }
         }
         course.prerequisiteIds?.mapNotNull { catalog.findCourse(it) }?.takeIf { it.isNotEmpty() }?.let { pre ->
-            Section("먼저 들으면 좋은 과목") {
-                Group { pre.forEachIndexed { i, p -> ListRow(p.name, "${p.credits}학점", divider = i < pre.lastIndex, chevron = true, onClick = { nav.openCourse(p.id) }) } }
+            Section(stringResource(Res.string.prerequisites)) {
+                pre.forEach { p -> ListRow(p.name, credits(p.credits), chevron = true, onClick = { nav.openCourse(p.id) }) }
             }
         }
     }
 }
 
-/** Professor details: research areas · keywords · courses taught. */
+/**
+ * Professor details by name: the department website profile when collected, otherwise the name and departments
+ * from this semester's open classes. Both list the classes they teach this semester.
+ */
 @Composable
-fun ProfessorSheet(catalog: Catalog, professorId: String, onDismiss: () -> Unit) {
+fun ProfessorSheet(catalog: Catalog, name: String, onDismiss: () -> Unit) {
+    val vm = LocalAppViewModel.current
+    val classes by vm.classes.collectAsState()
+    val faculty by vm.faculty.collectAsState()
+    val p = classes?.items.orEmpty().classProfessors().firstOrNull { it.name == name }
+    val profile = faculty.profileOf(name, p?.departments.orEmpty())
+    when {
+        profile != null -> FacultySheet(profile, onDismiss) { if (p != null) TaughtClasses(catalog, p, onDismiss) }
+        p != null -> DetailSheet(onDismiss) {
+            SheetHeader(stringResource(Res.string.professor_name, name), p.departments.joinToString(" · "))
+            TaughtClasses(catalog, p, onDismiss)
+        }
+        else -> LaunchedEffect(name) { onDismiss() }
+    }
+}
+
+@Composable
+private fun TaughtClasses(catalog: Catalog, p: ClassProfessor, onDismiss: () -> Unit) {
     val nav = LocalNavigator.current
-    val p = catalog.professors.firstOrNull { it.id == professorId } ?: return LaunchedEffect(professorId) { onDismiss() }
-    val courses = p.courseIds.mapNotNull { catalog.findCourse(it) }
-    DetailSheet(onDismiss) {
-        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s)) {
-            Txt("${p.name} 교수", AppTheme.type.largeTitle)
-            Txt(p.field, AppTheme.type.body, tone = Tone.Ink2)
-            Chips { p.keywords.forEach { Chip(it, ChipTone.Accent) } }
+    Section(stringResource(Res.string.teaching_this_term)) {
+        p.classes.forEach { k ->
+            val course = catalog.courseFor(k)
+            ListRow(
+                k.name,
+                listOfNotNull(stringResource(Res.string.section_no, k.classNo), k.credits?.let { credits(it) }, k.department).joinToString(" · "),
+                chevron = course != null,
+                onClick = course?.let { c -> { onDismiss(); nav.openCourse(c.id) } },
+            )
         }
-        Section("담당 과목") {
-            Group { courses.forEachIndexed { i, c -> ListRow(c.name, "${c.category.label} · ${c.credits}학점", divider = i < courses.lastIndex, chevron = true, onClick = { nav.openCourse(c.id) }) } }
-        }
-        Section("면담") { Txt(p.contactNote, AppTheme.type.callout, Modifier.padding(horizontal = Space.xs), tone = Tone.Ink2) }
     }
 }

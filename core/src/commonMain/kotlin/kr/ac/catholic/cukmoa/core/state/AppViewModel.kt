@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kr.ac.catholic.cukmoa.api.ApiClient
 import kr.ac.catholic.cukmoa.api.ApiException
@@ -16,7 +17,8 @@ import kr.ac.catholic.cukmoa.core.resources.Res
 import kr.ac.catholic.cukmoa.logic.decodeStudentState
 import kr.ac.catholic.cukmoa.logic.encodeStudentState
 import kr.ac.catholic.cukmoa.logic.parseCatalog
-import kr.ac.catholic.cukmoa.logic.sampleStudent
+import kr.ac.catholic.cukmoa.logic.newStudent
+import kr.ac.catholic.cukmoa.logic.withEmptyRecords
 import androidx.compose.material3.ColorScheme
 import kr.ac.catholic.cukmoa.model.Announcement
 import kr.ac.catholic.cukmoa.model.AnnouncementQuery
@@ -28,6 +30,17 @@ import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.Department
 import kr.ac.catholic.cukmoa.model.DepartmentList
 import kr.ac.catholic.cukmoa.model.FacultyList
+import kr.ac.catholic.cukmoa.model.JobList
+import kr.ac.catholic.cukmoa.model.OpenClass
+import kr.ac.catholic.cukmoa.model.ChosenTimetable
+import kr.ac.catholic.cukmoa.model.Grade
+import kr.ac.catholic.cukmoa.model.TimetablePlan
+import kr.ac.catholic.cukmoa.model.TimetablePrefs
+import kr.ac.catholic.cukmoa.model.TimetableRequest
+import kr.ac.catholic.cukmoa.model.TimetableResponse
+import kr.ac.catholic.cukmoa.model.OpenClassList
+import kr.ac.catholic.cukmoa.logic.hasTaken
+import kr.ac.catholic.cukmoa.logic.takenClass
 import kr.ac.catholic.cukmoa.model.MajorRoadmapList
 import kr.ac.catholic.cukmoa.model.ExamState
 import kr.ac.catholic.cukmoa.model.HomeCardId
@@ -46,7 +59,22 @@ interface LocalStore {
  * dynamicScheme: the platform's wallpaper-based M3 color scheme for light (false) or dark (true), or null where
  * there is none (desktop, iOS, Android before 12).
  */
-class Platform(val store: LocalStore, val apiBaseUrl: String, val dynamicScheme: ((dark: Boolean) -> ColorScheme)? = null)
+class Platform(
+    val store: LocalStore,
+    val apiBaseUrl: String,
+    val dynamicScheme: ((dark: Boolean) -> ColorScheme)? = null,
+    /** The OS's own per-app language setting (Android 13+), kept in step with the in-app choice. null where there is none. */
+    val systemAppLanguage: SystemAppLanguage? = null,
+)
+
+/** Languages the app is translated into. Anything else falls back to English (the default resources). */
+val SUPPORTED_LANGUAGES = listOf("ko", "en", "zh", "ja")
+
+interface SystemAppLanguage {
+    /** Language picked in the OS settings for this app, or null for "system default" */
+    fun get(): String?
+    fun set(language: String?)
+}
 
 /**
  * Loading: before the first load. Screens draw first from the bundled sample (or the last server catalog).
@@ -56,7 +84,7 @@ class Platform(val store: LocalStore, val apiBaseUrl: String, val dynamicScheme:
 sealed interface CatalogStatus {
     data object Loading : CatalogStatus
     data object Live : CatalogStatus
-    data class Offline(val message: String) : CatalogStatus
+    data class Offline(val error: ApiException) : CatalogStatus
 }
 
 /**
@@ -67,11 +95,11 @@ sealed interface CatalogStatus {
 enum class StorageStatus { Ok, Unreadable, SaveFailed }
 
 /** Picks one announcement filter. null means all. */
-enum class AnnouncementFilter(val label: String, val sources: List<String>) {
-    Mine("내 학과", listOf(AnnouncementSource.DEPT)),
-    School("학교", listOf(AnnouncementSource.MAIN, AnnouncementSource.LMS)),
-    Events("행사", listOf(AnnouncementSource.EVENT)),
-    Outside("공모·대외", listOf(AnnouncementSource.OUTSIDE));
+enum class AnnouncementFilter(val sources: List<String>) {
+    Mine(listOf(AnnouncementSource.DEPT)),
+    School(listOf(AnnouncementSource.MAIN, AnnouncementSource.LMS)),
+    Events(listOf(AnnouncementSource.EVENT)),
+    Outside(listOf(AnnouncementSource.OUTSIDE));
 
     companion object {
         /** "My department" shows the boards of both majors together. */
@@ -90,7 +118,7 @@ data class AnnouncementsState(
     val items: List<Announcement> = emptyList(),
     val total: Long = 0,
     val loading: Boolean = false,
-    val error: String? = null,
+    val error: ApiException? = null,
     /** Home card: my department + latest school notices */
     val highlights: List<Announcement> = emptyList(),
     /** Number of announcements posted since last viewed */
@@ -103,7 +131,15 @@ private const val DEPARTMENTS_KEY = "departments.live"
 private const val CALENDAR_KEY = "calendar.live"
 private const val FACULTY_KEY = "faculty.live"
 private const val ROADMAPS_KEY = "roadmaps.live"
+private const val CLASSES_KEY = "classes.live"
 private const val PAGE = 20
+
+sealed interface TimetableState {
+    data object Idle : TimetableState
+    data object Loading : TimetableState
+    data class Result(val response: TimetableResponse) : TimetableState
+    data class Error(val error: ApiException) : TimetableState
+}
 
 class AppViewModel(private val platform: Platform) : ViewModel() {
     val dynamicScheme = platform.dynamicScheme
@@ -121,6 +157,15 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     private val _student = MutableStateFlow(loadStudent())
     val student: StateFlow<StudentState> = _student.asStateFlow()
 
+    init {
+        // The OS per-app language (changed in Android settings while the app was closed) wins over the stored choice
+        // Only where the OS has such a setting (Android 13+); elsewhere the stored choice stands
+        platform.systemAppLanguage?.let { system ->
+            val lang = system.get()?.takeIf { it in SUPPORTED_LANGUAGES }
+            if (lang != _student.value.language) update { it.copy(language = lang) }
+        }
+    }
+
     /** When opening a specific career track's roadmap from home or a course sheet */
     private val _roadmapTrack = MutableStateFlow<TrackId?>(null)
     val roadmapTrack: StateFlow<TrackId?> = _roadmapTrack.asStateFlow()
@@ -130,7 +175,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     private val _departments = MutableStateFlow<DepartmentList?>(null)
     val departments: StateFlow<DepartmentList?> = _departments.asStateFlow()
 
-    /** Real academic calendar (server). null until received → screens use the catalog's sample schedule. */
+    /** Real academic calendar (server). null until received → home shows a "not received yet" card. */
     private val _calendar = MutableStateFlow<CalendarResponse?>(
         null, // Stored values are read in the background in init (so startup isn't blocked)
     )
@@ -142,7 +187,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     )
     val faculty: StateFlow<FacultyList?> = _faculty.asStateFlow()
 
-    fun refreshFaculty() {
+    fun refreshFaculty(): Job =
         viewModelScope.launch {
             runCatching { api.professors() }.onSuccess {
                 if (it.items.isEmpty()) return@onSuccess
@@ -150,7 +195,6 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
                 saveCache(FACULTY_KEY) { ApiJson.encodeToString(FacultyList.serializer(), it) }
             }
         }
-    }
 
     /** Official department major roadmaps (College of AI, Electronics & Information Convergence). null until received → the roadmap tab shows only seniors' records (sample). */
     private val _roadmaps = MutableStateFlow<MajorRoadmapList?>(
@@ -158,7 +202,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     )
     val roadmaps: StateFlow<MajorRoadmapList?> = _roadmaps.asStateFlow()
 
-    fun refreshRoadmaps() {
+    fun refreshRoadmaps(): Job =
         viewModelScope.launch {
             runCatching { api.roadmaps() }.onSuccess {
                 if (it.items.isEmpty()) return@onSuccess
@@ -166,7 +210,74 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
                 saveCache(ROADMAPS_KEY) { ApiJson.encodeToString(MajorRoadmapList.serializer(), it) }
             }
         }
+
+    /** This semester's open classes (server, imported once a semester). null until received → the graduation tab asks to reconnect. */
+    private val _classes = MutableStateFlow<OpenClassList?>(
+        null, // Stored values are read in the background in init (so startup isn't blocked)
+    )
+    val classes: StateFlow<OpenClassList?> = _classes.asStateFlow()
+
+    fun refreshClasses(): Job =
+        viewModelScope.launch {
+            runCatching { api.classes() }.onSuccess {
+                if (it.items.isEmpty()) return@onSuccess
+                _classes.value = it
+                saveCache(CLASSES_KEY) { ApiJson.encodeToString(OpenClassList.serializer(), it) }
+            }
+        }
+
+    // ---- Related jobs per department ----
+
+    /** Department id → its jobs. Kept on the device so onboarding works offline after the first time. */
+    private val _jobs = MutableStateFlow<Map<String, JobList>>(emptyMap())
+    val jobs: StateFlow<Map<String, JobList>> = _jobs.asStateFlow()
+
+    fun loadJobs(departmentId: String) {
+        val key = "jobs.$departmentId.live"
+        viewModelScope.launch {
+            if (departmentId !in _jobs.value) {
+                cached(key) { ApiJson.decodeFromString(JobList.serializer(), it) }?.let { c -> _jobs.update { it + (departmentId to c) } }
+            }
+            runCatching { api.jobs(departmentId) }.onSuccess { list ->
+                _jobs.update { it + (departmentId to list) }
+                saveCache(key) { ApiJson.encodeToString(JobList.serializer(), list) }
+            }
+        }
     }
+
+    // ---- AI timetable maker ----
+
+    private val _timetables = MutableStateFlow<TimetableState>(TimetableState.Idle)
+    val timetables: StateFlow<TimetableState> = _timetables.asStateFlow()
+    private var timetableJob: Job? = null
+
+    /** Asks the server for 3 checked timetables (AI). Takes up to a minute. */
+    fun makeTimetables(prefs: TimetablePrefs) {
+        timetableJob?.cancel()
+        _timetables.value = TimetableState.Loading
+        timetableJob = viewModelScope.launch {
+            _timetables.value = try {
+                TimetableState.Result(api.timetables(TimetableRequest(_student.value, prefs)))
+            } catch (e: ApiException) {
+                TimetableState.Error(e)
+            }
+        }
+    }
+
+    fun chooseTimetable(res: TimetableResponse, plan: TimetablePlan) =
+        update { it.copy(timetable = ChosenTimetable(res.year, res.semester, plan)) }
+
+    fun clearTimetable() = update { it.copy(timetable = null) }
+
+    /** Back to the empty maker form (after saving a suggestion) */
+    fun resetTimetables() {
+        timetableJob?.cancel()
+        _timetables.value = TimetableState.Idle
+    }
+
+    /** Grade of a completed course (catalog course id or class 학수번호); null removes it */
+    fun setCourseGrade(id: String, grade: Grade?) =
+        update { s -> s.copy(grades = if (grade == null) s.grades - id else s.grades + (id to grade)) }
 
     private val _announcements = MutableStateFlow(
         AnnouncementsState(filter = if (_student.value.majors.isNotEmpty()) AnnouncementFilter.Mine else null),
@@ -194,23 +305,48 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
             cached(CALENDAR_KEY) { ApiJson.decodeFromString(CalendarResponse.serializer(), it) }?.let { if (_calendar.value == null) _calendar.value = it }
             cached(FACULTY_KEY) { ApiJson.decodeFromString(FacultyList.serializer(), it) }?.let { if (_faculty.value == null) _faculty.value = it }
             cached(ROADMAPS_KEY) { ApiJson.decodeFromString(MajorRoadmapList.serializer(), it) }?.let { if (_roadmaps.value == null) _roadmaps.value = it }
+            cached(CLASSES_KEY) { ApiJson.decodeFromString(OpenClassList.serializer(), it) }?.let { if (_classes.value == null) _classes.value = it }
         }
         viewModelScope.launch {
             val cached = cached(DEPARTMENTS_KEY) { ApiJson.decodeFromString(DepartmentList.serializer(), it) }
             _departments.value = cached
                 ?: withContext(Dispatchers.Default) { ApiJson.decodeFromString(DepartmentList.serializer(), Res.readBytes("files/departments.json").decodeToString()) }
+            refreshDepartments().join()
+        }
+        refreshCalendar()
+        refreshFaculty()
+        refreshRoadmaps()
+        refreshClasses()
+        refreshAnnouncements()
+    }
+
+    fun refreshDepartments(): Job =
+        viewModelScope.launch {
             runCatching { api.departments() }.onSuccess {
                 _departments.value = it
                 saveCache(DEPARTMENTS_KEY) { ApiJson.encodeToString(DepartmentList.serializer(), it) }
             }
         }
-        refreshCalendar()
-        refreshFaculty()
-        refreshRoadmaps()
-        refreshAnnouncements()
+
+    /** Pull to refresh: true while refreshAll's requests are running. */
+    private val _refreshing = MutableStateFlow(false)
+    val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
+
+    /** Fetches everything from the server again (pull to refresh). The indicator stays until every request has finished. */
+    fun refreshAll() {
+        if (_refreshing.value) return
+        _refreshing.value = true
+        val jobs = listOf(
+            refreshCatalog(), refreshAnnouncements(), refreshCalendar(), refreshFaculty(),
+            refreshRoadmaps(), refreshClasses(), refreshDepartments(),
+        )
+        viewModelScope.launch {
+            jobs.joinAll()
+            _refreshing.value = false
+        }
     }
 
-    fun refreshCalendar() {
+    fun refreshCalendar(): Job =
         viewModelScope.launch {
             runCatching { api.calendar() }.onSuccess {
                 if (it.events.isEmpty()) return@onSuccess
@@ -218,20 +354,19 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
                 saveCache(CALENDAR_KEY) { ApiJson.encodeToString(CalendarResponse.serializer(), it) }
             }
         }
-    }
 
     // ---- Catalog ----
 
-    fun refreshCatalog() {
+    fun refreshCatalog(): Job {
         _catalogStatus.value = CatalogStatus.Loading
-        viewModelScope.launch {
+        return viewModelScope.launch {
             try {
                 val live = api.catalog()
                 _catalog.value = live
                 _catalogStatus.value = CatalogStatus.Live
                 saveCache(CATALOG_KEY) { ApiJson.encodeToString(Catalog.serializer(), live) }
             } catch (e: ApiException) {
-                _catalogStatus.value = CatalogStatus.Offline(e.message ?: "서버에 연결하지 못했습니다.")
+                _catalogStatus.value = CatalogStatus.Offline(e)
             }
         }
     }
@@ -239,8 +374,8 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     // ---- Student state (stored on device) ----
 
     private fun loadStudent(): StudentState {
-        val raw = store.read(STUDENT_KEY) ?: return sampleStudent(3)
-        return decodeStudentState(raw) ?: sampleStudent(3).also { _storage.value = StorageStatus.Unreadable }
+        val raw = store.read(STUDENT_KEY) ?: return newStudent(1)
+        return decodeStudentState(raw) ?: newStudent(1).also { _storage.value = StorageStatus.Unreadable }
     }
 
     private fun update(transform: (StudentState) -> StudentState) {
@@ -264,10 +399,12 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     /** Modules to enable (order = tab order) */
     fun setModules(ids: List<String>) = update { it.copy(modules = ids) }
 
-    fun completeOnboarding(grade: Int, trackIds: List<TrackId>, homeCards: List<HomeCardId>) = update { s ->
-        // When the year changes, swap in that year's sample course record. If the year is unchanged, the user's checkmarks are kept.
-        val base = if (grade == s.grade) s else sampleStudent(grade, trackIds).copy(majors = s.majors, departments = s.departments)
-        base.copy(onboarded = true, grade = grade, trackIds = trackIds, homeCards = homeCards)
+    fun completeOnboarding(grade: Int, trackIds: List<TrackId>, careers: List<String>, homeCards: List<HomeCardId>) = update { s ->
+        // The user's checkmarks are kept even when the year changes.
+        s.copy(
+            onboarded = true, grade = grade, currentSemester = kr.ac.catholic.cukmoa.model.SemesterKey.of(grade, 2),
+            trackIds = trackIds, careerInterests = careers, homeCards = homeCards,
+        )
     }
 
     fun toggleCompleted(courseId: String) = update { s ->
@@ -279,18 +416,33 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         )
     }
 
+    /** Checks or unchecks a class from the open-class list. Its credits go to the area its 이수구분 counts toward. */
+    fun toggleClass(k: OpenClass) = update { s ->
+        if (s.hasTaken(k.subjectNo)) s.copy(takenClasses = s.takenClasses.filterNot { it.subjectNo == k.subjectNo })
+        else s.copy(takenClasses = s.takenClasses + s.takenClass(k))
+    }
+
+    fun removeTakenClass(subjectNo: String) = update { s -> s.copy(takenClasses = s.takenClasses.filterNot { it.subjectNo == subjectNo }) }
+
     fun toggleSaved(courseId: String) = update { s ->
         if (courseId in s.savedCourseIds) s.copy(savedCourseIds = s.savedCourseIds - courseId)
         else s.copy(savedCourseIds = s.savedCourseIds + courseId)
     }
 
     fun setTracks(trackIds: List<TrackId>) = update { it.copy(trackIds = trackIds) }
+    fun setCareerInterests(careers: List<String>) = update { it.copy(careerInterests = careers.take(2)) }
     fun setExam(transform: (ExamState) -> ExamState) = update { it.copy(exam = transform(it.exam)) }
 
     /** Credits earned in an area outside the catalog's checklist (entered by hand from the transcript) */
     fun setOtherCredits(bucket: BucketId, credits: Int) = update { it.copy(otherCredits = it.otherCredits + (bucket to maxOf(0, credits))) }
 
     fun setTheme(mode: ThemeMode) = update { it.copy(theme = mode) }
+
+    /** null = follow the phone. Also updates Android's per-app language so both settings screens agree. */
+    fun setLanguage(language: String?) {
+        update { it.copy(language = language?.takeIf { l -> l in SUPPORTED_LANGUAGES }) }
+        platform.systemAppLanguage?.set(language)
+    }
 
     fun setDynamicColor(on: Boolean) = update { it.copy(dynamicColor = on) }
 
@@ -309,17 +461,12 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         refreshAnnouncements()
     }
 
-    fun setGrade(grade: Int, resetRecords: Boolean) = update { s ->
-        if (resetRecords) sampleStudent(grade, s.trackIds).copy(
-            onboarded = true, homeCards = s.homeCards, departments = s.departments, majors = s.majors,
-            modules = s.modules, announcementsSeenAt = s.announcementsSeenAt,
-        ) else s.copy(grade = grade, currentSemester = kr.ac.catholic.cukmoa.model.SemesterKey.of(grade, 2))
-    }
+    fun setGrade(grade: Int) = update { s -> s.copy(grade = grade, currentSemester = kr.ac.catholic.cukmoa.model.SemesterKey.of(grade, 2)) }
 
     fun setHomeCards(cards: List<HomeCardId>) = update { it.copy(homeCards = cards) }
 
-    /** Resets the course record to the sample for the current year (Settings → Data). */
-    fun resetRecords() = setGrade(_student.value.grade, resetRecords = true)
+    /** Clears the course record (Settings → Data). */
+    fun resetRecords() = update { it.withEmptyRecords() }
 
     fun resetAnnouncementsSeen() {
         update { it.copy(announcementsSeenAt = null) }
@@ -344,9 +491,10 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         if (!s.loading && s.items.size < s.total) loadAnnouncements(reset = false)
     }
 
-    fun refreshAnnouncements() {
+    fun refreshAnnouncements(): Job {
         loadAnnouncements(reset = true)
-        viewModelScope.launch {
+        val list = announcementsJob
+        return viewModelScope.launch {
             val majors = _student.value.majors
             val highlightFilter = if (majors.isNotEmpty()) AnnouncementFilter.Mine else AnnouncementFilter.School
             runCatching {
@@ -356,6 +504,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
                 else api.announcements(AnnouncementFilter.query(highlightFilter, majors).copy(since = seenAt, limit = 1)).total
                 _announcements.update { it.copy(highlights = mine.items, newCount = fresh) }
             }
+            list?.join() // Done once the list has loaded too
         }
     }
 
@@ -387,7 +536,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
                     it.copy(items = if (reset) page.items else it.items + page.items, total = page.total, loading = false)
                 }
             } catch (e: ApiException) {
-                _announcements.update { it.copy(loading = false, error = e.message) }
+                _announcements.update { it.copy(loading = false, error = e) }
             }
         }
     }

@@ -1,26 +1,38 @@
 package kr.ac.catholic.cukmoa.feature.graduation
 
-import androidx.compose.foundation.background
+import org.jetbrains.compose.resources.stringResource
+import kr.ac.catholic.cukmoa.core.resources.*
+import kr.ac.catholic.cukmoa.core.ui.bucketTitle
+import kr.ac.catholic.cukmoa.core.ui.credits
+import kr.ac.catholic.cukmoa.core.ui.title
+import kr.ac.catholic.cukmoa.core.ui.yearTitle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,8 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.LocalNavigator
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
@@ -38,18 +50,29 @@ import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.core.ui.Card
 import kr.ac.catholic.cukmoa.core.ui.CheckCircle
 import kr.ac.catholic.cukmoa.core.ui.Chip
+import kr.ac.catholic.cukmoa.core.ui.ChipRow
 import kr.ac.catholic.cukmoa.core.ui.ChipTone
 import kr.ac.catholic.cukmoa.core.ui.Chips
-import kr.ac.catholic.cukmoa.core.ui.DataNotice
-import kr.ac.catholic.cukmoa.core.ui.Group
+import kr.ac.catholic.cukmoa.core.ui.EmptyState
+import kr.ac.catholic.cukmoa.core.ui.FilterChip
 import kr.ac.catholic.cukmoa.core.ui.ListRow
+import kr.ac.catholic.cukmoa.core.ui.MoreRow
 import kr.ac.catholic.cukmoa.core.ui.ProgressBar
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
+import kr.ac.catholic.cukmoa.core.ui.SearchField
 import kr.ac.catholic.cukmoa.core.ui.StatusBanners
 import kr.ac.catholic.cukmoa.core.ui.Section
+import kr.ac.catholic.cukmoa.core.ui.SheetBlock
 import kr.ac.catholic.cukmoa.core.ui.Tone
 import kr.ac.catholic.cukmoa.core.ui.Txt
 import kr.ac.catholic.cukmoa.logic.CourseStatus
+import kr.ac.catholic.cukmoa.logic.OpenSubject
+import kr.ac.catholic.cukmoa.logic.bucketOf
+import kr.ac.catholic.cukmoa.logic.courseFor
+import kr.ac.catholic.cukmoa.logic.forCourse
+import kr.ac.catholic.cukmoa.logic.foreignTotal
+import kr.ac.catholic.cukmoa.logic.hasTaken
+import kr.ac.catholic.cukmoa.logic.subjects
 import kr.ac.catholic.cukmoa.logic.CreditSummary
 import kr.ac.catholic.cukmoa.logic.GraduationBucket
 import kr.ac.catholic.cukmoa.logic.GraduationPlan
@@ -61,7 +84,10 @@ import kr.ac.catholic.cukmoa.logic.statusOf
 import kr.ac.catholic.cukmoa.logic.testKey
 import kr.ac.catholic.cukmoa.logic.testMet
 import kr.ac.catholic.cukmoa.model.Catalog
+import kr.ac.catholic.cukmoa.model.Grade
 import kr.ac.catholic.cukmoa.model.GraduationTest
+import kr.ac.catholic.cukmoa.model.OpenClass
+import kr.ac.catholic.cukmoa.model.OpenClassList
 import kr.ac.catholic.cukmoa.model.SemesterKey
 import kr.ac.catholic.cukmoa.model.StudentState
 
@@ -71,60 +97,62 @@ private const val PREVIEW = 6
 fun GraduationScreen(catalog: Catalog, student: StudentState) {
     val plan = graduationPlan(catalog, student)
     val s = creditSummary(catalog, student)
+    val classes by LocalAppViewModel.current.classes.collectAsState()
+    // Rule notes from the guide go behind the info button instead of under every bar
+    val info = listOfNotNull(
+        plan.label,
+        if (plan.isFallback) plan.rules.note ?: stringResource(Res.string.check_with_department) else null,
+        stringResource(Res.string.in_brackets_hint),
+    ) + s.buckets.mapNotNull { b -> b.note?.let { "${bucketTitle(b.id, plan.doubleMajor)}: $it" } }
 
-    ScreenList(title = "졸업요건", eyebrow = plan.label) {
-        item { StatusBanners() }
-        if (plan.isFallback) item { DataNotice(plan.rules.note ?: "이 학과의 기준은 학과에 확인하세요") }
-        item { CreditsCard(s) }
+    ScreenList(title = stringResource(Res.string.graduation_title), info = info.joinToString("\n\n")) {
+        item(key = "banners") { StatusBanners() }
+        item(key = "credits") { CreditsCard(s, plan.doubleMajor) }
         plan.buckets.filter { it.checklistCourseIds.isNotEmpty() }.forEach { b ->
-            item(key = b.id.name) { Checklist(catalog, student, plan, b) }
+            item(key = b.id.name) { Checklist(catalog, student, plan, b, classes?.items.orEmpty()) }
         }
-        item { OtherCredits(student, s) }
-        item { ForeignLectures(catalog, plan, student) }
-        item { GraduationTestSection(catalog, plan, student) }
-        item { ThesisEligibility(catalog, student, s) }
-        item {
-            DataNotice(
-                listOfNotNull(catalog.graduation.source.label, plan.rules.test?.source?.label).joinToString(" · ") +
-                    " · ${catalog.graduation.label}이에요. 다른 학번은 본인 입학년도의 학사제도 안내를 확인하세요",
-            )
-        }
+        item(key = "classes") { ClassPicker(catalog, student, plan, classes) }
+        item(key = "other") { OtherCredits(student, s, plan) }
+        item(key = "foreign") { ForeignLectures(catalog, plan, student) }
+        item(key = "test") { GraduationTestSection(catalog, plan, student) }
+        item(key = "thesis") { ThesisEligibility(catalog, student, s) }
     }
 }
 
 @Composable
-private fun CreditsCard(s: CreditSummary) {
+private fun CreditsCard(s: CreditSummary, doubleMajor: Boolean) {
     Card {
         Row(verticalAlignment = Alignment.Bottom) {
             Column(Modifier.weight(1f)) {
-                Txt("남은 학점", AppTheme.type.subhead, tone = Tone.Ink2)
+                Txt(stringResource(Res.string.credits_left), MaterialTheme.typography.labelLarge, tone = Tone.Ink2)
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Txt("${s.remaining}", AppTheme.type.numeral.copy(fontSize = 52.sp, lineHeight = 56.sp, color = AppTheme.colors.ink))
-                    Txt("/ ${s.total}", AppTheme.type.headline, Modifier.padding(bottom = 7.dp), tone = Tone.Ink2)
+                    Txt("${s.remaining}", MaterialTheme.typography.displayMedium.merge(AppTheme.type.numeral))
+                    Txt("/ ${s.total}", MaterialTheme.typography.titleMedium, Modifier.padding(bottom = 8.dp), tone = Tone.Ink2)
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Txt("이번 학기 후", AppTheme.type.caption, tone = Tone.Ink3)
-                Txt("${s.remainingAfterTerm}", AppTheme.type.numeral.copy(fontSize = 22.sp, color = AppTheme.colors.ink))
+                Txt(stringResource(Res.string.after_this_term), MaterialTheme.typography.labelMedium, tone = Tone.Ink2)
+                Txt("${s.remainingAfterTerm}", MaterialTheme.typography.titleLarge.merge(AppTheme.type.numeral))
             }
         }
         s.buckets.forEach { b ->
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Txt(b.label, AppTheme.type.subhead, Modifier.weight(1f))
-                    if (b.met) Chip("충족", ChipTone.Good)
-                    else Txt("${b.earned}${if (b.inProgress > 0) " (+${b.inProgress})" else ""} / ${b.required}", AppTheme.type.subhead, tone = Tone.Ink2)
+                    Txt(bucketTitle(b.id, doubleMajor), MaterialTheme.typography.bodyMedium, Modifier.weight(1f))
+                    Txt(
+                        "${b.earned}${if (b.inProgress > 0) " (+${b.inProgress})" else ""} / ${b.required}",
+                        MaterialTheme.typography.bodyMedium.merge(AppTheme.type.numeral).copy(fontWeight = null),
+                        tone = if (b.met) Tone.Good else Tone.Ink2,
+                    )
                 }
-                ProgressBar(b.earned.toDouble(), b.required.toDouble(), pending = b.inProgress.toDouble(), complete = b.met)
-                b.note?.let { Txt(it, AppTheme.type.caption, tone = Tone.Ink3) }
+                ProgressBar(b.earned.toDouble(), b.required.toDouble(), pending = b.inProgress.toDouble(), complete = b.met, height = 4.dp)
             }
         }
-        Txt("괄호 안은 이번 학기에 듣고 있는 학점이에요.", AppTheme.type.caption, tone = Tone.Ink3)
     }
 }
 
 @Composable
-private fun Checklist(catalog: Catalog, student: StudentState, plan: GraduationPlan, bucket: GraduationBucket) {
+private fun Checklist(catalog: Catalog, student: StudentState, plan: GraduationPlan, bucket: GraduationBucket, classes: List<OpenClass>) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
     var expanded by remember { mutableStateOf(false) }
@@ -133,56 +161,165 @@ private fun Checklist(catalog: Catalog, student: StudentState, plan: GraduationP
     val long = courses.size > PREVIEW + 2
     val visible = if (long && !expanded) courses.take(PREVIEW) else courses
 
-    Section("${bucket.label} 필수", "${courses.size}과목 중 ${done}과목 이수") {
-        Group {
-            visible.forEachIndexed { i, c ->
-                val status = student.statusOf(c.id)
-                val checked = status == CourseStatus.Completed
-                ListRow(
-                    c.name,
-                    listOfNotNull(
-                        "${c.credits}학점",
-                        if (status == CourseStatus.InProgress) "이번 학기 수강 중" else plan.semesters[c.id]?.label,
-                    ).joinToString(" · "),
-                    divider = i < visible.lastIndex || long,
-                    onClick = { vm.toggleCompleted(c.id) },
-                    leading = { CheckCircle(checked) },
-                    trailing = {
-                        Icon(
-                            Icons.Default.Info, "${c.name} 자세히 보기", tint = AppTheme.colors.ink3,
-                            modifier = Modifier.size(22.dp).clip(CircleShape).clickable(role = Role.Button) { nav.openCourse(c.id) },
-                        )
-                    },
-                )
+    Section(stringResource(Res.string.required_in, bucketTitle(bucket.id, plan.doubleMajor)) + " · $done/${courses.size}") {
+        visible.forEach { c ->
+            val status = student.statusOf(c.id)
+            val checked = status == CourseStatus.Completed
+            ListRow(
+                c.name,
+                listOfNotNull(
+                    credits(c.credits),
+                    if (status == CourseStatus.InProgress) stringResource(Res.string.taking_this_term) else plan.semesters[c.id]?.title(),
+                ).joinToString(" · "),
+                onClick = { vm.toggleCompleted(c.id) },
+                leading = { CheckCircle(checked) },
+                trailing = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (checked) GradeChip(student.grades[c.id]) { vm.setCourseGrade(c.id, it) }
+                        IconButton(onClick = { nav.openCourse(c.id) }) {
+                            Icon(Icons.Outlined.Info, stringResource(Res.string.see_details, c.name), tint = AppTheme.colors.ink2)
+                        }
+                    }
+                },
+            )
+        }
+        if (long) MoreRow(if (expanded) stringResource(Res.string.collapse) else stringResource(Res.string.show_rest_courses, courses.size - PREVIEW)) { expanded = !expanded }
+    }
+}
+
+/** Grade of a completed course ("성적" until set). The AI timetable maker uses grades to lean toward strong areas. */
+@Composable
+private fun GradeChip(grade: Grade?, onPick: (Grade?) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        Chip(
+            grade?.label ?: stringResource(Res.string.grade),
+            if (grade == null) ChipTone.Neutral else ChipTone.Accent,
+            Modifier.clip(RoundedCornerShape(8.dp)).clickable(role = Role.Button, onClickLabel = stringResource(Res.string.enter_grade)) { open = true },
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            Grade.entries.forEach { g ->
+                DropdownMenuItem(text = { Text(g.label) }, onClick = { open = false; onPick(g) })
             }
-            if (long) {
-                Box(Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
-                    Txt(if (expanded) "접기" else "나머지 ${courses.size - PREVIEW}과목 보기", AppTheme.type.subhead, tone = Tone.Accent)
-                }
-            }
+            if (grade != null) DropdownMenuItem(text = { Text(stringResource(Res.string.clear)) }, onClick = { open = false; onPick(null) })
         }
     }
 }
 
-/** Credits per area that the checklists don't cover, entered from the transcript. */
 @Composable
-private fun OtherCredits(student: StudentState, s: CreditSummary) {
+private fun professorLine(names: List<String>): String? = when {
+    names.isEmpty() -> null
+    names.size <= 2 -> names.joinToString(", ")
+    else -> stringResource(Res.string.and_n_more_people, names.take(2).joinToString(", "), names.size - 2)
+}
+
+private const val PAGE = 20
+
+/**
+ * Check classes from this semester's open classes. A class that is a catalog course checks that course;
+ * any other class is stored with its credits and counted in the area its 이수구분 belongs to.
+ */
+@Composable
+private fun ClassPicker(catalog: Catalog, student: StudentState, plan: GraduationPlan, list: OpenClassList?) {
     val vm = LocalAppViewModel.current
-    Section("그 밖에 이수한 학점", "체크리스트에 없는 과목은 성적표를 보고 영역별로 더해요") {
-        Group {
-            s.buckets.forEachIndexed { i, b ->
-                ListRow(
-                    b.label, "직접 더한 학점",
-                    divider = i < s.buckets.lastIndex,
-                    trailing = {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s)) {
-                            val n = student.otherCredits[b.id] ?: 0
-                            Txt("$n", AppTheme.type.callout)
-                            Stepper(n, 200) { vm.setOtherCredits(b.id, it) }
-                        }
-                    },
+    val myMajor = student.departments.firstOrNull()?.substringAfter('/')
+    var query by remember { mutableStateOf("") }
+    var mineOnly by remember { mutableStateOf(myMajor != null) }
+    var shown by remember { mutableStateOf(PAGE) }
+    @Composable fun bucketLabel(id: kr.ac.catholic.cukmoa.model.BucketId) = bucketTitle(id, plan.doubleMajor)
+
+    Section(
+        stringResource(Res.string.check_from_open_classes),
+        info = list?.let { stringResource(Res.string.check_from_open_classes_detail, it.year, it.semester) },
+    ) {
+        if (list == null) {
+            EmptyState(stringResource(Res.string.classes_not_received), stringResource(Res.string.reconnect), vm::refreshClasses)
+            return@Section
+        }
+        student.takenClasses.forEach { t ->
+            ListRow(
+                t.name,
+                listOfNotNull(credits(t.credits), bucketLabel(t.bucket), if (t.foreignLanguage) stringResource(Res.string.foreign_lecture_short) else null).joinToString(" · "),
+                onClick = { vm.removeTakenClass(t.subjectNo) },
+                leading = { CheckCircle(true) },
+                trailing = { GradeChip(student.grades[t.subjectNo]) { vm.setCourseGrade(t.subjectNo, it) } },
+            )
+        }
+        SearchField(query, { query = it; shown = PAGE }, stringResource(Res.string.search_course_professor))
+        if (myMajor != null) ChipRow {
+            item { FilterChip(myMajor, mineOnly) { mineOnly = true; shown = PAGE } }
+            item { FilterChip(stringResource(Res.string.all_departments), !mineOnly) { mineOnly = false; shown = PAGE } }
+        }
+        val terms = query.split(' ').filter { it.isNotBlank() }
+        val subjects = list.items
+            .filter { k -> !mineOnly || k.department == myMajor }
+            .filter { k -> terms.all { t -> t in k.name || k.professors.any { t in it } } }
+            .subjects()
+        if (subjects.isEmpty()) {
+            EmptyState(stringResource(Res.string.no_matching_course))
+            return@Section
+        }
+        subjects.take(shown).forEach { sub -> SubjectRow(catalog, student, sub, bucketLabel(student.bucketOf(sub.first))) }
+        if (subjects.size > shown) MoreRow(stringResource(Res.string.more_courses_left, subjects.size - shown)) { shown += PAGE }
+    }
+}
+
+@Composable
+private fun SubjectRow(catalog: Catalog, student: StudentState, sub: OpenSubject, area: String) {
+    val vm = LocalAppViewModel.current
+    var expanded by remember { mutableStateOf(false) }
+    val k = sub.first
+    val course = catalog.courseFor(k)
+    val checked = if (course != null) course.id in student.completedCourseIds else student.hasTaken(k.subjectNo)
+    ListRow(
+        k.name,
+        listOfNotNull(
+            k.credits?.let { credits(it) },
+            if (course != null) course.category.title() else area,
+            k.grade?.let { yearTitle(it) },
+            professorLine(sub.professors),
+        ).joinToString(" · "),
+        onClick = { if (course != null) vm.toggleCompleted(course.id) else vm.toggleClass(k) },
+        leading = { CheckCircle(checked) },
+        trailing = {
+            IconButton(onClick = { expanded = !expanded }) {
+                Icon(
+                    if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    if (expanded) stringResource(Res.string.hide_sections) else stringResource(Res.string.show_sections, sub.classes.size),
+                    tint = AppTheme.colors.ink2,
                 )
             }
+        },
+    )
+    if (expanded) {
+        Column(Modifier.fillMaxWidth().padding(start = 56.dp, end = Space.l, bottom = Space.s), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Txt(stringResource(Res.string.subject_line, k.department, k.category, k.subjectNo), MaterialTheme.typography.bodySmall, tone = Tone.Ink2)
+            sub.classes.forEach { c -> Txt(classLine(c), MaterialTheme.typography.bodySmall, tone = Tone.Ink2) }
+        }
+    }
+}
+
+/** "01분반 · 김주완 · 3시간 · 수강 51명 · 진로개발" */
+@Composable
+internal fun classLine(c: OpenClass): String = listOfNotNull(
+    stringResource(Res.string.section_no, c.classNo),
+    c.professors.joinToString(", ").ifEmpty { null },
+    c.hours?.let { stringResource(Res.string.hours_n, it) },
+    c.enrolled?.let { stringResource(Res.string.enrolled_n, it) },
+    c.foreignLanguage,
+).joinToString(" · ")
+
+/** Credits per area that the checklists don't cover, entered from the transcript. */
+@Composable
+private fun OtherCredits(student: StudentState, s: CreditSummary, plan: GraduationPlan) {
+    val vm = LocalAppViewModel.current
+    Section(stringResource(Res.string.other_credits), info = stringResource(Res.string.other_credits_detail)) {
+        s.buckets.forEach { b ->
+            val n = student.otherCredits[b.id] ?: 0
+            ListRow(
+                bucketTitle(b.id, plan.doubleMajor),
+                trailing = { Stepper(n, 200) { vm.setOtherCredits(b.id, it) } },
+            )
         }
     }
 }
@@ -192,20 +329,24 @@ private fun ForeignLectures(catalog: Catalog, plan: GraduationPlan, student: Stu
     val vm = LocalAppViewModel.current
     val required = plan.rules.foreignCredits
     val liberal = catalog.graduation.liberalForeignCredits
-    Section("외국어강의", required?.let { "졸업까지 ${it}학점 이상 (교양·전공기초 ${liberal}학점 포함)" } ?: "최소 이수 학점은 2026학년도 안에 정해질 예정이에요") {
-        Card {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Txt("들은 외국어강의", AppTheme.type.callout)
-                    Txt("교양·전공기초에서 ${liberal}학점 이상은 꼭 들어야 수료·졸업할 수 있어요", AppTheme.type.caption, tone = Tone.Ink3)
-                }
-                Txt("${student.foreignCredits}${required?.let { " / $it" } ?: ""}", AppTheme.type.callout, Modifier.padding(end = Space.s))
-                Stepper(student.foreignCredits, 200) { vm.setForeignCredits(it) }
-            }
-            if (required != null) {
-                ProgressBar(student.foreignCredits.toDouble(), required.toDouble(), complete = student.foreignCredits >= required)
-            }
-            Txt("외국어강의 A형·B형으로 지정된 과목과 외국어로 개설된 전공 과목만 인정돼요. 편입생·외국인 학생은 교양 의무가 면제돼요.", AppTheme.type.caption, tone = Tone.Ink3)
+    val fromClasses = student.foreignTotal - student.foreignCredits
+    val info = listOfNotNull(
+        required?.let { stringResource(Res.string.foreign_required_detail, it, liberal) } ?: stringResource(Res.string.foreign_tbd),
+        stringResource(Res.string.foreign_liberal_note, liberal),
+        if (fromClasses > 0) stringResource(Res.string.foreign_from_classes, fromClasses) else null,
+        stringResource(Res.string.foreign_rule_note),
+    ).joinToString("\n\n")
+    Section(stringResource(Res.string.foreign_lectures), info = info) {
+        ListRow(
+            stringResource(Res.string.foreign_taken),
+            "${student.foreignTotal}${required?.let { " / $it" } ?: ""}",
+            trailing = { Stepper(student.foreignCredits, 200) { vm.setForeignCredits(it) } },
+        )
+        if (required != null) {
+            ProgressBar(
+                student.foreignTotal.toDouble(), required.toDouble(),
+                Modifier.padding(horizontal = Space.l, vertical = Space.xs), complete = student.foreignTotal >= required, height = 4.dp,
+            )
         }
     }
 }
@@ -216,31 +357,28 @@ private fun GraduationTestSection(catalog: Catalog, plan: GraduationPlan, studen
     val rules = plan.rules
     val test = rules.test
     if (test == null) {
-        Section("졸업논문 · 졸업종합시험", "학부(과)가 정한 요건이에요") {
-            Card { Txt("졸업논문 또는 졸업종합시험 중 무엇이 필요한지는 학과마다 달라요. 학과 사무실이나 학과 홈페이지의 학사정보에서 확인하세요.", AppTheme.type.callout, tone = Tone.Ink2) }
+        Section(stringResource(Res.string.thesis_or_exam), info = stringResource(Res.string.set_by_department)) {
+            EmptyState(stringResource(Res.string.thesis_or_exam_unknown))
         }
         return
     }
     val met = testMet(rules, student)
-    Section("학과 졸업요건", test.summary) {
+    Section(
+        stringResource(Res.string.department_requirements) + if (met) " · ✓" else "",
+        info = listOfNotNull(test.summary, test.note).joinToString("\n\n").ifEmpty { null },
+    ) {
         test.groups.forEach { g ->
-            Group {
-                Row(Modifier.fillMaxWidth().padding(horizontal = Space.m, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Txt(g.label, AppTheme.type.subhead, Modifier.weight(1f), tone = Tone.Ink2)
-                    if (met) Chip("충족", ChipTone.Good)
-                }
-                g.options.forEachIndexed { i, o ->
-                    val checked = if (o.exam) examRemaining(test, student.exam) == 0 else testKey(rules, o.id) in student.graduationChecks
-                    ListRow(
-                        o.label, o.detail,
-                        divider = i < g.options.lastIndex,
-                        onClick = if (o.exam) null else ({ vm.toggleGraduationCheck(testKey(rules, o.id)) }),
-                        leading = { CheckCircle(checked) },
-                    )
-                }
+            g.options.forEach { o ->
+                val checked = if (o.exam) examRemaining(test, student.exam) == 0 else testKey(rules, o.id) in student.graduationChecks
+                ListRow(
+                    o.label, o.detail,
+                    overline = g.label.takeIf { test.groups.size > 1 },
+                    subtitleMaxLines = 2,
+                    onClick = if (o.exam) null else ({ vm.toggleGraduationCheck(testKey(rules, o.id)) }),
+                    leading = { CheckCircle(checked) },
+                )
             }
         }
-        test.note?.let { Txt(it, AppTheme.type.footnote, Modifier.padding(horizontal = Space.xs), tone = Tone.Ink2) }
         if (test.exam != null) ExamCalculator(catalog, test, student)
     }
 }
@@ -249,7 +387,6 @@ private fun GraduationTestSection(catalog: Catalog, plan: GraduationPlan, studen
 private fun ExamCalculator(catalog: Catalog, test: GraduationTest, student: StudentState) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
-    val c = AppTheme.colors
     val exam = test.exam ?: return
     val program = exam.programs.firstOrNull { it.id == student.exam.programId } ?: exam.programs.first()
     val left = examRemaining(test, student.exam)
@@ -258,53 +395,45 @@ private fun ExamCalculator(catalog: Catalog, test: GraduationTest, student: Stud
 
     Card {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Txt("졸업종합시험 · 남은 시험", AppTheme.type.subhead, tone = Tone.Ink2)
-                Txt("${program.label} ${program.subjectCount}과목 선택", AppTheme.type.footnote, tone = Tone.Ink3)
-            }
+            Txt(stringResource(Res.string.exam_left), MaterialTheme.typography.labelLarge, Modifier.weight(1f), tone = Tone.Ink2)
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Txt("$left", AppTheme.type.numeral.copy(fontSize = 40.sp, lineHeight = 44.sp), tone = if (left == 0) Tone.Good else Tone.Ink)
-                Txt("과목", AppTheme.type.headline, Modifier.padding(bottom = 5.dp), tone = Tone.Ink2)
+                Txt("$left", MaterialTheme.typography.headlineMedium.merge(AppTheme.type.numeral), tone = if (left == 0) Tone.Good else Tone.Ink)
+                Txt(stringResource(Res.string.subjects_unit), MaterialTheme.typography.titleSmall, Modifier.padding(bottom = 4.dp), tone = Tone.Ink2)
             }
         }
-        Txt("전공 구분", AppTheme.type.subhead)
+        Txt(stringResource(Res.string.major_type), MaterialTheme.typography.labelLarge, tone = Tone.Ink2)
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             exam.programs.forEachIndexed { i, p ->
                 SegmentedButton(
                     selected = p.id == program.id,
                     onClick = { vm.setExam { e -> e.copy(programId = p.id, passed = minOf(e.passed, maxOf(0, p.subjectCount - e.englishWaiver))) } },
                     shape = SegmentedButtonDefaults.itemShape(i, exam.programs.size),
-                ) { Text("${p.label} · ${p.subjectCount}", style = AppTheme.type.subhead) }
+                ) { Text("${p.label} · ${p.subjectCount}", maxLines = 1) }
             }
         }
-        Txt("영어 점수로 대체", AppTheme.type.subhead)
+        Txt(stringResource(Res.string.english_waiver), MaterialTheme.typography.labelLarge, tone = Tone.Ink2)
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             exam.englishWaivers.forEachIndexed { i, w ->
                 SegmentedButton(
                     selected = w.level == student.exam.englishWaiver,
                     onClick = { vm.setExam { e -> e.copy(englishWaiver = w.level, passed = minOf(e.passed, maxOf(0, program.subjectCount - w.level))) } },
                     shape = SegmentedButtonDefaults.itemShape(i, exam.englishWaivers.size),
-                ) { Text(if (w.level == 0) "없음" else "${w.level}과목", style = AppTheme.type.subhead) }
+                ) { Text(if (w.level == 0) stringResource(Res.string.none) else stringResource(Res.string.n_subjects, w.level), maxLines = 1) }
             }
         }
-        Txt(exam.englishWaivers.firstOrNull { it.level == student.exam.englishWaiver }?.label ?: "없음", AppTheme.type.caption, tone = Tone.Ink3)
-        Box(Modifier.fillMaxWidth().height(0.5.dp).background(c.line))
+        HorizontalDivider()
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Txt("합격한 과목 ${student.exam.passed}", AppTheme.type.callout, Modifier.weight(1f))
+            Txt(stringResource(Res.string.passed_n, student.exam.passed), MaterialTheme.typography.bodyLarge, Modifier.weight(1f))
             Stepper(student.exam.passed, maxPassed) { n -> vm.setExam { it.copy(passed = n) } }
         }
-        exam.note?.let { Txt(it, AppTheme.type.caption, tone = Tone.Ink3) }
     }
-    Txt(
-        if (showSubjects) "시험 과목 접기" else "시험 과목 ${exam.subjectCourseIds.size}개 보기",
-        AppTheme.type.subhead,
-        Modifier.clickable { showSubjects = !showSubjects }.padding(horizontal = Space.xs, vertical = 4.dp),
-        tone = Tone.Accent,
-    )
-    if (showSubjects) Chips {
-        exam.subjectCourseIds.mapNotNull { catalog.findCourse(it) }.forEach { co ->
-            val done = co.id in student.completedCourseIds
-            Chip(if (done) "✓ ${co.name}" else co.name, if (done) ChipTone.Good else ChipTone.Neutral, Modifier.clickable { nav.openCourse(co.id) })
+    MoreRow(if (showSubjects) stringResource(Res.string.hide_exam_subjects) else stringResource(Res.string.show_exam_subjects, exam.subjectCourseIds.size)) { showSubjects = !showSubjects }
+    if (showSubjects) SheetBlock {
+        Chips {
+            exam.subjectCourseIds.mapNotNull { catalog.findCourse(it) }.forEach { co ->
+                val done = co.id in student.completedCourseIds
+                Chip(if (done) "✓ ${co.name}" else co.name, if (done) ChipTone.Good else ChipTone.Neutral, Modifier.clickable { nav.openCourse(co.id) })
+            }
         }
     }
 }
@@ -318,35 +447,30 @@ private fun ThesisEligibility(catalog: Catalog, student: StudentState, s: Credit
         student.currentSemester == SemesterKey.S4_2,
         student.currentSemester == SemesterKey.S4_2 && s.earned >= rules.creditsBy7th,
     )
-    Section("졸업논문 제출 · 졸업종합시험 응시 자격", "모든 학부(과) 공통") {
-        Group {
-            rules.conditions.forEachIndexed { i, text ->
-                ListRow(
-                    text,
-                    when (i) {
-                        0 -> "지금 ${student.currentSemester.label}"
-                        1 -> "지금까지 이수 ${s.earned}학점"
-                        else -> null
-                    },
-                    divider = i < rules.conditions.lastIndex,
-                    leading = { CheckCircle(known.getOrElse(i) { false }) },
-                )
-            }
+    Section(
+        stringResource(Res.string.eligibility),
+        info = (listOf(stringResource(Res.string.all_departments_common)) + rules.notes).joinToString("\n\n"),
+    ) {
+        rules.conditions.forEachIndexed { i, text ->
+            ListRow(
+                text,
+                when (i) {
+                    0 -> stringResource(Res.string.now_semester, student.currentSemester.title())
+                    1 -> stringResource(Res.string.earned_so_far, s.earned)
+                    else -> null
+                },
+                leading = { CheckCircle(known.getOrElse(i) { false }) },
+            )
         }
-        rules.notes.forEach { Txt(it, AppTheme.type.footnote, Modifier.padding(horizontal = Space.xs), tone = Tone.Ink2) }
     }
 }
 
+/** − value + */
 @Composable
 private fun Stepper(value: Int, max: Int, onChange: (Int) -> Unit) {
-    val c = AppTheme.colors
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s)) {
-        listOf(Icons.Default.Remove to (value > 0), Icons.Default.Add to (value < max)).forEachIndexed { i, (icon, enabled) ->
-            Box(
-                Modifier.size(34.dp).clip(CircleShape).background(c.fill)
-                    .clickable(enabled = enabled, role = Role.Button) { onChange(if (i == 0) value - 1 else value + 1) },
-                contentAlignment = Alignment.Center,
-            ) { Icon(icon, if (i == 0) "줄이기" else "늘리기", tint = if (enabled) c.ink else c.ink3, modifier = Modifier.size(16.dp)) }
-        }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { onChange(value - 1) }, enabled = value > 0) { Icon(Icons.Default.Remove, stringResource(Res.string.decrease)) }
+        Text("$value", Modifier.width(32.dp), style = MaterialTheme.typography.titleMedium.merge(AppTheme.type.numeral), textAlign = TextAlign.Center)
+        IconButton(onClick = { onChange(value + 1) }, enabled = value < max) { Icon(Icons.Default.Add, stringResource(Res.string.increase)) }
     }
 }

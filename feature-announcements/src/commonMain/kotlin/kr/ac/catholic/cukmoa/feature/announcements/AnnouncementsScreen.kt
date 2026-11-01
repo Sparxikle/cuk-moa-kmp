@@ -1,23 +1,20 @@
 package kr.ac.catholic.cukmoa.feature.announcements
 
+import org.jetbrains.compose.resources.stringResource
+import kr.ac.catholic.cukmoa.core.resources.*
+import kr.ac.catholic.cukmoa.core.ui.text
+import kr.ac.catholic.cukmoa.core.ui.title
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,21 +31,15 @@ import kotlinx.coroutines.delay
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.state.AnnouncementFilter
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
-import kr.ac.catholic.cukmoa.core.theme.Radius
 import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.core.ui.Banner
-import kr.ac.catholic.cukmoa.core.ui.Card
-import kr.ac.catholic.cukmoa.core.ui.Chip
-import kr.ac.catholic.cukmoa.core.ui.ChipTone
-import kr.ac.catholic.cukmoa.core.ui.Chips
-import kr.ac.catholic.cukmoa.core.ui.DataNotice
+import kr.ac.catholic.cukmoa.core.ui.ChipRow
+import kr.ac.catholic.cukmoa.core.ui.EmptyState
 import kr.ac.catholic.cukmoa.core.ui.FilterChip
-import kr.ac.catholic.cukmoa.core.ui.Group
 import kr.ac.catholic.cukmoa.core.ui.ListRow
-import kr.ac.catholic.cukmoa.core.ui.PrimaryButton
+import kr.ac.catholic.cukmoa.core.ui.MoreRow
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
-import kr.ac.catholic.cukmoa.core.ui.Tone
-import kr.ac.catholic.cukmoa.core.ui.Txt
+import kr.ac.catholic.cukmoa.core.ui.SearchField
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.logic.shortDate
 import kr.ac.catholic.cukmoa.model.Announcement
@@ -56,18 +47,27 @@ import kr.ac.catholic.cukmoa.model.AnnouncementSource
 import kr.ac.catholic.cukmoa.model.Majors
 import kr.ac.catholic.cukmoa.model.StudentState
 
-private val sourceLabel = mapOf(
-    AnnouncementSource.LMS to "LMS",
-    AnnouncementSource.MAIN to "학교",
-    AnnouncementSource.EVENT to "행사",
-    AnnouncementSource.OUTSIDE to "대외",
-    AnnouncementSource.DEPT to "학과",
-)
+@Composable
+private fun sourceLabel(source: String): String? = when (source) {
+    AnnouncementSource.LMS -> "LMS"
+    AnnouncementSource.MAIN -> stringResource(Res.string.source_main)
+    AnnouncementSource.EVENT -> stringResource(Res.string.source_event)
+    AnnouncementSource.OUTSIDE -> stringResource(Res.string.source_outside)
+    AnnouncementSource.DEPT -> stringResource(Res.string.source_dept)
+    else -> null
+}
 
-private val categoryLabel = mapOf(
-    "notice" to "공지", "career" to "취업", "news" to "소식", "external" to "공모·대외",
-    "graduate" to "대학원", "recruitment" to "모집", "event" to "행사",
-)
+@Composable
+private fun categoryLabel(category: String?): String? = when (category) {
+    "notice" -> stringResource(Res.string.cat_notice)
+    "career" -> stringResource(Res.string.cat_career)
+    "news" -> stringResource(Res.string.cat_news)
+    "external" -> stringResource(Res.string.cat_external)
+    "graduate" -> stringResource(Res.string.cat_graduate)
+    "recruitment" -> stringResource(Res.string.cat_recruitment)
+    "event" -> stringResource(Res.string.cat_event)
+    else -> null
+}
 
 @Composable
 fun AnnouncementsScreen(student: StudentState) {
@@ -86,110 +86,65 @@ fun AnnouncementsScreen(student: StudentState) {
         when (names.size) {
             0 -> null
             1 -> names[0]
-            else -> "내 전공 ${names.size}곳"
+            else -> stringResource(Res.string.my_majors_n, names.size)
         }
     }
 
-    ScreenList(title = "공지", eyebrow = "학교·LMS·학과 게시판을 한곳에") {
-        item {
-            Column(Modifier.contentWidth(), verticalArrangement = Arrangement.spacedBy(Space.m)) {
-                OutlinedTextField(
-                    value = search,
-                    onValueChange = { search = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("제목 검색 (예: 장학, 채용, 공모전)", style = AppTheme.type.callout) },
-                    leadingIcon = { Icon(Icons.Default.Search, null) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(Radius.control),
-                    textStyle = AppTheme.type.callout,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = AppTheme.colors.surface,
-                        unfocusedContainerColor = AppTheme.colors.surface,
-                        unfocusedBorderColor = AppTheme.colors.line,
-                        focusedBorderColor = AppTheme.colors.accent,
-                    ),
-                )
-                Chips {
-                    AnnouncementFilter.entries.forEach { f ->
-                        // If none of my majors has announcements collected yet, hide the "My department" filter
-                        if (f == AnnouncementFilter.Mine && majorName == null) return@forEach
-                        FilterChip(
-                            if (f == AnnouncementFilter.Mine) majorName!! else f.label,
-                            selected = state.filter == f,
-                            onClick = { vm.setAnnouncementFilter(f) },
-                        )
-                    }
-                    FilterChip("전체", selected = state.filter == null, onClick = { vm.setAnnouncementFilter(null) })
+    ScreenList(title = stringResource(Res.string.module_announcements), info = stringResource(Res.string.announcements_notice)) {
+        item(key = "search") { SearchField(search, { search = it }, stringResource(Res.string.search_titles)) }
+        item(key = "filters") {
+            ChipRow {
+                AnnouncementFilter.entries.forEach { f ->
+                    // If none of my majors has announcements collected yet, hide the "My department" filter
+                    if (f == AnnouncementFilter.Mine && majorName == null) return@forEach
+                    item { FilterChip(if (f == AnnouncementFilter.Mine) majorName!! else f.title(), state.filter == f) { vm.setAnnouncementFilter(f) } }
                 }
-                Txt(
-                    when {
-                        state.loading && state.items.isEmpty() -> "불러오는 중…"
-                        majorName == null -> "${state.total}개 · 내 전공 게시판은 준비 중이에요 (지금은 AI전자정보융합대학)"
-                        else -> "${state.total}개 · 고정 공지 먼저"
-                    },
-                    AppTheme.type.footnote,
-                    Modifier.padding(horizontal = Space.xs),
-                    tone = Tone.Ink2,
-                )
+                item { FilterChip(stringResource(Res.string.all), state.filter == null) { vm.setAnnouncementFilter(null) } }
             }
         }
 
-        state.error?.let { msg ->
-            item { Banner(msg, "다시 시도", vm::refreshAnnouncements) }
+        state.error?.let { e ->
+            item(key = "error") { Banner(e.text(), stringResource(Res.string.try_again), vm::refreshAnnouncements) }
         }
 
-        if (state.items.isNotEmpty()) item {
-            Group {
-                state.items.forEachIndexed { i, a ->
-                    AnnouncementRow(a, divider = i < state.items.lastIndex, seenAt = student.announcementsSeenAt, showSource = true)
-                }
+        items(state.items, key = { it.id }) { a ->
+            AnnouncementRow(a, seenAt = student.announcementsSeenAt, showSource = true)
+        }
+        if (state.items.isEmpty() && !state.loading && state.error == null) item(key = "empty") {
+            EmptyState(stringResource(Res.string.no_matching_announcements))
+        }
+
+        if (state.loading) item(key = "loading") {
+            Box(Modifier.contentWidth().padding(Space.l), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(Modifier.size(28.dp))
             }
-        } else if (!state.loading && state.error == null) item {
-            Card { Txt("조건에 맞는 공지가 없어요.", AppTheme.type.callout, tone = Tone.Ink2) }
+        } else if (state.items.size < state.total) item(key = "more") {
+            MoreRow(stringResource(Res.string.more_n_left, (state.total - state.items.size).toInt()), vm::loadMoreAnnouncements)
         }
-
-        if (state.items.size < state.total) item {
-            Box(Modifier.contentWidth(), contentAlignment = Alignment.Center) {
-                if (state.loading) CircularProgressIndicator(Modifier.size(28.dp), color = AppTheme.colors.accent)
-                else PrimaryButton("더 보기 (${state.total - state.items.size}개 남음)", vm::loadMoreAnnouncements, tinted = true)
-            }
-        }
-
-        item { DataNotice("공지는 서버가 30분마다 학교 사이트에서 모아요. 글을 누르면 원문으로 이동해요.") }
     }
 }
 
 /** One announcement row. Tapping it opens the original post (school website). */
 @Composable
-fun AnnouncementRow(a: Announcement, divider: Boolean, seenAt: String?, showSource: Boolean = false) {
+fun AnnouncementRow(a: Announcement, seenAt: String?, showSource: Boolean = false) {
     val uri = LocalUriHandler.current
     val c = AppTheme.colors
     val isNew = seenAt != null && a.firstSeen > seenAt
-    val meta = listOfNotNull(
-        shortDate(a.date),
-        a.author?.takeIf { it.isNotBlank() },
-        a.views?.let { "조회 $it" },
-    ).joinToString(" · ")
+    val source = if (!showSource) null
+    else if (a.source == AnnouncementSource.DEPT) categoryLabel(a.category) ?: stringResource(Res.string.source_dept)
+    else a.category?.takeIf { a.source == AnnouncementSource.MAIN } ?: sourceLabel(a.source) ?: a.source
+    val meta = listOfNotNull(shortDate(a.date), source, a.author?.takeIf { it.isNotBlank() }).joinToString(" · ")
 
     ListRow(
         title = a.title,
         subtitle = meta,
-        divider = divider,
+        modifier = Modifier.contentWidth(),
         onClick = { runCatching { uri.openUri(a.link) } },
         leading = if (a.pinned || isNew) {
             {
-                Box(Modifier.size(20.dp), contentAlignment = Alignment.Center) {
-                    if (a.pinned) Icon(Icons.Default.PushPin, "고정 공지", tint = c.accent, modifier = Modifier.size(16.dp))
+                Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+                    if (a.pinned) Icon(Icons.Default.PushPin, stringResource(Res.string.pinned), tint = c.accent, modifier = Modifier.size(18.dp))
                     else Box(Modifier.size(8.dp).clip(CircleShape).background(c.accent))
-                }
-            }
-        } else null,
-        trailing = if (showSource) {
-            {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    val label = if (a.source == AnnouncementSource.DEPT) categoryLabel[a.category] ?: "학과"
-                    else a.category?.takeIf { a.source == AnnouncementSource.MAIN } ?: sourceLabel[a.source] ?: a.source
-                    Chip(label, if (a.source == AnnouncementSource.OUTSIDE || a.category == "external") ChipTone.Warn else ChipTone.Neutral)
                 }
             }
         } else null,

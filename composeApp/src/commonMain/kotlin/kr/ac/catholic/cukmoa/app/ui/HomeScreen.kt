@@ -1,99 +1,77 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import org.jetbrains.compose.resources.stringResource
+import kr.ac.catholic.cukmoa.core.resources.*
+import kr.ac.catholic.cukmoa.core.ui.credits
+import kr.ac.catholic.cukmoa.core.ui.dDayText
+import kr.ac.catholic.cukmoa.core.ui.title
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kr.ac.catholic.cukmoa.app.ModuleRegistry
 import kr.ac.catholic.cukmoa.core.FeatureModule
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
-import kr.ac.catholic.cukmoa.core.ui.ProfessorRow
 import kr.ac.catholic.cukmoa.core.ui.SavableCourseRow
 import kr.ac.catholic.cukmoa.core.ui.StatusBanners
 import kr.ac.catholic.cukmoa.core.LocalNavigator
 import kr.ac.catholic.cukmoa.core.Routes
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
-import kr.ac.catholic.cukmoa.core.theme.Radius
 import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.core.ui.Card
-import kr.ac.catholic.cukmoa.core.ui.Chip
-import kr.ac.catholic.cukmoa.core.ui.ChipTone
-import kr.ac.catholic.cukmoa.core.ui.CreditGrid
-import kr.ac.catholic.cukmoa.core.ui.DataNotice
-import kr.ac.catholic.cukmoa.core.ui.GridLegend
-import kr.ac.catholic.cukmoa.core.ui.Group
-import kr.ac.catholic.cukmoa.core.ui.IconBadge
+import kr.ac.catholic.cukmoa.core.ui.ChipRow
+import kr.ac.catholic.cukmoa.core.ui.EmptyState
 import kr.ac.catholic.cukmoa.core.ui.ListRow
-import kr.ac.catholic.cukmoa.core.ui.PrimaryButton
+import kr.ac.catholic.cukmoa.core.ui.MoreRow
+import kr.ac.catholic.cukmoa.core.ui.ProgressBar
 import kr.ac.catholic.cukmoa.core.ui.SaveButton
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
 import kr.ac.catholic.cukmoa.core.ui.Section
 import kr.ac.catholic.cukmoa.core.ui.Tone
 import kr.ac.catholic.cukmoa.core.ui.Txt
-import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.core.ui.trackIcon
 import kr.ac.catholic.cukmoa.logic.creditSummary
-import kr.ac.catholic.cukmoa.logic.dDay
 import kr.ac.catholic.cukmoa.logic.daysUntil
 import kr.ac.catholic.cukmoa.logic.findCourse
-import kr.ac.catholic.cukmoa.logic.findTrack
-import kr.ac.catholic.cukmoa.logic.graduationPlan
 import kr.ac.catholic.cukmoa.logic.nextRecommendations
 import kr.ac.catholic.cukmoa.logic.officialRecommendations
 import kr.ac.catholic.cukmoa.logic.courseName
 import kr.ac.catholic.cukmoa.logic.ROADMAP_COURSE_PREFIX
 import kr.ac.catholic.cukmoa.logic.shortDate
-import kr.ac.catholic.cukmoa.logic.today
 import kr.ac.catholic.cukmoa.logic.todayKst
 import kr.ac.catholic.cukmoa.model.Catalog
-import kr.ac.catholic.cukmoa.model.Course
 import kr.ac.catholic.cukmoa.model.HomeCardId
 import kr.ac.catholic.cukmoa.model.StudentState
 
 @Composable
 fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureModule>) {
     val nav = LocalNavigator.current
-    val track = catalog.findTrack(student.trackIds.firstOrNull())
-    val eyebrow = listOf("${student.grade}학년", track?.shortName ?: "진로 탐색 중", catalog.term.label).joinToString(" · ")
 
     ScreenList(
-        title = "대시보드",
-        eyebrow = eyebrow,
-        trailing = {
-            Box(
-                Modifier.size(38.dp).clip(CircleShape).background(AppTheme.colors.surface)
-                    .clickable(role = Role.Button, onClickLabel = "설정") { nav.openSettings() },
-                contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Default.Settings, "설정", tint = AppTheme.colors.ink, modifier = Modifier.size(18.dp)) }
-        },
+        title = APP_NAME,
+        actions = { IconButton(onClick = nav.openSettings) { Icon(Icons.Outlined.Settings, stringResource(Res.string.settings)) } },
     ) {
-        item { StatusBanners() }
+        item(key = "banners") { StatusBanners() }
         student.homeCards.forEach { id ->
             val provider = ModuleRegistry.all.firstOrNull { id in it.homeCards }
             if (provider != null && provider !in modules) return@forEach // Hide the card too if its module is off
@@ -104,24 +82,14 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
                     HomeCardId.Next -> NextCard(catalog, student)
                     HomeCardId.Saved -> SavedCard(catalog, student)
                     HomeCardId.Story -> StoryCard(catalog, student)
-                    HomeCardId.Events -> EventsCard(catalog)
+                    HomeCardId.Events -> EventsCard()
                     HomeCardId.Professors -> provider?.HomeCard(id, catalog, student)
                     HomeCardId.Explore -> ExploreCard(catalog)
                 }
             }
         }
-        if (student.homeCards.isEmpty()) item {
-            Card {
-                Txt("홈이 비어 있어요", AppTheme.type.headline)
-                Txt("보고 싶은 정보를 골라 홈 화면을 채워 보세요.", AppTheme.type.callout, tone = Tone.Ink2)
-            }
-        }
-        item {
-            Column(Modifier.contentWidth(), verticalArrangement = Arrangement.spacedBy(Space.m)) {
-                PrimaryButton("설정 · 홈 화면 편집", onClick = nav.openSettings, tinted = true)
-                PrimaryButton("기능 켜고 끄기", onClick = nav.manageModules, tinted = true)
-                DataNotice("졸업요건은 2026학년도 학사제도 안내 기준이에요. 이수 기록과 선배 기록은 시연용 예시이고, 공지·학사일정은 학교 사이트에서 실시간으로 모아요.")
-            }
+        if (student.homeCards.isEmpty()) item(key = "empty") {
+            EmptyState(stringResource(Res.string.home_empty), stringResource(Res.string.settings), nav.openSettings)
         }
     }
 }
@@ -130,21 +98,18 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
 private fun ProgressCard(catalog: Catalog, student: StudentState) {
     val nav = LocalNavigator.current
     val s = creditSummary(catalog, student)
-    val plan = graduationPlan(catalog, student)
-    Card(onClick = { nav.open(Routes.GRADUATION) }) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Txt("졸업까지", AppTheme.type.subhead, Modifier.weight(1f), tone = Tone.Ink2)
-            Chip(if (plan.isFallback) catalog.graduation.label else plan.rules.name)
+    Card(onClick = { nav.open(Routes.GRADUATION) }, modifier = Modifier.padding(top = Space.s)) {
+        Txt(stringResource(Res.string.until_graduation), MaterialTheme.typography.labelLarge, tone = Tone.Ink2)
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Txt("${s.remaining}", MaterialTheme.typography.displayMedium.merge(AppTheme.type.numeral))
+            Txt(stringResource(Res.string.credits_left_suffix), MaterialTheme.typography.titleMedium, Modifier.padding(bottom = 8.dp))
         }
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Txt("${s.remaining}", AppTheme.type.numeral.copy(fontSize = 56.sp, lineHeight = 60.sp, color = AppTheme.colors.ink))
-                Txt("학점 남았어요", AppTheme.type.title, Modifier.padding(bottom = 8.dp))
-            }
-            Txt("이번 학기를 마치면 ${s.remainingAfterTerm}학점 · 전체 ${s.total}학점", AppTheme.type.footnote, tone = Tone.Ink2)
+        ProgressBar(s.earned.toDouble(), s.total.toDouble(), pending = s.inProgress.toDouble(), height = 8.dp)
+        Row {
+            Txt("${stringResource(Res.string.legend_done)} ${s.earned}", MaterialTheme.typography.labelMedium, Modifier.weight(1f), tone = Tone.Ink2)
+            if (s.inProgress > 0) Txt("${stringResource(Res.string.legend_this_term)} ${s.inProgress}", MaterialTheme.typography.labelMedium, Modifier.weight(1f), tone = Tone.Ink2)
+            Txt("${s.total}", MaterialTheme.typography.labelMedium, tone = Tone.Ink2)
         }
-        CreditGrid(total = s.total, done = s.earned, pending = s.inProgress)
-        GridLegend(done = s.earned, pending = s.inProgress, left = s.remainingAfterTerm)
     }
 }
 
@@ -152,37 +117,30 @@ private fun ProgressCard(catalog: Catalog, student: StudentState) {
 private fun NextCard(catalog: Catalog, student: StudentState) {
     val nav = LocalNavigator.current
     val roadmaps by LocalAppViewModel.current.roadmaps.collectAsStateWithLifecycle()
+    val action = (stringResource(Res.string.roadmap) to { nav.open(Routes.ROADMAP) }).takeIf { nav.isEnabled(Routes.ROADMAP) }
     // Recommend from my major's official department roadmap if there is one, otherwise from seniors' records (sample)
     val official = roadmaps?.let { officialRecommendations(catalog, student, it.items) }
     if (official != null) {
-        val departments = official.items.map { it.department }.distinct().joinToString("·").ifEmpty { "내 전공" }
-        val action = ("로드맵" to { nav.open(Routes.ROADMAP) }).takeIf { nav.isEnabled(Routes.ROADMAP) }
-        Section("다음 학기 추천", "$departments 로드맵의 ${official.periodLabel} 과목", action = action) {
-            if (official.items.isEmpty()) Card { Txt("이 학기 로드맵 과목은 이미 다 들었거나 듣고 있어요.", AppTheme.type.callout, tone = Tone.Ink2) }
-            else Group {
-                val shown = official.items.take(6)
-                shown.forEachIndexed { i, r -> OfficialCourseRow(r.name, r.courseId, listOfNotNull(r.marks.firstOrNull(), r.track, r.catalogCourse?.let { "${it.credits}학점" }).joinToString(" · "), student, divider = i < shown.lastIndex || official.items.size > 6) }
-                if (official.items.size > 6) ListRow("나머지 ${official.items.size - 6}과목은 로드맵에서", chevron = true, divider = false, onClick = { nav.open(Routes.ROADMAP) })
+        Section(stringResource(Res.string.next_semester_recs), action = action) {
+            if (official.items.isEmpty()) EmptyState(stringResource(Res.string.roadmap_all_taken))
+            else {
+                official.items.take(4).forEach { r ->
+                    OfficialCourseRow(r.name, r.courseId, listOfNotNull(r.marks.firstOrNull(), r.catalogCourse?.let { credits(it.credits) }).joinToString(" · "), student)
+                }
+                if (official.items.size > 4) MoreRow(stringResource(Res.string.rest_in_roadmap, official.items.size - 4)) { nav.open(Routes.ROADMAP) }
             }
         }
         return
     }
     val rec = nextRecommendations(catalog, student)
-    val semester = rec.semester
-    if (semester == null) {
-        Section("다음 학기 추천") { Card { Txt("마지막 학기예요. 남은 졸업요건부터 확인해 보세요.", AppTheme.type.callout, tone = Tone.Ink2) } }
-        return
-    }
-    val detail = rec.track?.let { "${it.shortName} 선배 ${it.seniorCount}명이 ${semester.label}에 들은 과목 (예시)" }
-        ?: "${semester.label} 권장 과목 · 관심 진로를 고르면 선배 기록으로 바뀌어요"
-    Section("다음 학기 추천", detail, action = ("로드맵" to { nav.open(Routes.ROADMAP) }).takeIf { nav.isEnabled(Routes.ROADMAP) }) {
-        if (rec.items.isEmpty()) Card { Txt("이 학기 추천 과목은 이미 다 들었거나 듣고 있어요.", AppTheme.type.callout, tone = Tone.Ink2) }
-        else Group {
-            rec.items.forEachIndexed { i, r ->
+    Section(stringResource(Res.string.next_semester_recs), action = action) {
+        when {
+            rec.semester == null -> EmptyState(stringResource(Res.string.last_semester))
+            rec.items.isEmpty() -> EmptyState(stringResource(Res.string.recs_all_taken))
+            else -> rec.items.forEach { r ->
                 SavableCourseRow(
                     r.course, student,
-                    detail = r.takenCount?.let { "선배 ${r.seniorCount}명 중 ${it}명 · ${r.course.credits}학점" },
-                    divider = i < rec.items.lastIndex,
+                    detail = r.takenCount?.let { stringResource(Res.string.taken_of_seniors_credits, r.seniorCount ?: 0, it, credits(r.course.credits)) },
                 )
             }
         }
@@ -191,13 +149,12 @@ private fun NextCard(catalog: Catalog, student: StudentState) {
 
 /** One roadmap course row: opens course details if it's in the catalog; saving works either way */
 @Composable
-private fun OfficialCourseRow(name: String, courseId: String, detail: String, student: StudentState, divider: Boolean) {
+private fun OfficialCourseRow(name: String, courseId: String, detail: String, student: StudentState) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
     val inCatalog = !courseId.startsWith(ROADMAP_COURSE_PREFIX)
     ListRow(
-        name, detail,
-        divider = divider,
+        name, detail.ifEmpty { null },
         onClick = if (inCatalog) ({ nav.openCourse(courseId) }) else null,
         trailing = { SaveButton(courseId in student.savedCourseIds, name) { vm.toggleSaved(courseId) } },
     )
@@ -208,14 +165,12 @@ private fun SavedCard(catalog: Catalog, student: StudentState) {
     val roadmaps by LocalAppViewModel.current.roadmaps.collectAsStateWithLifecycle()
     // Show catalog courses and courses saved from roadmaps (rm:) together
     val saved = student.savedCourseIds.mapNotNull { id -> courseName(id, catalog, roadmaps?.items.orEmpty())?.let { id to it } }
-    val credits = saved.sumOf { (id, _) -> catalog.findCourse(id)?.credits ?: 0 }
-    Section("담은 과목", if (saved.isNotEmpty()) "${saved.size}과목" + (if (credits > 0) " · 학점이 알려진 과목 ${credits}학점" else "") else null) {
-        if (saved.isEmpty()) Card { Txt("로드맵이나 추천 과목에서 책갈피를 누르면 여기에 모여요.", AppTheme.type.callout, tone = Tone.Ink2) }
-        else Group {
-            saved.forEachIndexed { i, (id, name) ->
-                val course = catalog.findCourse(id)
-                OfficialCourseRow(name, id, course?.let { "${it.category.label} · ${it.credits}학점" } ?: "학과 로드맵 과목", student, divider = i < saved.lastIndex)
-            }
+    val total = saved.sumOf { (id, _) -> catalog.findCourse(id)?.credits ?: 0 }
+    Section(stringResource(Res.string.saved_courses) + if (total > 0) " · " + credits(total) else "") {
+        if (saved.isEmpty()) EmptyState(stringResource(Res.string.saved_empty))
+        else saved.forEach { (id, name) ->
+            val course = catalog.findCourse(id)
+            OfficialCourseRow(name, id, course?.let { it.category.title() + " · " + credits(it.credits) } ?: "", student)
         }
     }
 }
@@ -224,56 +179,44 @@ private fun SavedCard(catalog: Catalog, student: StudentState) {
 private fun StoryCard(catalog: Catalog, student: StudentState) {
     val nav = LocalNavigator.current
     val story = catalog.stories.firstOrNull { it.trackId == student.trackIds.firstOrNull() } ?: catalog.stories.firstOrNull() ?: return
-    val path = story.courseIds.mapNotNull { catalog.findCourse(it)?.name }
-    Section("선배 한마디") {
-        Card(onClick = { nav.openRoadmap(story.trackId) }) {
-            Icon(Icons.Default.FormatQuote, null, tint = AppTheme.colors.accent, modifier = Modifier.size(22.dp))
-            Txt(story.quote, AppTheme.type.headline.copy(fontSize = 18.sp, lineHeight = 27.sp))
-            Txt("${story.cohort} · ${story.role}", AppTheme.type.footnote, tone = Tone.Ink2)
-            Txt(path.joinToString("  →  "), AppTheme.type.caption, tone = Tone.Ink3, maxLines = 2)
-        }
+    Section(stringResource(Res.string.card_story)) {
+        ListRow(
+            story.quote,
+            "${story.cohort} · ${story.role}",
+            titleMaxLines = 3,
+            leading = { Icon(Icons.Default.FormatQuote, null, tint = MaterialTheme.colorScheme.primary) },
+            onClick = { nav.openRoadmap(story.trackId) },
+        )
     }
 }
 
 @Composable
-private fun EventsCard(catalog: Catalog) {
+private fun EventsCard() {
     val c = AppTheme.colors
-    val calendar by LocalAppViewModel.current.calendar.collectAsStateWithLifecycle()
-    // With the real academic calendar, use today's actual date; otherwise the catalog's sample schedule and sample reference date
+    val vm = LocalAppViewModel.current
+    val calendar by vm.calendar.collectAsStateWithLifecycle()
+    val today = todayKst()
+    // Only the school's academic calendar from the server (or its last saved copy); no bundled schedule
     val live = calendar
-    val today = if (live != null) todayKst() else today(catalog)
-    val events = live?.events ?: catalog.events
-    val upcoming = events.filter { daysUntil(today, it.end ?: it.start) >= 0 }.take(3)
-    Section(
-        "다가오는 학사일정",
-        if (live != null) "오늘(${shortDate(today)}) 기준 · 학교 학사일정 ${live.campus}교정" else "${shortDate(today)} 기준 예시 일정",
-    ) {
-        if (upcoming.isEmpty()) {
-            Card { Txt("남은 학사일정이 없어요.", AppTheme.type.callout, tone = Tone.Ink2) }
+    Section(stringResource(Res.string.card_events)) {
+        if (live == null) {
+            EmptyState(stringResource(Res.string.calendar_not_received), stringResource(Res.string.reconnect), vm::refreshCalendar)
             return@Section
         }
-        Group {
-            upcoming.forEachIndexed { i, e ->
-                val days = daysUntil(today, e.start)
-                val soon = days <= 10
-                val (_, m, d) = e.start.split('-')
-                ListRow(
-                    e.title,
-                    e.end?.let { "${shortDate(e.start)} – ${shortDate(it)}" } ?: shortDate(e.start),
-                    divider = i < upcoming.lastIndex,
-                    leading = {
-                        Column(
-                            Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(if (soon) c.accentSoft else c.fill),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Txt("${m.toInt()}월", AppTheme.type.caption, tone = if (soon) Tone.Accent else Tone.Ink2)
-                            Txt("${d.toInt()}", AppTheme.type.numeral.copy(fontSize = 19.sp, lineHeight = 22.sp), tone = if (soon) Tone.Accent else Tone.Ink)
-                        }
-                    },
-                    trailing = { Chip(dDay(days), if (soon) ChipTone.Accent else ChipTone.Neutral) },
-                )
-            }
+        val upcoming = live.events.filter { daysUntil(today, it.end ?: it.start) >= 0 }.take(3)
+        if (upcoming.isEmpty()) EmptyState(stringResource(Res.string.no_upcoming_events))
+        upcoming.forEach { e ->
+            val days = daysUntil(today, e.start)
+            val soon = days <= 10
+            ListRow(
+                e.title,
+                e.end?.let { "${shortDate(e.start)} – ${shortDate(it)}" } ?: shortDate(e.start),
+                leading = {
+                    Box(Modifier.size(48.dp).clip(CircleShape).background(if (soon) c.accentSoft else c.fill), contentAlignment = Alignment.Center) {
+                        Text(dDayText(days), color = if (soon) c.onAccentSoft else c.ink2, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                    }
+                },
+            )
         }
     }
 }
@@ -281,24 +224,18 @@ private fun EventsCard(catalog: Catalog) {
 @Composable
 private fun ExploreCard(catalog: Catalog) {
     val nav = LocalNavigator.current
-    val c = AppTheme.colors
-    Section("진로 둘러보기", "선배들이 걸어간 다섯 갈래 길") {
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(Space.m), contentPadding = PaddingValues(end = Space.l)) {
-            items(catalog.tracks, key = { it.id.name }) { t ->
-                Column(
-                    Modifier.width(232.dp).heightIn(min = 188.dp).clip(RoundedCornerShape(Radius.card)).background(c.surface)
-                        .clickable(role = Role.Button) { nav.openRoadmap(t.id) }.padding(Space.l),
-                    verticalArrangement = Arrangement.spacedBy(Space.m),
-                ) {
-                    IconBadge(trackIcon(t.id))
-                    Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Txt(t.name, AppTheme.type.headline)
-                        Txt(t.summary, AppTheme.type.footnote, tone = Tone.Ink2)
-                    }
-                    Txt("선배 ${t.seniorCount}명의 기록", AppTheme.type.caption, tone = Tone.Ink3)
+    Column {
+        Section(stringResource(Res.string.card_explore)) {}
+        ChipRow {
+            catalog.tracks.forEach { t ->
+                item(key = t.id.name) {
+                    AssistChip(
+                        onClick = { nav.openRoadmap(t.id) },
+                        label = { Text(t.shortName) },
+                        leadingIcon = { Icon(trackIcon(t.id), null, Modifier.size(AssistChipDefaults.IconSize)) },
+                    )
                 }
             }
         }
     }
 }
-

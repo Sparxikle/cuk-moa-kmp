@@ -1,64 +1,43 @@
 package kr.ac.catholic.cukmoa.feature.roadmap
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+import org.jetbrains.compose.resources.stringResource
+import kr.ac.catholic.cukmoa.core.resources.*
+import kr.ac.catholic.cukmoa.core.ui.title
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.FilterChip as M3FilterChip
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.Icon
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.LocalNavigator
 import kr.ac.catholic.cukmoa.core.Routes
-import kr.ac.catholic.cukmoa.core.theme.AppTheme
-import kr.ac.catholic.cukmoa.core.theme.Radius
-import kr.ac.catholic.cukmoa.core.theme.Space
-import kr.ac.catholic.cukmoa.core.ui.Card
-import kr.ac.catholic.cukmoa.core.ui.CheckCircle
+import kr.ac.catholic.cukmoa.core.ui.ChipRow
 import kr.ac.catholic.cukmoa.core.ui.Chip
 import kr.ac.catholic.cukmoa.core.ui.ChipTone
-import kr.ac.catholic.cukmoa.core.ui.Chips
-import kr.ac.catholic.cukmoa.core.ui.DataNotice
-import kr.ac.catholic.cukmoa.core.ui.Group
 import kr.ac.catholic.cukmoa.core.ui.IconBadge
 import kr.ac.catholic.cukmoa.core.ui.ListRow
-import kr.ac.catholic.cukmoa.core.ui.PrimaryButton
-import kr.ac.catholic.cukmoa.core.ui.ProgressBar
 import kr.ac.catholic.cukmoa.core.ui.SaveButton
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
 import kr.ac.catholic.cukmoa.core.ui.Section
-import kr.ac.catholic.cukmoa.core.ui.Tone
-import kr.ac.catholic.cukmoa.core.ui.Txt
+import kr.ac.catholic.cukmoa.core.ui.ProgressBar
+import kr.ac.catholic.cukmoa.core.theme.Space
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.core.ui.trackIcon
 import kr.ac.catholic.cukmoa.logic.CourseStatus
@@ -81,8 +60,6 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
     val roadmap = catalog.findRoadmap(track.id)
     val stories = catalog.stories.filter { it.trackId == track.id }
     val isMine = track.id in student.trackIds
-    val listState = rememberLazyListState()
-    LaunchedEffect(track.id) { listState.animateScrollToItem(catalog.tracks.indexOf(track).coerceAtLeast(0)) }
 
     val roadmaps by vm.roadmaps.collectAsStateWithLifecycle()
     val ui = rememberRoadmapUiState(student, roadmaps)
@@ -90,63 +67,64 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
     LaunchedEffect(requestedTrack) { if (requestedTrack != null) ui.official = false }
     val official = ui.official && roadmaps != null
 
-    ScreenList(title = "로드맵", eyebrow = if (official) "학과가 안내하는 학기별 전공 과목" else "선배들이 실제로 들은 순서") {
-        if (roadmaps != null) item { Column(Modifier.contentWidth()) { RoadmapModeChips(ui.official) { ui.official = it } } }
+    ScreenList(
+        title = stringResource(Res.string.module_roadmap),
+        info = if (official) stringResource(Res.string.roadmap_official_eyebrow)
+        else stringResource(Res.string.roadmap_notice, roadmap?.source?.label ?: stringResource(Res.string.sample_data)),
+    ) {
+        if (roadmaps != null) item(key = "mode") { RoadmapModeTabs(ui.official) { ui.official = it } }
         if (official) {
             officialRoadmap(roadmaps!!, catalog, student, ui.major) { ui.major = it }
             return@ScreenList
         }
-        item {
-            LazyRow(state = listState, horizontalArrangement = Arrangement.spacedBy(Space.m), contentPadding = PaddingValues(end = Space.l), modifier = Modifier.contentWidth()) {
-                items(catalog.tracks, key = { it.id.name }) { t ->
-                    val on = t.id == track.id
-                    val c = AppTheme.colors
-                    Column(
-                        Modifier.width(260.dp).heightIn(min = 160.dp).clip(RoundedCornerShape(Radius.card))
-                            .background(if (on) c.accent else c.surface)
-                            .clickable(role = Role.Tab) { picked = t.id }
-                            .padding(Space.xl),
-                        verticalArrangement = Arrangement.spacedBy(Space.m),
-                    ) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            IconBadge(trackIcon(t.id), selected = on)
-                            if (t.id in student.trackIds) Txt("내 관심", AppTheme.type.caption, tone = if (on) Tone.OnAccent else Tone.Accent)
-                        }
-                        Txt(t.name, AppTheme.type.title, tone = if (on) Tone.OnAccent else Tone.Ink)
-                        Txt(t.summary, AppTheme.type.footnote, tone = if (on) Tone.OnAccent else Tone.Ink2)
-                        Txt("선배 ${t.seniorCount}명의 기록", AppTheme.type.caption, tone = if (on) Tone.OnAccent else Tone.Ink3)
+        item(key = "tracks") {
+            ChipRow {
+                catalog.tracks.forEach { t ->
+                    item(key = t.id.name) {
+                        M3FilterChip(
+                            selected = t.id == track.id,
+                            onClick = { picked = t.id },
+                            label = { Text(t.shortName) },
+                            leadingIcon = { Icon(trackIcon(t.id), null, Modifier.size(FilterChipDefaults.IconSize)) },
+                        )
                     }
                 }
             }
         }
-        item {
-            Row(Modifier.contentWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.m)) {
-                Txt("${track.name} 선배 ${track.seniorCount}명의 수강 기록이에요. 막대는 그 학기에 그 과목을 들은 비율이에요.", AppTheme.type.footnote, Modifier.weight(1f), tone = Tone.Ink2)
-                val toggle = {
-                    vm.setTracks(if (isMine) student.trackIds - track.id else (listOf(track.id) + student.trackIds).take(2))
-                }
-                if (isMine) Chip("내 관심 진로 ✓", ChipTone.Accent, Modifier.clickable(onClick = toggle))
-                else PrimaryButton("관심 진로로", toggle, Modifier.widthIn(max = 120.dp), tinted = true)
-            }
+        item(key = "track-${track.id}") {
+            ListRow(
+                track.name,
+                stringResource(Res.string.n_seniors_records, track.seniorCount),
+                modifier = Modifier.contentWidth(),
+                leading = { IconBadge(trackIcon(track.id)) },
+                onClick = { vm.setTracks(if (isMine) student.trackIds - track.id else (listOf(track.id) + student.trackIds).take(2)) },
+                trailing = {
+                    Switch(
+                        checked = isMine,
+                        onCheckedChange = { vm.setTracks(if (isMine) student.trackIds - track.id else (listOf(track.id) + student.trackIds).take(2)) },
+                    )
+                },
+            )
         }
         // Recent semesters on top, 1st year 1st semester at the bottom
         val steps = roadmap?.steps.orEmpty().sortedByDescending { it.semester.ordinal }
+        if (steps.isNotEmpty()) item(key = "timeline-gap") { Box(Modifier.height(Space.s)) }
         steps.forEachIndexed { i, step ->
             item(key = "${track.id}-${step.semester}") { SemesterStep(catalog, student, step, track.seniorCount, last = i == steps.lastIndex) }
         }
-        if (stories.isNotEmpty()) item {
-            Section("선배 이야기", "실명 없이 학번과 지금 하는 일만 적어요") {
+        if (stories.isNotEmpty()) item(key = "stories") {
+            Section(stringResource(Res.string.senior_stories)) {
                 stories.forEach { s ->
-                    Card {
-                        Icon(Icons.Default.FormatQuote, null, tint = AppTheme.colors.accent, modifier = Modifier.size(20.dp))
-                        Txt(s.quote, AppTheme.type.headline)
-                        Txt("${s.cohort} · ${s.role}", AppTheme.type.footnote, tone = Tone.Ink2)
-                        Chips { s.courseIds.mapNotNull { catalog.findCourse(it) }.forEach { c -> Chip(c.name, modifier = Modifier.clickable { nav.openCourse(c.id) }) } }
-                    }
+                    ListRow(
+                        s.quote,
+                        "${s.cohort} · ${s.role}",
+                        titleMaxLines = 4,
+                        leading = { Icon(Icons.Default.FormatQuote, null) },
+                        onClick = s.courseIds.firstOrNull()?.let { id -> { nav.openCourse(id) } },
+                    )
                 }
             }
         }
-        item { DataNotice("${roadmap?.source?.label ?: "예시 데이터"} · 1~2학년은 모든 진로가 같은 순서예요") }
     }
 }
 
@@ -154,55 +132,42 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
 private fun SemesterStep(catalog: Catalog, student: StudentState, step: RoadmapStep, seniorCount: Int, last: Boolean) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
-    val c = AppTheme.colors
     val position = step.semester.ordinal - student.currentSemester.ordinal
-    val now = position == 0
-    val past = position < 0
+    TimelineSemester(step.semester.title(), now = position == 0, past = position < 0, last = last) {
+        step.items.forEach { item ->
+            if (item.kind == RoadmapItemKind.Milestone) {
+                ListRow(
+                    item.label ?: stringResource(Res.string.graduation_prep),
+                    leading = { Icon(Icons.Default.School, null) },
+                    chevron = true,
+                    onClick = { nav.open(Routes.GRADUATION) },
+                )
+                return@forEach
+            }
+            val course = catalog.findCourse(item.courseId) ?: return@forEach
+            val status = student.statusOf(course.id)
+            val required = item.kind == RoadmapItemKind.Required
+            Column {
+                ListRow(
+                    title = course.name,
+                    subtitle = if (required) stringResource(Res.string.everyone_takes)
+                    else stringResource(Res.string.taken_of_seniors, seniorCount, (item.takenRatio * seniorCount).roundToIntHalfUp()),
+                    onClick = { nav.openCourse(course.id) },
+                    trailing = { CourseStatusTrailing(status, course.name) { vm.toggleSaved(course.id) } },
+                )
+                // Share of seniors who took it that semester
+                if (!required) ProgressBar(item.takenRatio, 1.0, Modifier.padding(start = Space.l, end = 72.dp, bottom = Space.s), height = 4.dp)
+            }
+        }
+    }
+}
 
-    Row(Modifier.contentWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(Space.m)) {
-        // Vertical rail: past semesters in gray, the current semester highlighted
-        Column(Modifier.width(18.dp).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                Modifier.padding(top = 3.dp).size(if (now) 18.dp else 12.dp).clip(CircleShape)
-                    .background(if (now) c.accent else if (past) c.ink3 else c.bg)
-                    .border(if (now) 4.dp else if (past) 0.dp else 2.dp, if (now) c.accentSoft else c.fillStrong, CircleShape),
-            )
-            if (!last) Box(Modifier.padding(top = 6.dp).width(2.dp).weight(1f).background(if (past) c.ink3 else c.fillStrong))
-        }
-        Column(Modifier.weight(1f).padding(bottom = Space.xxl), verticalArrangement = Arrangement.spacedBy(Space.s)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s)) {
-                Txt(step.semester.label, AppTheme.type.headline, tone = if (past) Tone.Ink2 else Tone.Ink)
-                if (now) Chip("지금", ChipTone.Accent)
-            }
-            Group {
-                step.items.forEachIndexed { i, item ->
-                    val divider = i < step.items.lastIndex
-                    if (item.kind == RoadmapItemKind.Milestone) {
-                        ListRow(item.label ?: "졸업 준비", "남은 시험 과목은 졸업요건에서 확인해요", divider = divider, chevron = true, onClick = { nav.open(Routes.GRADUATION) })
-                        return@forEachIndexed
-                    }
-                    val course = catalog.findCourse(item.courseId) ?: return@forEachIndexed
-                    val status = student.statusOf(course.id)
-                    val taken = (item.takenRatio * seniorCount).roundToIntHalfUp()
-                    Column {
-                        ListRow(
-                            title = course.name + if (item.kind == RoadmapItemKind.Required) " · 필수" else "",
-                            subtitle = if (item.kind == RoadmapItemKind.Required) "모두 들어요" else "선배 ${seniorCount}명 중 ${taken}명",
-                            divider = false,
-                            onClick = { nav.openCourse(course.id) },
-                            trailing = {
-                                when (status) {
-                                    CourseStatus.Completed -> Chip("이수", ChipTone.Good)
-                                    CourseStatus.InProgress -> Chip("수강 중", ChipTone.Accent)
-                                    else -> SaveButton(status == CourseStatus.Saved, course.name) { vm.toggleSaved(course.id) }
-                                }
-                            },
-                        )
-                        ProgressBar(item.takenRatio, 1.0, Modifier.padding(start = Space.l, end = 80.dp, bottom = Space.m), height = 4.dp)
-                        if (divider) Box(Modifier.fillMaxWidth().padding(start = Space.l).height(0.5.dp).background(c.line))
-                    }
-                }
-            }
-        }
+/** Completed / in progress label, otherwise the save button. */
+@Composable
+internal fun CourseStatusTrailing(status: CourseStatus, name: String, onSave: () -> Unit) {
+    when (status) {
+        CourseStatus.Completed -> Chip(stringResource(Res.string.completed_short), ChipTone.Good, Modifier.padding(end = 12.dp))
+        CourseStatus.InProgress -> Chip(stringResource(Res.string.status_in_progress), ChipTone.Accent, Modifier.padding(end = 12.dp))
+        else -> SaveButton(status == CourseStatus.Saved, name, onSave)
     }
 }
