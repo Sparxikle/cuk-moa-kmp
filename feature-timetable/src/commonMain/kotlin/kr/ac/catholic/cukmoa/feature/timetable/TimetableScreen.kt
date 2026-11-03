@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.timetable
 
+import kr.ac.catholic.cukmoa.core.ui.Choices
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import kr.ac.catholic.cukmoa.core.ui.credits
@@ -32,7 +33,7 @@ import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
+import kr.ac.catholic.cukmoa.core.ui.Toggle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -175,7 +176,7 @@ private fun MakeTimetable(onBack: () -> Unit) {
                     stringResource(Res.string.high_gpa),
                     onClick = { highGpa = !highGpa; if (!highGpa) max = max.coerceAtMost(CreditRules.MAX) },
                     trailing = {
-                        Switch(checked = highGpa, onCheckedChange = { highGpa = it; if (!it) max = max.coerceAtMost(CreditRules.MAX) })
+                        Toggle(checked = highGpa, onCheckedChange = { highGpa = it; if (!it) max = max.coerceAtMost(CreditRules.MAX) })
                     },
                 )
             }
@@ -192,13 +193,7 @@ private fun MakeTimetable(onBack: () -> Unit) {
         item(key = "time") {
             Section(stringResource(Res.string.time_of_day)) {
                 val options = listOf(TimePreference.Morning to stringResource(Res.string.mostly_morning), TimePreference.Afternoon to stringResource(Res.string.mostly_afternoon), TimePreference.Any to stringResource(Res.string.no_preference))
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = Space.l)) {
-                    options.forEachIndexed { i, (t, label) ->
-                        SegmentedButton(selected = time == t, onClick = { time = t }, shape = SegmentedButtonDefaults.itemShape(i, options.size)) {
-                            Text(label, maxLines = 1)
-                        }
-                    }
-                }
+                Choices(options.map { it.second }, options.indexOfFirst { it.first == time }, { time = options[it].first })
             }
         }
         item(key = "note") {
@@ -233,13 +228,7 @@ private fun MakeTimetable(onBack: () -> Unit) {
                 val plans = s.response.plans
                 val plan = plans[picked.coerceIn(0, plans.lastIndex)]
                 Section(stringResource(Res.string.suggested_n, plans.size)) {
-                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = Space.l)) {
-                        plans.forEachIndexed { i, p ->
-                            SegmentedButton(selected = picked == i, onClick = { picked = i }, shape = SegmentedButtonDefaults.itemShape(i, plans.size)) {
-                                Text(p.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            }
-                        }
-                    }
+                    Choices(plans.map { it.title }, picked, { picked = it })
                     PlanView(plan, all)
                     Box(Modifier.padding(Space.l)) {
                         PrimaryButton(stringResource(Res.string.save_timetable), { vm.chooseTimetable(s.response, plan); vm.resetTimetables(); onBack() })

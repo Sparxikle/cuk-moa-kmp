@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.LocalNavigator
+import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.logic.CourseStatus
 import kr.ac.catholic.cukmoa.logic.findCourse
@@ -54,6 +55,8 @@ fun DetailSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Un
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        // Page color, so the LG UX cards inside stand out
+        containerColor = AppTheme.colors.bg,
     ) {
         Column(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = Space.l).navigationBarsPadding(),

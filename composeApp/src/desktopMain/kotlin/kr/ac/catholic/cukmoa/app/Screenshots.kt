@@ -34,7 +34,8 @@ fun main(args: Array<String>): Unit = runBlocking(Dispatchers.Main) {
     val out = File(args.firstOrNull() ?: "build/screenshots").apply { mkdirs() }
     val api = System.getenv("CUK_MOA_API") ?: "http://localhost:8080"
     // Proposal demo order: 3rd year · backend
-    val demo = encodeStudentState(sampleStudent(3).copy(onboarded = true))
+    // Light on purpose: "system" follows the machine, which may be dark; the -dark shots cover dark mode
+    val demo = encodeStudentState(sampleStudent(3).copy(onboarded = true, theme = ThemeMode.Light))
     val demoDark = encodeStudentState(sampleStudent(3).copy(onboarded = true, theme = ThemeMode.Dark))
 
     suspend fun shoot(name: String, heightDp: Int, store: Map<String, String>, route: String = Routes.HOME) {

@@ -2,6 +2,7 @@ package kr.ac.catholic.cukmoa.core.theme
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 
 // The app's own scheme, used where the platform has no wallpaper colors (before Android 12, iOS, desktop)
@@ -49,8 +50,9 @@ val LightScheme = lightColorScheme(
 )
 
 val DarkScheme = darkColorScheme(
-    primary = Color(0xFFB6C4FF),
-    onPrimary = Color(0xFF002780),
+    // Saturated like the LG UX dark accent (white text and switch thumbs sit on it), not the pale M3 tone 80
+    primary = Color(0xFF4F6FE3),
+    onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFF244097),
     onPrimaryContainer = Color(0xFFDCE1FF),
     inversePrimary = Color(0xFF3F58B0),
@@ -96,3 +98,35 @@ val DarkExtended = ExtendedColors(
     good = Color(0xFF73D8C0), onGood = Color(0xFF00382E), goodContainer = Color(0xFF005143), onGoodContainer = Color(0xFF90F5DB),
     warn = Color(0xFFFFB68E), onWarn = Color(0xFF542200), warnContainer = Color(0xFF773300), onWarnContainer = Color(0xFFFFDBCA),
 )
+
+/**
+ * LG UX neutrals (LGUX_APP_STYLE.md): a light grey or near-black page, white or #171717 cards with no shadow,
+ * thin grey dividers and grey summaries. Applied over the app's own scheme and over wallpaper colors alike,
+ * so only the accent (primary) changes with the wallpaper.
+ */
+fun ColorScheme.withLgNeutrals(dark: Boolean): ColorScheme {
+    val page = if (dark) Color(0xFF080808) else Color(0xFFF8F8F8)
+    val card = if (dark) Color(0xFF171717) else Color(0xFFFFFFFF)
+    val fill = if (dark) Color(0xFF202020) else Color(0xFFECECEC)
+    val ink = if (dark) Color(0xFFFFFFFF) else Color(0xFF000000)
+    return copy(
+        background = page,
+        onBackground = ink,
+        surface = page,
+        onSurface = ink,
+        onSurfaceVariant = if (dark) Color(0xFF8F8F8F) else Color(0xFF878787),
+        surfaceVariant = fill,
+        surfaceDim = page,
+        surfaceBright = card,
+        surfaceContainerLowest = card,
+        surfaceContainerLow = card,
+        surfaceContainer = card,
+        surfaceContainerHigh = card,
+        surfaceContainerHighest = fill,
+        outline = if (dark) Color(0xFF6A6A6A) else Color(0xFFAAAAAA),
+        outlineVariant = if (dark) Color(0xFF383838) else Color(0xFFE5E5E5),
+    )
+}
+
+/** Switch off track and slider inactive track (LG UX) */
+fun lgTrackOff(dark: Boolean) = if (dark) Color(0xFF545454) else Color(0xFFD4D4D4)

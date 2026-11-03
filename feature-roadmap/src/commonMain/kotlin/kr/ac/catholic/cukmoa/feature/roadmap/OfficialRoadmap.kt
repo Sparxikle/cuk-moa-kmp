@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.roadmap
 
+import kr.ac.catholic.cukmoa.core.ui.Choices
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import kr.ac.catholic.cukmoa.core.ui.title
@@ -122,13 +123,12 @@ private fun OfficialRow(name: String, marks: List<String>, courseId: String, inC
 /** View switcher above the roadmap tab: official department roadmap ↔ seniors' course records */
 @Composable
 fun RoadmapModeTabs(official: Boolean, onChange: (Boolean) -> Unit) {
-    SingleChoiceSegmentedButtonRow(Modifier.contentWidth().padding(horizontal = Space.l, vertical = Space.xs)) {
-        listOf(true to Res.string.official_roadmap, false to Res.string.senior_records_sample).forEachIndexed { i, (value, label) ->
-            SegmentedButton(selected = official == value, onClick = { onChange(value) }, shape = SegmentedButtonDefaults.itemShape(i, 2)) {
-                Text(stringResource(label), maxLines = 1)
-            }
-        }
-    }
+    Choices(
+        listOf(stringResource(Res.string.official_roadmap), stringResource(Res.string.senior_records_sample)),
+        if (official) 0 else 1,
+        { onChange(it == 0) },
+        Modifier.contentWidth(),
+    )
 }
 
 /** Roadmap tab state: view mode and selected department */

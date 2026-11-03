@@ -50,7 +50,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import kr.ac.catholic.cukmoa.core.ui.Toggle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -215,7 +215,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                                     stringResource(info.title),
                                     leading = { Icon(info.icon, null) },
                                     onClick = { set(info.id !in cards) },
-                                    trailing = { Switch(checked = info.id in cards, onCheckedChange = ::set) },
+                                    trailing = { Toggle(checked = info.id in cards, onCheckedChange = ::set) },
                                 )
                             }
                         }

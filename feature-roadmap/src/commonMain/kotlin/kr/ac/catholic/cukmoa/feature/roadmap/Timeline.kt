@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.roadmap
 
+import kr.ac.catholic.cukmoa.core.theme.Radius
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.foundation.background
@@ -57,7 +58,7 @@ internal fun TimelineSemester(title: String, now: Boolean, past: Boolean, last: 
                 if (now) Chip(stringResource(Res.string.now), ChipTone.Accent)
             }
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(cs.surfaceContainer).padding(vertical = Space.xs),
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.card)).background(cs.surfaceContainer).padding(vertical = Space.xs),
                 content = content,
             )
         }

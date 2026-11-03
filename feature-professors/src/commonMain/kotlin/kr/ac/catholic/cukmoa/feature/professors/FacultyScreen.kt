@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.professors
 
+import kr.ac.catholic.cukmoa.core.ui.cardItems
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.foundation.lazy.items
@@ -57,6 +58,6 @@ fun FacultyScreen(list: FacultyList, student: StudentState) {
             }
         }
         if (shown.isEmpty()) item(key = "empty") { EmptyState(stringResource(Res.string.no_matching_professors)) }
-        items(shown, key = { it.id }) { m -> FacultyRow(m) { nav.openProfessor(m.name) } }
+        cardItems(shown, key = { it.id }) { m -> FacultyRow(m) { nav.openProfessor(m.name) } }
     }
 }

@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import kr.ac.catholic.cukmoa.core.ui.Choices
 import kr.ac.catholic.cukmoa.core.resources.*
 import kr.ac.catholic.cukmoa.core.ui.text
 import kr.ac.catholic.cukmoa.core.ui.yearTitle
@@ -13,21 +14,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.Campaign
-import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.Storage
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
+import kr.ac.catholic.cukmoa.core.ui.Toggle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -121,34 +122,46 @@ private fun SettingsPageContent(
         is CatalogStatus.Offline -> stringResource(Res.string.offline_saved, s.error.text())
     }
 
+    // LG Settings: related pages share a card, each with a colored rounded-square icon (white glyph)
+    val groups = listOf(
+        listOf(
+            SettingsEntry(SettingsPage.Home, Icons.Filled.Dashboard, SettingsColors.orange, stringResource(Res.string.home_screen), stringResource(Res.string.cards_on, student.homeCards.size)),
+            SettingsEntry(SettingsPage.Modules, Icons.Filled.Extension, SettingsColors.slate, stringResource(Res.string.features), ModuleRegistry.enabled(student).map { stringResource(it.title) }.joinToString(", ")),
+        ),
+        listOf(SettingsEntry(SettingsPage.Announcements, Icons.Filled.Campaign, SettingsColors.red, stringResource(Res.string.module_announcements), null)),
+        listOf(
+            SettingsEntry(SettingsPage.Appearance, Icons.Filled.Palette, SettingsColors.purple, stringResource(Res.string.display), themeLabel(student.theme)),
+            SettingsEntry(SettingsPage.Language, Icons.Filled.Language, SettingsColors.blue, stringResource(Res.string.language), languageLabel(student.language)),
+        ),
+        listOf(
+            SettingsEntry(SettingsPage.Data, Icons.Filled.Storage, SettingsColors.green, stringResource(Res.string.data), null),
+            SettingsEntry(SettingsPage.About, Icons.Filled.Info, SettingsColors.slate, stringResource(Res.string.about), APP_VERSION),
+        ),
+    )
+
     when (page) {
         SettingsPage.Main -> ScreenList(title = stringResource(Res.string.settings), onBack = onBack) {
             item(key = "me") {
+                Group {
                 ListRow(
                     yearTitle(student.grade) + " · " + (majors.firstOrNull()?.name ?: stringResource(Res.string.no_major_chosen)),
                     listOfNotNull(majors.getOrNull(1)?.name, tracks.joinToString(" · ").ifEmpty { null }).joinToString(" · ").ifEmpty { null },
                     modifier = Modifier.contentWidth().padding(vertical = Space.s),
                     leading = {
-                        Box(Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                            Text("${student.grade}", color = MaterialTheme.colorScheme.onPrimaryContainer, style = MaterialTheme.typography.titleLarge)
+                        Box(Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+                            Text("${student.grade}", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.titleLarge)
                         }
                     },
                     onClick = { go(SettingsPage.Me) },
                 )
+                }
             }
-            item(key = "pages") {
-                Group {
-                    val rows = listOf(
-                        Triple(SettingsPage.Home, Icons.Outlined.Dashboard, stringResource(Res.string.home_screen) to stringResource(Res.string.cards_on, student.homeCards.size)),
-                        Triple(SettingsPage.Modules, Icons.Outlined.Extension, stringResource(Res.string.features) to ModuleRegistry.enabled(student).map { stringResource(it.title) }.joinToString(", ")),
-                        Triple(SettingsPage.Announcements, Icons.Outlined.Campaign, stringResource(Res.string.module_announcements) to null),
-                        Triple(SettingsPage.Appearance, Icons.Outlined.Palette, stringResource(Res.string.display) to themeLabel(student.theme)),
-                        Triple(SettingsPage.Language, Icons.Outlined.Language, stringResource(Res.string.language) to languageLabel(student.language)),
-                        Triple(SettingsPage.Data, Icons.Outlined.Storage, stringResource(Res.string.data) to null),
-                        Triple(SettingsPage.About, Icons.Outlined.Info, stringResource(Res.string.about) to APP_VERSION),
-                    )
-                    rows.forEach { (target, icon, text) ->
-                        ListRow(text.first, text.second, leading = { Icon(icon, null) }, onClick = { go(target) })
+            groups.forEachIndexed { i, rows ->
+                item(key = "group$i") {
+                    Group {
+                        rows.forEach { e ->
+                            ListRow(e.title, e.summary, leading = { SettingsIcon(e.icon, e.color) }, onClick = { go(e.page) })
+                        }
                     }
                 }
             }
@@ -157,15 +170,7 @@ private fun SettingsPageContent(
         SettingsPage.Me -> ScreenList(title = stringResource(Res.string.my_info), onBack = back) {
             item(key = "year") {
                 Section(stringResource(Res.string.year)) {
-                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = Space.l)) {
-                        (1..4).forEach { g ->
-                            SegmentedButton(
-                                selected = g == student.grade,
-                                onClick = { if (g != student.grade) vm.setGrade(g) },
-                                shape = SegmentedButtonDefaults.itemShape(g - 1, 4),
-                            ) { Text(yearTitle(g), maxLines = 1) }
-                        }
-                    }
+                    Choices((1..4).map { yearTitle(it) }, student.grade - 1, { vm.setGrade(it + 1) })
                 }
             }
             item(key = "major") {
@@ -217,7 +222,7 @@ private fun SettingsPageContent(
                             if (moduleOff) stringResource(Res.string.turn_on_feature_to_use, stringResource(provider!!.title)) else null,
                             leading = { Icon(info.icon, null) },
                             onClick = if (moduleOff) null else ({ set(!on) }),
-                            trailing = { Switch(checked = on, enabled = !moduleOff, onCheckedChange = ::set) },
+                            trailing = { Toggle(checked = on, enabled = !moduleOff, onCheckedChange = ::set) },
                         )
                     }
                 }
@@ -247,15 +252,7 @@ private fun SettingsPageContent(
         SettingsPage.Appearance -> ScreenList(title = stringResource(Res.string.display), onBack = back) {
             item {
                 Section(stringResource(Res.string.theme)) {
-                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = Space.l, vertical = Space.xs)) {
-                        ThemeMode.entries.forEachIndexed { i, mode ->
-                            SegmentedButton(
-                                selected = student.theme == mode,
-                                onClick = { vm.setTheme(mode) },
-                                shape = SegmentedButtonDefaults.itemShape(i, ThemeMode.entries.size),
-                            ) { Text(themeLabel(mode), maxLines = 1) }
-                        }
-                    }
+                    Choices(ThemeMode.entries.map { themeLabel(it) }, student.theme.ordinal, { vm.setTheme(ThemeMode.entries[it]) })
                 }
             }
             // Only on phones that have wallpaper colors (Android 12+)
@@ -265,7 +262,7 @@ private fun SettingsPageContent(
                         stringResource(Res.string.use_wallpaper_colors),
                         stringResource(Res.string.use_wallpaper_colors_detail),
                         onClick = { vm.setDynamicColor(!student.dynamicColor) },
-                        trailing = { Switch(checked = student.dynamicColor, onCheckedChange = { vm.setDynamicColor(it) }) },
+                        trailing = { Toggle(checked = student.dynamicColor, onCheckedChange = { vm.setDynamicColor(it) }) },
                     )
                 }
             }
@@ -349,6 +346,26 @@ private fun SettingsPageContent(
             confirmButton = { TextButton(onClick = { vm.resetRecords(); confirmReset = false }) { Text(stringResource(Res.string.clear)) } },
             dismissButton = { TextButton(onClick = { confirmReset = false }) { Text(stringResource(Res.string.cancel)) } },
         )
+    }
+}
+
+private class SettingsEntry(val page: SettingsPage, val icon: ImageVector, val color: Color, val title: String, val summary: String?)
+
+/** LG Settings category icon colors (measured on LG UX 10) */
+private object SettingsColors {
+    val blue = Color(0xFF2A9DF4)
+    val red = Color(0xFFF5594A)
+    val orange = Color(0xFFFF9500)
+    val purple = Color(0xFF7A3CF0)
+    val green = Color(0xFF34C25A)
+    val slate = Color(0xFF5F6B76)
+}
+
+/** LG Settings icon: 36dp rounded square in the category color with a white glyph */
+@Composable
+private fun SettingsIcon(icon: ImageVector, color: Color) {
+    Box(Modifier.size(36.dp).clip(RoundedCornerShape(percent = 30)).background(color), contentAlignment = Alignment.Center) {
+        Icon(icon, null, Modifier.size(22.dp), tint = Color.White)
     }
 }
 

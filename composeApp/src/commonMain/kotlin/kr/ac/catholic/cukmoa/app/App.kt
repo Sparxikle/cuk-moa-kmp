@@ -13,8 +13,27 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Scaffold
@@ -73,22 +92,7 @@ private fun MainTabs(
 
     Scaffold(
         containerColor = AppTheme.colors.bg,
-        bottomBar = {
-            NavigationBar {
-                tabs.forEach { t ->
-                    NavigationBarItem(
-                        selected = route == t.route,
-                        onClick = { onTab(t.route) },
-                        icon = {
-                            if (t.route == Routes.ANNOUNCEMENTS && newCount > 0) {
-                                BadgedBox(badge = { Badge { Text("$newCount") } }) { Icon(t.icon, null) }
-                            } else Icon(t.icon, null)
-                        },
-                        label = { Text(stringResource(t.label)) },
-                    )
-                }
-            }
-        },
+        bottomBar = { TabBar(tabs, route, newCount, onTab) },
     ) { padding ->
         // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
         AnimatedContent(
@@ -99,6 +103,61 @@ private fun MainTabs(
         ) { r ->
             val module = ModuleRegistry.byId(r)
             if (module == null) HomeScreen(catalog, student, modules) else module.Screen(catalog, student)
+        }
+    }
+}
+
+/**
+ * LG UX bottom tab bar (Dialer, Clock): 75dp, equal tabs, a 40dp icon over a 12sp label, no indicator pill.
+ * Selection shows only by color — accent and bold for the selected tab, 40% black/white for the others — and the
+ * newly selected icon plays a short pop (LG plays a Lottie once; the old icon just goes grey). Colors swap instantly.
+ */
+@Composable
+private fun TabBar(tabs: List<TabItem>, route: String, newCount: Long, onTab: (String) -> Unit) {
+    val c = AppTheme.colors
+    val off = c.ink.copy(alpha = 0.4f)
+    // LG pads tabs 4dp + 8dp; with five tabs (home + 4 modules) the labels need the room
+    val crowded = tabs.size > 4
+    Row(Modifier.fillMaxWidth().background(c.bg).navigationBarsPadding().height(75.dp).padding(horizontal = 4.dp)) {
+        tabs.forEach { t ->
+            val selected = route == t.route
+            val color = if (selected) c.accent else off
+            // Pop only when a tab becomes selected, not for the first tab at start
+            val pop = remember { Animatable(1f) }
+            var started by remember { mutableStateOf(false) }
+            LaunchedEffect(selected) {
+                if (selected && started) {
+                    pop.snapTo(0.55f)
+                    pop.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = 260f))
+                } else pop.snapTo(1f)
+                started = true
+            }
+            Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = if (crowded) 1.dp else 4.dp), contentAlignment = Alignment.Center) {
+                Column(
+                    Modifier.fillMaxWidth().height(61.dp).clip(RoundedCornerShape(25.dp))
+                        .selectable(selected = selected, role = Role.Tab, onClick = { onTab(t.route) })
+                        .padding(horizontal = if (crowded) 2.dp else 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Box(Modifier.size(36.dp).graphicsLayer { scaleX = pop.value; scaleY = pop.value }, contentAlignment = Alignment.Center) {
+                        if (t.route == Routes.ANNOUNCEMENTS && newCount > 0) {
+                            BadgedBox(badge = { Badge { Text("$newCount") } }) { Icon(t.icon, null, Modifier.size(28.dp), tint = color) }
+                        } else Icon(t.icon, null, Modifier.size(28.dp), tint = color)
+                    }
+                    Text(
+                        stringResource(t.label),
+                        color = color,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 12.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                            letterSpacing = 0.sp,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
         }
     }
 }

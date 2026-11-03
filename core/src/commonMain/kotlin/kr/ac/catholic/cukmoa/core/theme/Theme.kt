@@ -23,7 +23,8 @@ import kr.ac.catholic.cukmoa.core.resources.lgeitext_regular
 import kr.ac.catholic.cukmoa.core.resources.lgeitext_semibold
 import org.jetbrains.compose.resources.Font
 
-// Material 3: every color comes from a ColorScheme (ColorSchemes.kt, or the wallpaper's dynamic colors on Android 12+).
+// LG UX look on Material 3: every color comes from a ColorScheme (ColorSchemes.kt, or the wallpaper's dynamic colors on Android 12+)
+// with LG UX neutrals on top (withLgNeutrals), so only the accent follows the wallpaper.
 // Palette keeps short names for the roles screens use; status colors (completed, warning) are M3 extended colors.
 // Tracks don't get their own colors — they are told apart by icon and name.
 
@@ -43,7 +44,7 @@ data class ExtendedColors(
 data class Palette(
     /** Screen background (surface) */
     val bg: Color,
-    /** Cards and grouped lists (surfaceContainerLow) */
+    /** Cards and grouped lists (white / #171717) */
     val surface: Color,
     val fill: Color,
     val fillStrong: Color,
@@ -64,13 +65,15 @@ data class Palette(
     val warnSoft: Color,
     val onWarnSoft: Color,
     val cell: Color,
+    /** Switch off track, slider inactive track */
+    val trackOff: Color,
 )
 
-fun palette(s: ColorScheme, x: ExtendedColors) = Palette(
+fun palette(s: ColorScheme, x: ExtendedColors, dark: Boolean) = Palette(
     bg = s.surface,
     surface = s.surfaceContainerLow,
-    fill = s.surfaceContainerHigh,
-    fillStrong = s.surfaceContainerHighest,
+    fill = s.surfaceContainerHighest,
+    fillStrong = lgTrackOff(dark).copy(alpha = 0.6f),
     ink = s.onSurface,
     ink2 = s.onSurfaceVariant,
     ink3 = s.outline,
@@ -87,6 +90,7 @@ fun palette(s: ColorScheme, x: ExtendedColors) = Palette(
     warnSoft = x.warnContainer,
     onWarnSoft = x.onWarnContainer,
     cell = s.surfaceContainerHighest,
+    trackOff = lgTrackOff(dark),
 )
 
 object Space {
@@ -99,11 +103,18 @@ object Space {
     val xxxl = 32.dp
 }
 
-/** M3 shape scale: cards and lists use large (16dp), controls are fully rounded. */
+/** LG UX: cards and grouped lists have 10dp corners (content_foreground_corner_radius), controls are fully rounded. */
 object Radius {
-    val card = 16.dp
-    val group = 16.dp
+    val card = 10.dp
+    val group = 10.dp
     val control = 20.dp
+}
+
+/** LG UX card geometry: 8dp from the screen edge, content 19dp inside the card, 20dp between cards. */
+object CardMetrics {
+    val margin = 8.dp
+    val inset = 19.dp
+    val gap = 20.dp
 }
 
 @Immutable
@@ -137,7 +148,8 @@ private fun typography(f: FontFamily) = Typography(
     displayLarge = style(f, 57, 64, FontWeight.Normal, -0.25),
     displayMedium = style(f, 45, 52, FontWeight.Normal),
     displaySmall = style(f, 36, 44, FontWeight.Normal),
-    headlineLarge = style(f, 32, 40, FontWeight.SemiBold),
+    // LG UX big title (type_ay01_sp: 32sp bold)
+    headlineLarge = style(f, 32, 40, FontWeight.Bold),
     headlineMedium = style(f, 28, 36, FontWeight.SemiBold),
     headlineSmall = style(f, 24, 32, FontWeight.SemiBold),
     titleLarge = style(f, 22, 28, FontWeight.SemiBold),
@@ -167,12 +179,12 @@ private fun typeScale(t: Typography, f: FontFamily) = TypeScale(
 private val AppShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(12.dp),
-    large = RoundedCornerShape(16.dp),
+    medium = RoundedCornerShape(10.dp),
+    large = RoundedCornerShape(10.dp),
     extraLarge = RoundedCornerShape(28.dp),
 )
 
-val LocalPalette = staticCompositionLocalOf { palette(LightScheme, LightExtended) }
+val LocalPalette = staticCompositionLocalOf { palette(LightScheme.withLgNeutrals(false), LightExtended, false) }
 val LocalType = staticCompositionLocalOf<TypeScale> { error("AppTheme 안에서 써야 해요.") }
 
 object AppTheme {
@@ -189,11 +201,11 @@ fun AppTheme(
     dynamic: ColorScheme? = null,
     content: @Composable () -> Unit,
 ) {
-    val scheme = dynamic ?: if (dark) DarkScheme else LightScheme
+    val scheme = (dynamic ?: if (dark) DarkScheme else LightScheme).withLgNeutrals(dark)
     val font = appFont()
     val typography = typography(font)
     CompositionLocalProvider(
-        LocalPalette provides palette(scheme, if (dark) DarkExtended else LightExtended),
+        LocalPalette provides palette(scheme, if (dark) DarkExtended else LightExtended, dark),
         LocalType provides typeScale(typography, font),
     ) {
         MaterialTheme(colorScheme = scheme, typography = typography, shapes = AppShapes, content = content)

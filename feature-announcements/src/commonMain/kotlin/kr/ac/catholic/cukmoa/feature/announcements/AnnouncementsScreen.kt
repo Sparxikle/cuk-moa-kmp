@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.announcements
 
+import kr.ac.catholic.cukmoa.core.ui.cardItems
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import kr.ac.catholic.cukmoa.core.ui.text
@@ -107,7 +108,7 @@ fun AnnouncementsScreen(student: StudentState) {
             item(key = "error") { Banner(e.text(), stringResource(Res.string.try_again), vm::refreshAnnouncements) }
         }
 
-        items(state.items, key = { it.id }) { a ->
+        cardItems(state.items, key = { it.id }) { a ->
             AnnouncementRow(a, seenAt = student.announcementsSeenAt, showSource = true)
         }
         if (state.items.isEmpty() && !state.loading && state.error == null) item(key = "empty") {

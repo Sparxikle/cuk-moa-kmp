@@ -39,6 +39,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.font.FontWeight
+import kr.ac.catholic.cukmoa.core.theme.CardMetrics
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -102,8 +109,9 @@ import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.theme.Space
 import kr.ac.catholic.cukmoa.model.TrackId
 
-// Basic components shared by screens. Native Android layout: full-width lists under small section headers,
-// one top app bar per screen, and cards only for summaries. Explanations live behind the app bar's info button.
+// Basic components shared by screens, in the LG UX style (LGUX_APP_STYLE.md): a big bold title that collapses into a
+// small bar, rows grouped on rounded cards (Cards.kt) with the page color between them, and accent-colored actions.
+// Explanations live behind the app bar's info button.
 
 enum class Tone { Ink, Ink2, Ink3, Accent, OnAccent, Good, Warn, OnWarnSoft }
 
@@ -130,20 +138,21 @@ fun Txt(
     maxLines: Int = Int.MAX_VALUE,
 ) = Text(text, modifier, color = tone.color(), style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
 
-/** Collapsing header sizes: one 64dp row when collapsed, plus room above it for the big title when expanded. */
-private val BarCollapsed = 64.dp
-private val BarExpanded = 104.dp
+/** Header sizes: one 56dp toolbar row when collapsed, plus room for the big title when expanded (LG homepage_actionbar_size 119dp). */
+private val BarCollapsed = 56.dp
+private val BarExpanded = 116.dp
 
-/** Header title size when collapsed; the expanded title is this text scaled up. */
-private const val TITLE_SP = 24f
+/** Header title size when collapsed (16sp bold); the expanded title is this text scaled up to 32sp (type_ay01_sp). */
+private const val TITLE_SP = 16f
+private const val TITLE_EXPANDED_SP = 32f
 
 /** How far the list slides down for a full pull (and stays while refreshing). */
 private val PullDistance = 72.dp
 
 /**
- * Scrolling screen under a collapsing header, like the AOSP Settings app: the title starts large and shrinks into the bar
- * on scroll. The info button and actions sit on the title's row, so they move with it; the back arrow stays top left
- * and the title slides in beside it when collapsed. The bar is tinted once content scrolls under it.
+ * Scrolling screen under an LG UX header. Tab screens (no back arrow) start with a big 32sp bold title that collapses
+ * into a 16sp bold toolbar title on scroll; sub-pages have only the toolbar: an accent back arrow and a 16sp bold title.
+ * The info button and actions are accent-colored and sit on the title's row. The bar keeps the page color.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,32 +171,32 @@ fun ScreenList(
     val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val c = AppTheme.colors
     var showInfo by remember { mutableStateOf(false) }
+    // Sub-pages have no big title, so nothing to collapse
+    val expanded = if (onBack != null) BarCollapsed else BarExpanded
     // The scroll behavior only collapses as far as this limit (the expanded part of the header)
-    val limit = with(LocalDensity.current) { (BarExpanded - BarCollapsed).toPx() }
+    val limit = with(LocalDensity.current) { (expanded - BarCollapsed).toPx() }
     LaunchedEffect(limit) { scroll.state.heightOffsetLimit = -limit }
-    val fraction = scroll.state.collapsedFraction
-    // Only the scroll tint is animated (as a fraction), so a theme change recolors the bar in the same frame as the screen.
-    val tint by animateFloatAsState(if (scroll.state.overlappedFraction > 0.01f) 1f else 0f)
-    val barColor = lerp(c.bg, MaterialTheme.colorScheme.surfaceContainer, tint)
-    val barHeight = lerp(BarExpanded, BarCollapsed, fraction)
+    val fraction = if (onBack != null) 1f else scroll.state.collapsedFraction
+    val barColor = c.bg
+    val barHeight = lerp(expanded, BarCollapsed, fraction)
     // M3 pull to refresh around the whole screen, so a pull first expands a collapsed header (inner nested scroll)
     // and only then refreshes. The indicator comes out from under the header.
     val screen: @Composable () -> Unit = {
     Column(Modifier.fillMaxSize().background(c.bg).nestedScroll(scroll.nestedScrollConnection)) {
+        CompositionLocalProvider(LocalContentColor provides c.accent) {
         Box(Modifier.fillMaxWidth().background(barColor).statusBarsPadding().height(barHeight)) {
-            if (onBack != null) IconButton(onClick = onBack, modifier = Modifier.align(Alignment.TopStart).padding(start = Space.xs, top = Space.s)) {
+            if (onBack != null) IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart).padding(start = Space.xs)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
             }
-            // The title row fills the whole header (below the back arrow when there is one); the title grows to fill it
+            // The title row fills the whole header (beside the back arrow when there is one); the title grows to fill it
             Row(
                 Modifier.fillMaxSize()
-                    .padding(top = lerp(if (onBack != null) BarCollapsed - Space.s else 0.dp, 0.dp, fraction))
-                    .padding(start = lerp(Space.l, if (onBack != null) 60.dp else Space.l, fraction), end = Space.xs),
+                    .padding(start = if (onBack != null) 60.dp else Space.xxl, end = Space.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Laid out at the collapsed size and scaled up from the left when expanded: up to 40sp (28sp under a back arrow),
-                // or less when a long title would not fit the row. Scaling keeps the shrink smooth while the header collapses.
-                val expandedSp = if (onBack != null) 28f else 40f
+                // Laid out at the collapsed size and scaled up from the left when expanded, or less when a long title
+                // would not fit the row. Scaling keeps the shrink smooth while the header collapses.
+                val expandedSp = TITLE_EXPANDED_SP
                 var textWidth by remember { mutableStateOf(0) }
                 BoxWithConstraints(Modifier.weight(1f)) {
                     val room = constraints.maxWidth.toFloat()
@@ -200,7 +209,8 @@ fun ScreenList(
                             scaleY = scale
                             transformOrigin = TransformOrigin(0f, 0.5f)
                         },
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = TITLE_SP.sp, lineHeight = 1.2.em),
+                        color = c.ink,
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = TITLE_SP.sp, lineHeight = 1.2.em, fontWeight = FontWeight.Bold),
                         maxLines = 1,
                         softWrap = false,
                         overflow = TextOverflow.Ellipsis,
@@ -210,6 +220,7 @@ fun ScreenList(
                 if (info != null) IconButton(onClick = { showInfo = true }) { Icon(Icons.Outlined.Info, stringResource(Res.string.about)) }
                 actions()
             }
+        }
         }
         Box(Modifier.fillMaxSize().clipToBounds()) {
             val pulled = { pull.distanceFraction.coerceIn(0f, 1.6f) }
@@ -252,7 +263,10 @@ fun InfoDialog(title: String, text: String, onDismiss: () -> Unit) {
 /** On wide screens (desktop/tablet), content is kept within 640dp. */
 fun Modifier.contentWidth() = this.widthIn(max = 640.dp).fillMaxWidth()
 
-/** A titled block of a screen: small header in the accent color, then full-width content. info adds an info button to the header. */
+/**
+ * A titled block of a screen as one LG UX card: the title is the card's first row (primary text color, like
+ * "Screen mode" in LG Settings), then the content. info adds an info button to the title.
+ */
 @Composable
 fun Section(
     title: String? = null,
@@ -260,7 +274,7 @@ fun Section(
     info: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(Modifier.contentWidth()) {
+    CardColumn(Modifier.padding(top = CardMetrics.gap)) {
         if (title != null) SectionHeader(title, action, info)
         content()
     }
@@ -270,10 +284,10 @@ fun Section(
 fun SectionHeader(title: String, action: Pair<String, () -> Unit>? = null, info: String? = null) {
     var showInfo by remember { mutableStateOf(false) }
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(start = Space.l, end = Space.xs, top = Space.s),
+        Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(start = CardMetrics.inset, end = Space.xs, top = Space.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, Modifier.weight(1f, fill = false), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall)
+        Text(title, Modifier.weight(1f, fill = false), color = AppTheme.colors.ink, style = MaterialTheme.typography.titleMedium)
         if (info != null) IconButton(onClick = { showInfo = true }, modifier = Modifier.size(36.dp)) {
             Icon(Icons.Outlined.Info, stringResource(Res.string.about), Modifier.size(18.dp), tint = AppTheme.colors.ink2)
         }
@@ -283,25 +297,28 @@ fun SectionHeader(title: String, action: Pair<String, () -> Unit>? = null, info:
     if (showInfo && info != null) InfoDialog(title, info) { showInfo = false }
 }
 
-/** M3 filled card with the screen margins. For summaries (credits, timetable), not for lists. */
+/** LG UX summary card (credits, timetable): 10dp corners, white / #171717, no shadow, 8dp from the screen edge. */
 @Composable
 fun Card(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
-    val colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-    val m = modifier.contentWidth().padding(horizontal = Space.l, vertical = Space.xs)
+    val colors = CardDefaults.cardColors(containerColor = AppTheme.colors.surface)
+    val m = modifier.contentWidth().padding(horizontal = CardMetrics.margin, vertical = Space.xs)
     val inner: @Composable ColumnScope.() -> Unit = {
-        Column(Modifier.padding(Space.l), verticalArrangement = Arrangement.spacedBy(Space.m), content = content)
+        Column(Modifier.padding(horizontal = CardMetrics.inset, vertical = Space.l), verticalArrangement = Arrangement.spacedBy(Space.m), content = content)
     }
     if (onClick != null) M3Card(onClick, m, shape = MaterialTheme.shapes.large, colors = colors, content = inner)
     else M3Card(m, shape = MaterialTheme.shapes.large, colors = colors, content = inner)
 }
 
-/** Full-width list. Rows sit directly on the screen background. */
+/** Rows on one LG UX card, with dividers between them. */
 @Composable
 fun Group(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.contentWidth(), content = content)
+    CardColumn(modifier.padding(top = CardMetrics.gap), content = content)
 }
 
-/** M3 list item (one or two lines). */
+/**
+ * LG UX list row: 16sp title, 12sp grey summary, content 19dp inside the card, no chevron (chevron is kept for
+ * callers but not drawn, as in LG Settings). Inside a card, rows get dividers between them.
+ */
 @Composable
 fun ListRow(
     title: String,
@@ -315,23 +332,39 @@ fun ListRow(
     subtitleMaxLines: Int = 1,
     onClick: (() -> Unit)? = null,
 ) {
-    ListItem(
-        headlineContent = { Text(title, maxLines = titleMaxLines, overflow = TextOverflow.Ellipsis) },
-        overlineContent = overline?.let { { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) } },
-        supportingContent = subtitle?.let { { Text(it, maxLines = subtitleMaxLines, overflow = TextOverflow.Ellipsis) } },
-        leadingContent = leading?.let { { it() } },
-        trailingContent = if (trailing != null || chevron) {
-            {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
-                    trailing?.invoke()
-                    if (chevron) Icon(Icons.Default.ChevronRight, null, tint = AppTheme.colors.ink2, modifier = Modifier.size(20.dp))
-                }
-            }
-        } else null,
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-    )
+    val c = AppTheme.colors
+    val density = LocalDensity.current
+    // Text start for the divider above this row; a leading icon moves it (onSizeChanged below)
+    val mark = remember { RowMark().apply { textStart = with(density) { CardMetrics.inset.toPx() } } }
+    val twoLine = subtitle != null || overline != null
+    Row(
+        modifier.fillMaxWidth().cardRow(mark)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .heightIn(min = if (twoLine) 60.dp else 56.dp)
+            .padding(start = CardMetrics.inset, end = if (trailing != null) Space.s else CardMetrics.inset, top = Space.s, bottom = Space.s),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (leading != null) {
+            Box(
+                Modifier.onSizeChanged { mark.textStart = with(density) { (CardMetrics.inset + LeadingGap).toPx() } + it.width },
+                contentAlignment = Alignment.Center,
+            ) { CompositionLocalProvider(LocalContentColor provides c.ink2) { leading() } }
+            Spacer(Modifier.width(LeadingGap))
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            overline?.let { Text(it, color = c.ink2, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            Text(title, color = c.ink, style = MaterialTheme.typography.bodyLarge, maxLines = titleMaxLines, overflow = TextOverflow.Ellipsis)
+            subtitle?.let { Text(it, color = c.ink2, style = MaterialTheme.typography.bodySmall, maxLines = subtitleMaxLines, overflow = TextOverflow.Ellipsis) }
+        }
+        if (trailing != null) {
+            Spacer(Modifier.width(Space.s))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.xs)) { trailing() }
+        }
+    }
 }
+
+/** Gap between a row's leading icon and its text (LG Settings: icon 19dp inside the card, text 82dp from the screen edge) */
+private val LeadingGap = 16.dp
 
 /** Centered "show more" / "show less" row at the end of a list. */
 @Composable
@@ -374,14 +407,29 @@ fun Chip(text: String, tone: ChipTone = ChipTone.Neutral, modifier: Modifier = M
     )
 }
 
-/** M3 filter chip. Selected chips show a check. */
+/** Filter chip as an LG UX pill: accent fill and white text when selected, card color when not; no outline. */
 @Composable
-fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
+fun FilterChip(text: String, selected: Boolean, icon: ImageVector? = null, onClick: () -> Unit) {
+    val c = AppTheme.colors
     M3FilterChip(
         selected = selected,
         onClick = onClick,
         label = { Text(text, maxLines = 1) },
-        leadingIcon = if (selected) { { Icon(Icons.Default.Check, null, Modifier.size(FilterChipDefaults.IconSize)) } } else null,
+        shape = CircleShape,
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = c.surface,
+            labelColor = c.ink,
+            selectedContainerColor = c.accent,
+            selectedLabelColor = c.onAccent,
+            iconColor = c.ink2,
+            selectedLeadingIconColor = c.onAccent,
+        ),
+        border = null,
+        leadingIcon = when {
+            icon != null -> { { Icon(icon, null, Modifier.size(FilterChipDefaults.IconSize)) } }
+            selected -> { { Icon(Icons.Default.Check, null, Modifier.size(FilterChipDefaults.IconSize)) } }
+            else -> null
+        },
     )
 }
 
@@ -418,7 +466,7 @@ fun SearchField(
     TextField(
         value = value,
         onValueChange = onChange,
-        modifier = modifier.contentWidth().padding(horizontal = Space.l, vertical = Space.xs).heightIn(min = 52.dp),
+        modifier = modifier.contentWidth().padding(horizontal = CardMetrics.margin, vertical = Space.xs).heightIn(min = 52.dp),
         placeholder = { Text(placeholder, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         leadingIcon = { Icon(Icons.Default.Search, null) },
         trailingIcon = if (value.isNotEmpty() || extra != null) {
@@ -433,8 +481,9 @@ fun SearchField(
         shape = CircleShape,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            // LG UX search fill: #0c000000 light, #19ffffff dark
+            focusedContainerColor = AppTheme.colors.fill,
+            unfocusedContainerColor = AppTheme.colors.fill,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),
@@ -505,7 +554,7 @@ fun ProgressBar(done: Double, total: Double, modifier: Modifier = Modifier, pend
 fun Banner(text: String, actionLabel: String? = null, onAction: (() -> Unit)? = null, icon: ImageVector = Icons.Default.CloudOff) {
     val c = AppTheme.colors
     Row(
-        Modifier.contentWidth().padding(horizontal = Space.l, vertical = Space.xs).clip(MaterialTheme.shapes.medium)
+        Modifier.contentWidth().padding(horizontal = CardMetrics.margin, vertical = Space.xs).clip(MaterialTheme.shapes.medium)
             .background(c.warnSoft).padding(start = Space.l, end = Space.xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Space.m),
@@ -518,12 +567,12 @@ fun Banner(text: String, actionLabel: String? = null, onAction: (() -> Unit)? = 
     }
 }
 
-/** Round tonal icon container (list leading icons, track icons). */
+/** LG UX rounded-square icon (list leading icons, track icons): accent fill and white glyph when selected, tonal otherwise. */
 @Composable
-fun IconBadge(icon: ImageVector, size: Dp = 40.dp, selected: Boolean = false) {
+fun IconBadge(icon: ImageVector, size: Dp = 36.dp, selected: Boolean = false) {
     val c = AppTheme.colors
     Box(
-        Modifier.size(size).clip(CircleShape).background(if (selected) c.accent else c.accentSoft),
+        Modifier.size(size).clip(RoundedCornerShape(percent = 30)).background(if (selected) c.accent else c.accentSoft),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, null, tint = if (selected) c.onAccent else c.onAccentSoft, modifier = Modifier.size(size * 0.5f))

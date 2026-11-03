@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.graduation
 
+import kr.ac.catholic.cukmoa.core.ui.Choices
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import kr.ac.catholic.cukmoa.core.ui.bucketTitle
@@ -402,25 +403,20 @@ private fun ExamCalculator(catalog: Catalog, test: GraduationTest, student: Stud
             }
         }
         Txt(stringResource(Res.string.major_type), MaterialTheme.typography.labelLarge, tone = Tone.Ink2)
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            exam.programs.forEachIndexed { i, p ->
-                SegmentedButton(
-                    selected = p.id == program.id,
-                    onClick = { vm.setExam { e -> e.copy(programId = p.id, passed = minOf(e.passed, maxOf(0, p.subjectCount - e.englishWaiver))) } },
-                    shape = SegmentedButtonDefaults.itemShape(i, exam.programs.size),
-                ) { Text("${p.label} · ${p.subjectCount}", maxLines = 1) }
-            }
-        }
+        Choices(
+            exam.programs.map { "${it.label} · ${it.subjectCount}" },
+            exam.programs.indexOfFirst { it.id == program.id },
+            { i -> val p = exam.programs[i]; vm.setExam { e -> e.copy(programId = p.id, passed = minOf(e.passed, maxOf(0, p.subjectCount - e.englishWaiver))) } },
+            inset = 0.dp,
+        )
         Txt(stringResource(Res.string.english_waiver), MaterialTheme.typography.labelLarge, tone = Tone.Ink2)
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            exam.englishWaivers.forEachIndexed { i, w ->
-                SegmentedButton(
-                    selected = w.level == student.exam.englishWaiver,
-                    onClick = { vm.setExam { e -> e.copy(englishWaiver = w.level, passed = minOf(e.passed, maxOf(0, program.subjectCount - w.level))) } },
-                    shape = SegmentedButtonDefaults.itemShape(i, exam.englishWaivers.size),
-                ) { Text(if (w.level == 0) stringResource(Res.string.none) else stringResource(Res.string.n_subjects, w.level), maxLines = 1) }
-            }
-        }
+        val waiverLabels = exam.englishWaivers.map { w -> if (w.level == 0) stringResource(Res.string.none) else stringResource(Res.string.n_subjects, w.level) }
+        Choices(
+            waiverLabels,
+            exam.englishWaivers.indexOfFirst { it.level == student.exam.englishWaiver },
+            { i -> val w = exam.englishWaivers[i]; vm.setExam { e -> e.copy(englishWaiver = w.level, passed = minOf(e.passed, maxOf(0, program.subjectCount - w.level))) } },
+            inset = 0.dp,
+        )
         HorizontalDivider()
         Row(verticalAlignment = Alignment.CenterVertically) {
             Txt(stringResource(Res.string.passed_n, student.exam.passed), MaterialTheme.typography.bodyLarge, Modifier.weight(1f))

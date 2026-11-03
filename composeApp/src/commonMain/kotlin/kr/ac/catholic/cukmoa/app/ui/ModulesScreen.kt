@@ -38,7 +38,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.zIndex
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
+import kr.ac.catholic.cukmoa.core.ui.Toggle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -203,7 +203,7 @@ fun ModuleList(enabled: List<String>, onChange: (List<String>) -> Unit) {
                         }
                     },
                     trailing = {
-                        Switch(
+                        Toggle(
                             checked = isOn,
                             enabled = isOn || !full,
                             onCheckedChange = { checked -> onChange(if (checked) enabled + m.id else enabled - m.id) },

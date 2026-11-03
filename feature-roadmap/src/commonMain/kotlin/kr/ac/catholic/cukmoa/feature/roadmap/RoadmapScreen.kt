@@ -1,5 +1,7 @@
 package kr.ac.catholic.cukmoa.feature.roadmap
 
+import kr.ac.catholic.cukmoa.core.ui.Group
+import kr.ac.catholic.cukmoa.core.ui.FilterChip
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import kr.ac.catholic.cukmoa.core.ui.title
@@ -10,7 +12,7 @@ import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
+import kr.ac.catholic.cukmoa.core.ui.Toggle
 import androidx.compose.material3.Text
 import androidx.compose.material3.FilterChip as M3FilterChip
 import androidx.compose.runtime.Composable
@@ -81,17 +83,13 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
             ChipRow {
                 catalog.tracks.forEach { t ->
                     item(key = t.id.name) {
-                        M3FilterChip(
-                            selected = t.id == track.id,
-                            onClick = { picked = t.id },
-                            label = { Text(t.shortName) },
-                            leadingIcon = { Icon(trackIcon(t.id), null, Modifier.size(FilterChipDefaults.IconSize)) },
-                        )
+                        FilterChip(t.shortName, t.id == track.id, icon = trackIcon(t.id)) { picked = t.id }
                     }
                 }
             }
         }
         item(key = "track-${track.id}") {
+            Group {
             ListRow(
                 track.name,
                 stringResource(Res.string.n_seniors_records, track.seniorCount),
@@ -99,12 +97,13 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
                 leading = { IconBadge(trackIcon(track.id)) },
                 onClick = { vm.setTracks(if (isMine) student.trackIds - track.id else (listOf(track.id) + student.trackIds).take(2)) },
                 trailing = {
-                    Switch(
+                    Toggle(
                         checked = isMine,
                         onCheckedChange = { vm.setTracks(if (isMine) student.trackIds - track.id else (listOf(track.id) + student.trackIds).take(2)) },
                     )
                 },
             )
+            }
         }
         // Recent semesters on top, 1st year 1st semester at the bottom
         val steps = roadmap?.steps.orEmpty().sortedByDescending { it.semester.ordinal }
