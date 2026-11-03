@@ -45,7 +45,13 @@ import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import kr.ac.catholic.cukmoa.core.theme.CardMetrics
+import kr.ac.catholic.cukmoa.core.ui.Group
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -155,21 +161,25 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
         // Top: back/close + progress
         val progressSteps = steps.filter { it != Step.Intro }
         val progress by animateFloatAsState((progressSteps.indexOf(step) + 1f) / progressSteps.size)
-        Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal = Space.xs), verticalAlignment = Alignment.CenterVertically) {
+        // LG UX toolbar: accent back arrow and close, progress as a 4dp slider-style track (accent part, grey rest)
+        Row(Modifier.fillMaxWidth().height(56.dp).padding(horizontal = Space.xs), verticalAlignment = Alignment.CenterVertically) {
             when {
-                index > 0 && !(editing && index == 0) -> IconButton(onClick = { go(-1) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.previous)) }
+                index > 0 && !(editing && index == 0) -> IconButton(onClick = { go(-1) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.previous), tint = c.accent) }
                 else -> Spacer(Modifier.size(48.dp))
             }
             LinearProgressIndicator(
                 progress = { progress },
-                modifier = Modifier.weight(1f).padding(horizontal = Space.s),
+                modifier = Modifier.weight(1f).padding(horizontal = Space.s).height(4.dp),
+                color = c.accent,
+                trackColor = c.trackOff,
                 strokeCap = StrokeCap.Round,
+                gapSize = 0.dp,
+                drawStopIndicator = {},
             )
-            if (editing) IconButton(onClick = onClose) { Icon(Icons.Default.Close, stringResource(Res.string.close)) }
+            if (editing) IconButton(onClick = onClose) { Icon(Icons.Default.Close, stringResource(Res.string.close), tint = c.accent) }
             else Spacer(Modifier.size(48.dp))
         }
 
-        // The round next button floats over the content (bottom right); the content leaves room for it at its end
         Box(Modifier.weight(1f)) {
         AnimatedContent(
             targetState = step,
@@ -179,14 +189,14 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                 (slideInHorizontally { it * dir / 3 } + fadeIn()) togetherWith (slideOutHorizontally { -it * dir / 3 } + fadeOut())
             },
         ) { s ->
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = FAB_SPACE), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = Space.xxl), horizontalAlignment = Alignment.CenterHorizontally) {
                 Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()) {
                     when (s) {
                         Step.Intro -> Unit
                         Step.Grade -> StepFrame(stringResource(Res.string.ask_grade)) {
-                            Column(Modifier.padding(horizontal = Space.l), verticalArrangement = Arrangement.spacedBy(Space.m)) {
+                            Group(Modifier.padding(top = 0.dp)) {
                                 (1..4).forEach { g ->
-                                    ChoiceButton(yearTitle(g), selected = g == grade) { grade = g; if (!cardsTouched) cards = defaultHomeCards(g) }
+                                    ChoiceRow(yearTitle(g), selected = g == grade) { grade = g; if (!cardsTouched) cards = defaultHomeCards(g) }
                                 }
                             }
                         }
@@ -204,6 +214,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                             ModuleList(modules) { modules = it }
                         }
                         Step.Cards -> StepFrame(stringResource(Res.string.ask_cards)) {
+                            Group {
                             homeCardInfo.forEach { info ->
                                 fun set(on: Boolean) {
                                     cardsTouched = true
@@ -218,101 +229,95 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                                     trailing = { Toggle(checked = info.id in cards, onCheckedChange = ::set) },
                                 )
                             }
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Round next button at the bottom right, like the Android setup wizard; a check on the last step
-        Box(Modifier.align(Alignment.BottomEnd).padding(Space.l)) {
-            if (last) RoundButton(Icons.Default.Check, stringResource(if (editing) Res.string.save else Res.string.make_my_screen), ::finish)
-            else RoundButton(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.next)) { go(1) }
         }
-        }
+        // LG UX bottom button: one full-width accent pill with bold white text, on the page color below the content
+        if (last) PillButton(stringResource(if (editing) Res.string.save else Res.string.make_my_screen), ::finish)
+        else PillButton(stringResource(Res.string.next)) { go(1) }
     }
     }
 }
 
-/** Room left at the end of scrolling content so the floating round button never covers the last row. */
-private val FAB_SPACE = 96.dp
-
-/** Round floating button with one icon (next / done). */
+/** LG UX primary button: full-width accent pill (like the selected Light/Dark choice) with bold white text. */
 @Composable
-private fun RoundButton(icon: ImageVector, label: String, onClick: () -> Unit) {
-    FloatingActionButton(
+private fun PillButton(label: String, onClick: () -> Unit) {
+    val c = AppTheme.colors
+    Box(
+        Modifier.fillMaxWidth().padding(horizontal = Space.l, vertical = Space.m).height(52.dp)
+            .clip(CircleShape).background(c.accent).clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, color = c.onAccent, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), maxLines = 1)
+    }
+}
+
+/** One choice in an LG UX card (a ListRow, so the card draws dividers): an accent check marks the selected row. */
+@Composable
+private fun ChoiceRow(label: String, selected: Boolean, onClick: () -> Unit) {
+    ListRow(
+        label,
         onClick = onClick,
-        modifier = Modifier.size(64.dp),
-        shape = CircleShape,
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
-    ) {
-        Icon(icon, label, Modifier.size(28.dp))
-    }
+        trailing = { if (selected) Icon(Icons.Default.Check, stringResource(Res.string.selected), tint = AppTheme.colors.accent) },
+    )
 }
 
-/** Large full-width choice button; the selected one is filled with the primary container color and shows a check. */
-@Composable
-private fun ChoiceButton(label: String, selected: Boolean, onClick: () -> Unit) {
-    val cs = MaterialTheme.colorScheme
-    val bg by animateColorAsState(if (selected) cs.primaryContainer else cs.surfaceContainerHigh)
-    val fg by animateColorAsState(if (selected) cs.onPrimaryContainer else cs.onSurface)
-    Row(
-        Modifier.fillMaxWidth().height(72.dp).clip(RoundedCornerShape(24.dp)).background(bg)
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = Space.xxl),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, Modifier.weight(1f), color = fg, style = MaterialTheme.typography.titleLarge)
-        if (selected) Icon(Icons.Default.Check, null, tint = fg)
-    }
-}
-
+/** Step page: an LG UX big title (32sp bold) above the step's cards. */
 @Composable
 private fun StepFrame(title: String, content: @Composable () -> Unit) {
     Column {
-        Txt(title, MaterialTheme.typography.headlineMedium, Modifier.padding(start = Space.xxl, end = Space.xxl, top = Space.l, bottom = Space.xl))
+        Txt(title, MaterialTheme.typography.headlineLarge, Modifier.padding(start = Space.xxl, end = Space.xxl, top = Space.l, bottom = Space.xs))
         content()
     }
 }
 
-/** First screen: a tall color panel with the app name and promise, four feature lines, and the start button. */
+/**
+ * First screen in the LG UX style: the app icon (accent rounded square), name and promise as a big bold title on the
+ * page color, the four features on one card with LG Settings-style colored icons, and the start button.
+ */
 @Composable
 private fun Intro(onStart: () -> Unit) {
-    val cs = MaterialTheme.colorScheme
+    val c = AppTheme.colors
     val points = listOf(
-        Icons.Default.Route to Res.string.intro_point1,
-        Icons.Default.School to Res.string.intro_point2,
-        Icons.Default.Campaign to Res.string.intro_point3,
-        Icons.Default.Group to Res.string.intro_point4,
+        Triple(Icons.Default.Route, Color(0xFF2A9DF4), Res.string.intro_point1),
+        Triple(Icons.Default.School, Color(0xFF7A3CF0), Res.string.intro_point2),
+        Triple(Icons.Default.Campaign, Color(0xFFF5594A), Res.string.intro_point3),
+        Triple(Icons.Default.Group, Color(0xFF34C25A), Res.string.intro_point4),
     )
-    Box(Modifier.fillMaxSize().background(AppTheme.colors.bg).navigationBarsPadding()) {
-    Column(Modifier.fillMaxSize()) {
-        Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)).background(cs.primaryContainer)
-                .statusBarsPadding().padding(horizontal = Space.xxl, vertical = Space.xxxl),
-            verticalArrangement = Arrangement.spacedBy(Space.l),
-        ) {
-            Box(Modifier.size(56.dp).clip(RoundedCornerShape(16.dp)).background(cs.primary), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Bookmark, null, tint = cs.onPrimary, modifier = Modifier.size(28.dp))
+    Column(Modifier.fillMaxSize().background(c.bg).statusBarsPadding().navigationBarsPadding()) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                Modifier.widthIn(max = 640.dp).fillMaxWidth().padding(start = Space.xxl, end = Space.xxl, top = 56.dp, bottom = Space.s),
+                verticalArrangement = Arrangement.spacedBy(Space.l),
+            ) {
+                Box(Modifier.size(56.dp).clip(RoundedCornerShape(percent = 30)).background(c.accent), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Bookmark, null, tint = c.onAccent, modifier = Modifier.size(28.dp))
+                }
+                Text(APP_NAME, color = c.ink2, style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(Res.string.intro_headline), color = c.ink, style = MaterialTheme.typography.headlineLarge)
             }
-            Text(APP_NAME, color = cs.onPrimaryContainer, style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(Res.string.intro_headline), color = cs.onPrimaryContainer, style = MaterialTheme.typography.headlineLarge)
-        }
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = Space.l, bottom = FAB_SPACE)) {
-            points.forEach { (icon, title) ->
-                ListRow(stringResource(title), leading = { Icon(icon, null, tint = cs.primary) })
+            Group {
+                points.forEach { (icon, color, title) ->
+                    ListRow(stringResource(title), leading = {
+                        Box(Modifier.size(36.dp).clip(RoundedCornerShape(percent = 30)).background(color), contentAlignment = Alignment.Center) {
+                            Icon(icon, null, Modifier.size(22.dp), tint = Color.White)
+                        }
+                    })
+                }
             }
         }
-    }
-        Box(Modifier.align(Alignment.BottomEnd).padding(Space.l)) {
-            RoundButton(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.start), onStart)
-        }
+        PillButton(stringResource(Res.string.start), onStart)
     }
 }
 
 @Composable
 private fun TracksStep(catalog: Catalog, selected: List<TrackId>, onChange: (List<TrackId>) -> Unit) {
+    Group {
     catalog.tracks.forEach { t ->
         val order = selected.indexOf(t.id)
         ListRow(
@@ -329,6 +334,7 @@ private fun TracksStep(catalog: Catalog, selected: List<TrackId>, onChange: (Lis
         trailing = { CheckCircle(selected.isEmpty()) },
         onClick = { onChange(emptyList()) },
     )
+    }
 }
 
 /** Interests for majors without catalog tracks: the 1st major's related jobs (names: 대교협, details: CareerNet). */
@@ -347,5 +353,5 @@ private fun CareersStep(major: Department?, selected: List<String>, onChange: (L
         )
         return
     }
-    JobPicker(careers, jobs[major.id], selected, onChange)
+    Group { JobPicker(careers, jobs[major.id], selected, onChange) }
 }

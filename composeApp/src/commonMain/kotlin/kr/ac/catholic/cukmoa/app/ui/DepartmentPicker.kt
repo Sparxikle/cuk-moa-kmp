@@ -109,7 +109,7 @@ fun DepartmentPicker(list: DepartmentList?, selected: List<Department>, onChange
         if (groups.isEmpty()) EmptyState(stringResource(Res.string.no_department_for, query))
         groups.forEach { (key, departments) ->
             val (campus, college) = key
-            SectionHeader(if (campus != "성심") "$college · ${stringResource(Res.string.campus_name, campus)}" else college)
+            Section(if (campus != "성심") "$college · ${stringResource(Res.string.campus_name, campus)}" else college) {
             departments.forEach { d ->
                 val hits = if (d.name.squash().contains(query.trim().squash(), ignoreCase = true)) emptyList() else d.subjectHits(query)
                 val order = selected.indexOfFirst { it.id == d.id }
@@ -129,6 +129,7 @@ fun DepartmentPicker(list: DepartmentList?, selected: List<Department>, onChange
                         }
                     },
                 )
+            }
             }
         }
     }
