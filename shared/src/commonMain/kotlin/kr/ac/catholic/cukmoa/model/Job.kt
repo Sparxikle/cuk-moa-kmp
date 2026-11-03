@@ -20,6 +20,11 @@ data class JobInfo(
     val related: String? = null,
     /** CareerNet job page */
     val url: String? = null,
+    /**
+     * CareerNet job the details come from, when its name differs from [name] (a broader job, e.g. 일러스트레이터
+     * for 게임일러스트레이터). null when the names are the same or there are no details.
+     */
+    val matched: String? = null,
 )
 
 /** GET /api/v1/jobs?department=성심/경영학과 */

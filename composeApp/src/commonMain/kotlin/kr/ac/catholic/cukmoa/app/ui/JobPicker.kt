@@ -55,7 +55,12 @@ fun JobPicker(names: List<String>, jobs: JobList?, selected: List<String>, onCha
 private fun JobRow(job: JobInfo, order: Int, trailing: (@Composable () -> Unit)? = null, onClick: () -> Unit) {
     ListRow(
         if (order >= 0) "${order + 1}. ${job.name}" else job.name,
-        listOfNotNull(job.summary, job.wage?.let { stringResource(Res.string.job_wage, it) }).joinToString(" · ").ifEmpty { null },
+        // A broader CareerNet job says so first, so its description isn't taken for this exact job
+        listOfNotNull(
+            job.matched?.let { stringResource(Res.string.job_matched, it) },
+            job.summary,
+            job.wage?.let { stringResource(Res.string.job_wage, it) },
+        ).joinToString(" · ").ifEmpty { null },
         subtitleMaxLines = 2,
         leading = { CheckCircle(order >= 0) },
         trailing = trailing,

@@ -240,6 +240,7 @@
     <string name="view_all_jobs">職業%1$d件をすべて見る</string>
     <string name="jobs_source_default">関連職業：韓国大学教育協議会の学科情報</string>
     <string name="job_wage">平均年収 %1$s</string>
+    <string name="job_matched">キャリアネット「%1$s」の説明</string>
     <string name="not_sure_yet">まだわかりません</string>
     <string name="not_sure_yet_detail">学校の推奨順で科目をおすすめします。</string>
     <string name="all_jobs_title">関連職業 %1$d件</string>

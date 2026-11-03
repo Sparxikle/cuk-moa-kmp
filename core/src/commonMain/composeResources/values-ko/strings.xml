@@ -240,6 +240,7 @@
     <string name="view_all_jobs">직업 %1$d개 모두 보기</string>
     <string name="jobs_source_default">관련 직업: 한국대학교육협의회 학과 정보</string>
     <string name="job_wage">평균 연봉 %1$s</string>
+    <string name="job_matched">커리어넷 ‘%1$s’ 기준</string>
     <string name="not_sure_yet">아직 모르겠어요</string>
     <string name="not_sure_yet_detail">학교 권장 순서로 과목을 추천해 드려요.</string>
     <string name="all_jobs_title">관련 직업 %1$d개</string>

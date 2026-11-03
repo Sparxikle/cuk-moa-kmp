@@ -240,6 +240,7 @@
     <string name="view_all_jobs">View all %1$d jobs</string>
     <string name="jobs_source_default">Related jobs: Korean Council for University Education</string>
     <string name="job_wage">Avg. salary %1$s</string>
+    <string name="job_matched">Described as %1$s (CareerNet)</string>
     <string name="not_sure_yet">Not sure yet</string>
     <string name="not_sure_yet_detail">We'll recommend courses in the school's suggested order.</string>
     <string name="all_jobs_title">All %1$d related jobs</string>

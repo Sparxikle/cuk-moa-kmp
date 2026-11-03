@@ -240,6 +240,7 @@
     <string name="view_all_jobs">查看全部%1$d个职业</string>
     <string name="jobs_source_default">相关职业：韩国大学教育协议会院系信息</string>
     <string name="job_wage">平均年薪 %1$s</string>
+    <string name="job_matched">按职业网“%1$s”说明</string>
     <string name="not_sure_yet">还不确定</string>
     <string name="not_sure_yet_detail">将按学校建议的顺序推荐课程。</string>
     <string name="all_jobs_title">全部%1$d个相关职业</string>
