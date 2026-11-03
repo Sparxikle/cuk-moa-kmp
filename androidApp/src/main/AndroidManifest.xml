@@ -6,7 +6,7 @@
     <!-- usesCleartextTraffic: for reaching the HTTP dev server (localhost via adb reverse). Switch to HTTPS and turn this off before release. -->
     <application
         android:label="가대모아"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.App"
         android:localeConfig="@xml/locales_config">

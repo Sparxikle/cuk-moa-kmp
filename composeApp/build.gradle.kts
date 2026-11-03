@@ -61,6 +61,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "가대모아"
             packageVersion = "1.0.0"
+            // App icon per installer (made by icons.sh from icons/)
+            macOS { iconFile.set(project.file("icons/AppIcon.icns")) }
+            windows { iconFile.set(project.file("icons/AppIcon.ico")) }
+            linux { iconFile.set(project.file("icons/AppIcon.png")) }
         }
     }
 }
