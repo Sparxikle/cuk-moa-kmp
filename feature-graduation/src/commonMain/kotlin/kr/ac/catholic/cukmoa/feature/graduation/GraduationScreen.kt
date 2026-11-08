@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.graduation
 
+import kr.ac.catholic.cukmoa.core.ui.InfoButton
 import kr.ac.catholic.cukmoa.core.ui.Choices
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
@@ -56,6 +57,7 @@ import kr.ac.catholic.cukmoa.core.ui.ChipTone
 import kr.ac.catholic.cukmoa.core.ui.Chips
 import kr.ac.catholic.cukmoa.core.ui.EmptyState
 import kr.ac.catholic.cukmoa.core.ui.FilterChip
+import kr.ac.catholic.cukmoa.core.ui.Group
 import kr.ac.catholic.cukmoa.core.ui.ListRow
 import kr.ac.catholic.cukmoa.core.ui.MoreRow
 import kr.ac.catholic.cukmoa.core.ui.ProgressBar
@@ -99,6 +101,11 @@ fun GraduationScreen(catalog: Catalog, student: StudentState) {
     val plan = graduationPlan(catalog, student)
     val s = creditSummary(catalog, student)
     val classes by LocalAppViewModel.current.classes.collectAsState()
+    val departments by LocalAppViewModel.current.departments.collectAsState()
+    val uri = androidx.compose.ui.platform.LocalUriHandler.current
+    // The 1st major's own page on graduation requirements (from the server's department site registry)
+    val departmentPage = student.departments.firstOrNull()?.let { id -> departments?.items?.firstOrNull { it.id == id } }
+        ?.let { d -> d.graduationUrl?.let { d.name to it } }
     // Rule notes from the guide go behind the info button instead of under every bar
     val info = listOfNotNull(
         plan.label,
@@ -109,6 +116,18 @@ fun GraduationScreen(catalog: Catalog, student: StudentState) {
     ScreenList(title = stringResource(Res.string.graduation_title), info = info.joinToString("\n\n")) {
         item(key = "banners") { StatusBanners() }
         item(key = "credits") { CreditsCard(s, plan.doubleMajor) }
+        departmentPage?.let { (name, url) ->
+            item(key = "dept-page") {
+                Group {
+                    ListRow(
+                        stringResource(Res.string.dept_graduation_page, name),
+                        stringResource(Res.string.dept_graduation_page_detail),
+                        chevron = true,
+                        onClick = { runCatching { uri.openUri(url) } },
+                    )
+                }
+            }
+        }
         plan.buckets.filter { it.checklistCourseIds.isNotEmpty() }.forEach { b ->
             item(key = b.id.name) { Checklist(catalog, student, plan, b, classes?.items.orEmpty()) }
         }
@@ -177,9 +196,7 @@ private fun Checklist(catalog: Catalog, student: StudentState, plan: GraduationP
                 trailing = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (checked) GradeChip(student.grades[c.id]) { vm.setCourseGrade(c.id, it) }
-                        IconButton(onClick = { nav.openCourse(c.id) }) {
-                            Icon(Icons.Outlined.Info, stringResource(Res.string.see_details, c.name), tint = AppTheme.colors.ink2)
-                        }
+                        InfoButton(stringResource(Res.string.see_details, c.name), onClick = { nav.openCourse(c.id) }, tint = AppTheme.colors.ink2)
                     }
                 },
             )

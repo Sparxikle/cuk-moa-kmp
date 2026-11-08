@@ -16,8 +16,12 @@ data class Department(
     val college: String,
     /** 성심 · 성의 · 성신 */
     val campus: String,
-    /** Board code of a department whose announcements are collected (csie, ai …). null for departments that aren't collected yet */
+    /** Board code of a department whose announcements are collected (csie, ai, major_convergence …). null when none are collected */
     val board: String? = null,
+    /** Department website (from the server's site registry) */
+    val site: String? = null,
+    /** Department page on graduation requirements, when the department publishes one */
+    val graduationUrl: String? = null,
     /** Main courses (per-department main courses published by the school) */
     val subjects: List<String> = emptyList(),
     /** Related careers */
@@ -34,13 +38,7 @@ data class DepartmentList(
     val items: List<Department>,
 )
 
-/** Departments whose announcements are collected now: department name → board code. Other departments get added in turn. */
-val DepartmentBoards: Map<String, String> = linkedMapOf(
-    "컴퓨터정보공학부" to "csie",
-    "미디어기술콘텐츠학과" to "mtc",
-    "데이터사이언스학과" to "datascience",
-    "정보통신전자공학부" to "ice",
-    "인공지능학과" to "ai",
-)
+/** Departments of the College of AI, Electronics & Information Convergence (the public department data has no college for them) */
+val AiCollegeDepartments: Set<String> = setOf("컴퓨터정보공학부", "미디어기술콘텐츠학과", "데이터사이언스학과", "정보통신전자공학부", "인공지능학과")
 
 const val AI_COLLEGE = "AI전자정보융합대학"

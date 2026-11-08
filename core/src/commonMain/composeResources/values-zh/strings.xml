@@ -432,4 +432,7 @@
     <string name="language_restart_title">更改语言？</string>
     <string name="language_restart_text">应用将重新启动以使用新语言。</string>
     <string name="restart">重新启动</string>
+    <string name="dept_graduation_page">%1$s毕业要求说明</string>
+    <string name="dept_graduation_page_detail">院系主页的说明（毕业考试·附加要求等）</string>
+    <string name="department_website">院系主页</string>
 </resources>

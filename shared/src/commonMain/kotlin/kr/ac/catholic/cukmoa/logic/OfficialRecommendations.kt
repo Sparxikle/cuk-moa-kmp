@@ -60,7 +60,7 @@ data class OfficialRecommendations(
  */
 fun officialRecommendations(catalog: Catalog, student: StudentState, roadmaps: List<MajorRoadmap>): OfficialRecommendations? {
     val next: SemesterKey = student.currentSemester.next ?: return null
-    val mine = student.majors.mapNotNull { m -> roadmaps.firstOrNull { it.major == m && it.entries.isNotEmpty() } }
+    val mine = student.myRoadmaps(roadmaps).filter { it.entries.isNotEmpty() }
     if (mine.isEmpty()) return null
     val done = (student.completedCourseIds + student.inProgressCourseIds).map { catalog.keyOf(it) }.toSet()
     val yearOnly = mine.all { r -> r.entries.all { it.semester == null } }
@@ -79,3 +79,10 @@ fun officialRecommendations(catalog: Catalog, student: StudentState, roadmaps: L
         .sortedBy { if (it.marks.any { m -> "졸업" in m || "필수" in m || "핵심" in m }) 0 else 1 }
     return OfficialRecommendations(if (yearOnly) "${next.year}학년" else next.label, items, next, yearOnly)
 }
+
+/**
+ * Official roadmaps of my majors, 1st major first. Matched by department name, since majors sharing one website
+ * (융복합전공, 글로벌경영대학) have separate roadmaps under the same board code.
+ */
+fun StudentState.myRoadmaps(roadmaps: List<MajorRoadmap>): List<MajorRoadmap> =
+    departments.map { it.substringAfter('/') }.mapNotNull { name -> roadmaps.firstOrNull { it.department == name } }

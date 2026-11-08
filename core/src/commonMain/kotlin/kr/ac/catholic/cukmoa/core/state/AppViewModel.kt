@@ -320,11 +320,25 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         refreshAnnouncements()
     }
 
+    /**
+     * Board codes of my majors as the server knows them now. Majors picked before their department's boards were
+     * collected get them here, so "내 학과" announcements and professors work without picking the major again.
+     */
+    private fun syncBoards(list: DepartmentList) {
+        val s = _student.value
+        val boards = s.departments.mapNotNull { id -> list.items.firstOrNull { it.id == id }?.board }.distinct()
+        if (s.departments.isNotEmpty() && boards != s.majors) {
+            update { it.copy(majors = boards) }
+            refreshAnnouncements()
+        }
+    }
+
     fun refreshDepartments(): Job =
         viewModelScope.launch {
             runCatching { api.departments() }.onSuccess {
                 _departments.value = it
                 saveCache(DEPARTMENTS_KEY) { ApiJson.encodeToString(DepartmentList.serializer(), it) }
+                syncBoards(it)
             }
         }
 

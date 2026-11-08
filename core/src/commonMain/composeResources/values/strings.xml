@@ -432,4 +432,7 @@
     <string name="language_restart_title">Change language?</string>
     <string name="language_restart_text">The app will restart to apply the new language.</string>
     <string name="restart">Restart</string>
+    <string name="dept_graduation_page">%1$s graduation requirements</string>
+    <string name="dept_graduation_page_detail">The department's own page (checks, exams, extra rules)</string>
+    <string name="department_website">Department website</string>
 </resources>

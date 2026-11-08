@@ -34,7 +34,7 @@ import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.logic.statusOf
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.MajorRoadmapList
-import kr.ac.catholic.cukmoa.model.Majors
+import kr.ac.catholic.cukmoa.logic.myRoadmaps
 import kr.ac.catholic.cukmoa.model.StudentState
 import kr.ac.catholic.cukmoa.model.courseKey
 import kr.ac.catholic.cukmoa.logic.roadmapCourseId
@@ -57,8 +57,9 @@ fun LazyListScope.officialRoadmap(
     item(key = "majors") {
         ChipRow {
             // My majors' departments first
-            val order = list.items.sortedBy { if (it.major in student.majors) student.majors.indexOf(it.major) else 10 }
-            order.forEach { r -> item(key = r.major) { FilterChip(Majors[r.major] ?: r.department, roadmap.major == r.major) { onMajor(r.major) } } }
+            val mine = student.myRoadmaps(list.items)
+            val order = mine + list.items.filter { it !in mine }
+            order.forEach { r -> item(key = r.major) { FilterChip(r.department, roadmap.major == r.major) { onMajor(r.major) } } }
         }
     }
 
@@ -139,6 +140,6 @@ class RoadmapUiState(initialMajor: String) {
 
 @Composable
 fun rememberRoadmapUiState(student: StudentState, list: MajorRoadmapList?): RoadmapUiState {
-    val first = student.majors.firstOrNull { m -> list?.items?.any { it.major == m } == true } ?: list?.items?.firstOrNull()?.major ?: "csie"
+    val first = list?.items?.let { student.myRoadmaps(it).firstOrNull()?.major ?: it.firstOrNull()?.major } ?: ""
     return remember(first) { RoadmapUiState(first) }
 }

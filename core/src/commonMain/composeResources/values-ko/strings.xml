@@ -432,4 +432,7 @@
     <string name="language_restart_title">언어를 바꿀까요?</string>
     <string name="language_restart_text">새 언어를 적용하려면 앱을 다시 시작해요.</string>
     <string name="restart">다시 시작</string>
+    <string name="dept_graduation_page">%1$s 졸업요건 안내</string>
+    <string name="dept_graduation_page_detail">학과 홈페이지의 안내 (졸업시험·추가 요건 등)</string>
+    <string name="department_website">학과 홈페이지</string>
 </resources>

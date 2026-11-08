@@ -126,5 +126,3 @@ data class AnnouncementMeta(
     val scrapeRuns: List<ScrapeRun>,
 )
 
-/** Board code → department name. Shared by the server (collector) and the app (filter chips). */
-val Majors: Map<String, String> = DepartmentBoards.entries.associate { (name, code) -> code to name }

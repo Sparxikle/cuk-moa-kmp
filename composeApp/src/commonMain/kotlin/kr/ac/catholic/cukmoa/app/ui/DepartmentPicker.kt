@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import kr.ac.catholic.cukmoa.core.ui.InfoButton
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import kr.ac.catholic.cukmoa.core.ui.ChipTone
 import kr.ac.catholic.cukmoa.core.ui.Chips
 import kr.ac.catholic.cukmoa.core.ui.DetailSheet
 import kr.ac.catholic.cukmoa.core.ui.EmptyState
+import kr.ac.catholic.cukmoa.core.ui.Group
 import kr.ac.catholic.cukmoa.core.ui.ListRow
 import kr.ac.catholic.cukmoa.core.ui.PrimaryButton
 import kr.ac.catholic.cukmoa.core.ui.SearchField
@@ -125,7 +127,7 @@ fun DepartmentPicker(list: DepartmentList?, selected: List<Department>, onChange
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (d.board != null) Icon(Icons.Outlined.Campaign, stringResource(Res.string.notices_supported), tint = AppTheme.colors.ink2, modifier = Modifier.size(20.dp))
-                            IconButton(onClick = { detail = d }) { Icon(Icons.Outlined.Info, stringResource(Res.string.view_courses_of, d.name), tint = AppTheme.colors.ink2) }
+                            InfoButton(stringResource(Res.string.view_courses_of, d.name), onClick = { detail = d }, tint = AppTheme.colors.ink2)
                         }
                     },
                 )
@@ -160,6 +162,16 @@ fun DepartmentSheet(department: Department, order: Int, highlight: String, onTog
                 onClick = { onToggle(); onDismiss() },
                 tinted = order >= 0,
             )
+        }
+        d.site?.let { url ->
+            val uri = androidx.compose.ui.platform.LocalUriHandler.current
+            Group {
+                ListRow(stringResource(Res.string.department_website), url.removePrefix("https://").removePrefix("http://").substringBefore('/'),
+                    chevron = true, onClick = { runCatching { uri.openUri(url) } })
+                d.graduationUrl?.let { g ->
+                    ListRow(stringResource(Res.string.dept_graduation_page, d.name), null, chevron = true, onClick = { runCatching { uri.openUri(g) } })
+                }
+            }
         }
         if (d.subjects.isNotEmpty()) Section(stringResource(Res.string.main_subjects_n, d.subjects.size)) {
             SheetBlock { Chips { d.subjects.forEach { Chip(it, if (it in hits) ChipTone.Accent else ChipTone.Neutral) } } }

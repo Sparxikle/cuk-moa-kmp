@@ -2,7 +2,6 @@ package kr.ac.catholic.cukmoa.logic
 
 import kr.ac.catholic.cukmoa.model.BucketId
 import kr.ac.catholic.cukmoa.model.Catalog
-import kr.ac.catholic.cukmoa.model.DepartmentBoards
 import kr.ac.catholic.cukmoa.model.DepartmentRules
 import kr.ac.catholic.cukmoa.model.ExamState
 import kr.ac.catholic.cukmoa.model.GraduationTest
@@ -39,9 +38,7 @@ data class GraduationPlan(
 /** Name of the student's 1st major on the 성심 campus, or null if none (or another campus) is chosen. */
 fun StudentState.firstMajorName(): String? {
     val id = departments.firstOrNull()
-    if (id != null) return id.substringAfter('/').takeIf { id.substringBefore('/') == GUIDE_CAMPUS }
-    val board = majors.firstOrNull() ?: return null
-    return DepartmentBoards.entries.firstOrNull { it.value == board }?.key
+    return id?.substringAfter('/')?.takeIf { id.substringBefore('/') == GUIDE_CAMPUS }
 }
 
 fun graduationPlan(catalog: Catalog, student: StudentState): GraduationPlan {

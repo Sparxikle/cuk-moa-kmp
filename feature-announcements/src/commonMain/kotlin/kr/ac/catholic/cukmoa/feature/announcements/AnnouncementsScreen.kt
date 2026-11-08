@@ -45,7 +45,6 @@ import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.logic.shortDate
 import kr.ac.catholic.cukmoa.model.Announcement
 import kr.ac.catholic.cukmoa.model.AnnouncementSource
-import kr.ac.catholic.cukmoa.model.Majors
 import kr.ac.catholic.cukmoa.model.StudentState
 
 @Composable
@@ -83,7 +82,7 @@ fun AnnouncementsScreen(student: StudentState) {
         }
     }
     // "My department" = the boards of my two majors. Hide the chip if none of my majors has announcements collected.
-    val majorName = student.majors.mapNotNull { Majors[it] }.let { names ->
+    val majorName = (if (student.majors.isEmpty()) emptyList() else student.departments.map { it.substringAfter('/') }).let { names ->
         when (names.size) {
             0 -> null
             1 -> names[0]

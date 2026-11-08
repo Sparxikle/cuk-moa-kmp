@@ -33,7 +33,7 @@ class OfficialRecommendationsTest {
 
     @Test
     fun `next semester courses from my majors, graduation requirements first`() {
-        val student = sampleStudent(3).copy(majors = listOf("ai")) // 3-2 → 4-1
+        val student = sampleStudent(3).copy(majors = listOf("ai"), departments = listOf("성심/인공지능학과")) // 3-2 → 4-1
         val rec = officialRecommendations(catalog, student, listOf(ai, ice))!!
         assertEquals("4학년 1학기", rec.periodLabel)
         assertEquals(listOf("인공지능캡스톤디자인1-2", "정보검색", "웹서비스 컴퓨팅"), rec.items.map { it.name })
@@ -44,19 +44,19 @@ class OfficialRecommendationsTest {
 
     @Test
     fun `completed and in-progress courses are left out, also when saved by name`() {
-        val student = sampleStudent(3).copy(majors = listOf("ai"), completedCourseIds = sampleStudent(3).completedCourseIds + roadmapCourseId("정보검색") + "web-services")
+        val student = sampleStudent(3).copy(majors = listOf("ai"), departments = listOf("성심/인공지능학과"), completedCourseIds = sampleStudent(3).completedCourseIds + roadmapCourseId("정보검색") + "web-services")
         val names = officialRecommendations(catalog, student, listOf(ai))!!.items.map { it.name }
         assertEquals(listOf("인공지능캡스톤디자인1-2"), names)
     }
 
     @Test
     fun `year-only roadmaps recommend next year, no roadmap means no official recommendations`() {
-        val iceStudent = sampleStudent(3).copy(majors = listOf("ice"))
+        val iceStudent = sampleStudent(3).copy(majors = listOf("ice"), departments = listOf("성심/정보통신전자공학부"))
         val rec = officialRecommendations(catalog, iceStudent, listOf(ai, ice))!!
         assertEquals("4학년", rec.periodLabel)
         assertEquals(listOf("영상처리"), rec.items.map { it.name })
-        assertNull(officialRecommendations(catalog, sampleStudent(3).copy(majors = emptyList()), listOf(ai)))
-        assertNull(officialRecommendations(catalog, sampleStudent(4).copy(majors = listOf("ai")), listOf(ai))) // Nothing comes after 4-2
+        assertNull(officialRecommendations(catalog, sampleStudent(3).copy(majors = emptyList(), departments = emptyList()), listOf(ai)))
+        assertNull(officialRecommendations(catalog, sampleStudent(4).copy(majors = listOf("ai"), departments = listOf("성심/인공지능학과")), listOf(ai))) // Nothing comes after 4-2
     }
 
     @Test

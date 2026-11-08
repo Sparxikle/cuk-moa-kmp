@@ -432,4 +432,7 @@
     <string name="language_restart_title">言語を変更しますか？</string>
     <string name="language_restart_text">新しい言語を適用するためにアプリを再起動します。</string>
     <string name="restart">再起動</string>
+    <string name="dept_graduation_page">%1$sの卒業要件案内</string>
+    <string name="dept_graduation_page_detail">学科ホームページの案内（卒業試験・追加要件など）</string>
+    <string name="department_website">学科ホームページ</string>
 </resources>

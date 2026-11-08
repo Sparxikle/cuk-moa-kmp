@@ -19,7 +19,6 @@ import kr.ac.catholic.cukmoa.core.ui.ScreenList
 import kr.ac.catholic.cukmoa.core.ui.SearchField
 import kr.ac.catholic.cukmoa.model.FacultyList
 import kr.ac.catholic.cukmoa.model.FacultyMember
-import kr.ac.catholic.cukmoa.model.Majors
 import kr.ac.catholic.cukmoa.model.StudentState
 
 private const val MINE = "mine"
@@ -39,6 +38,12 @@ fun FacultyScreen(list: FacultyList, student: StudentState) {
     // Default: my majors' professors, if I have a major whose announcements are collected
     var filter by remember { mutableStateOf(if (student.majors.isNotEmpty()) MINE else null) }
     val nav = LocalNavigator.current
+    // One chip per department site that has professors, named after a department on it
+    val majorChips = remember(list) {
+        list.items.flatMap { m -> m.majors.map { it to m.departments.firstOrNull() } }
+            .groupBy({ it.first }, { it.second }).mapValues { (code, names) -> names.filterNotNull().groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: code }
+            .entries.sortedBy { it.value }.map { it.key to it.value }
+    }
 
     val shown = list.items.filter { m ->
         when (filter) {
@@ -53,7 +58,7 @@ fun FacultyScreen(list: FacultyList, student: StudentState) {
         item(key = "filters") {
             ChipRow {
                 if (student.majors.isNotEmpty()) item { FilterChip(stringResource(Res.string.my_major), filter == MINE) { filter = MINE } }
-                Majors.forEach { (code, name) -> item(key = code) { FilterChip(name, filter == code) { filter = code } } }
+                majorChips.forEach { (code, name) -> item(key = code) { FilterChip(name, filter == code) { filter = code } } }
                 item { FilterChip(stringResource(Res.string.all), filter == null) { filter = null } }
             }
         }
