@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.professors
 
+import kr.ac.catholic.cukmoa.core.ui.AnimatedIcon
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ object ProfessorsModule : FeatureModule {
     override val title = Res.string.module_professors
     override val summary = Res.string.module_professors_summary
     override val icon = Icons.Default.Group
+    override val animatedIcon = AnimatedIcon.Users
     override val homeCards = setOf(HomeCardId.Professors)
 
     @Composable

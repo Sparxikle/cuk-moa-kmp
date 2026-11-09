@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.timetable
 
+import kr.ac.catholic.cukmoa.core.ui.AnimatedIcon
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarViewWeek
@@ -15,6 +16,7 @@ object TimetableModule : FeatureModule {
     override val title = Res.string.module_timetable
     override val summary = Res.string.module_timetable_summary
     override val icon = Icons.Default.CalendarViewWeek
+    override val animatedIcon = AnimatedIcon.Table
     override val needsNetwork = true
 
     @Composable

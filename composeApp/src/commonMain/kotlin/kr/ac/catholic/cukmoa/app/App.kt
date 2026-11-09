@@ -1,5 +1,8 @@
 package kr.ac.catholic.cukmoa.app
 
+import androidx.compose.runtime.mutableIntStateOf
+import kr.ac.catholic.cukmoa.core.ui.LottieIcon
+import kr.ac.catholic.cukmoa.core.ui.AnimatedIcon
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import org.jetbrains.compose.resources.StringResource
@@ -73,7 +76,7 @@ private sealed interface Sheet {
     data class Professor(val id: String) : Sheet
 }
 
-private data class TabItem(val route: String, val label: StringResource, val icon: ImageVector)
+private data class TabItem(val route: String, val label: StringResource, val icon: ImageVector, val animated: AnimatedIcon? = null)
 
 private enum class AppScreen(val depth: Int) { Onboarding(0), Main(1), Settings(2), Modules(2) }
 
@@ -87,7 +90,7 @@ private fun MainTabs(
     newCount: Long,
     onTab: (String) -> Unit,
 ) {
-    val tabs = listOf(TabItem(Routes.HOME, Res.string.tab_home, Icons.Default.GridView)) + modules.map { TabItem(it.id, it.title, it.icon) }
+    val tabs = listOf(TabItem(Routes.HOME, Res.string.tab_home, Icons.Default.GridView, AnimatedIcon.Grid)) + modules.map { TabItem(it.id, it.title, it.icon, it.animatedIcon) }
     fun index(r: String) = tabs.indexOfFirst { it.route == r }.coerceAtLeast(0)
 
     Scaffold(
@@ -122,15 +125,24 @@ private fun TabBar(tabs: List<TabItem>, route: String, newCount: Long, onTab: (S
         tabs.forEach { t ->
             val selected = route == t.route
             val color = if (selected) c.accent else off
-            // Pop only when a tab becomes selected, not for the first tab at start
+            // Animate only when a tab becomes selected, not for the first tab at start: animated icons play their
+            // Lottie once (play counts selections), plain icons pop
             val pop = remember { Animatable(1f) }
+            var play by remember { mutableIntStateOf(0) }
             var started by remember { mutableStateOf(false) }
             LaunchedEffect(selected) {
                 if (selected && started) {
-                    pop.snapTo(0.55f)
-                    pop.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = 260f))
+                    if (t.animated != null) play++
+                    else {
+                        pop.snapTo(0.55f)
+                        pop.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = 260f))
+                    }
                 } else pop.snapTo(1f)
                 started = true
+            }
+            val icon: @Composable () -> Unit = {
+                if (t.animated != null) LottieIcon(t.animated, play, tint = color, size = 30.dp)
+                else Icon(t.icon, null, Modifier.size(28.dp), tint = color)
             }
             Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = if (crowded) 1.dp else 4.dp), contentAlignment = Alignment.Center) {
                 Column(
@@ -142,8 +154,8 @@ private fun TabBar(tabs: List<TabItem>, route: String, newCount: Long, onTab: (S
                 ) {
                     Box(Modifier.size(36.dp).graphicsLayer { scaleX = pop.value; scaleY = pop.value }, contentAlignment = Alignment.Center) {
                         if (t.route == Routes.ANNOUNCEMENTS && newCount > 0) {
-                            BadgedBox(badge = { Badge { Text("$newCount") } }) { Icon(t.icon, null, Modifier.size(28.dp), tint = color) }
-                        } else Icon(t.icon, null, Modifier.size(28.dp), tint = color)
+                            BadgedBox(badge = { Badge { Text("$newCount") } }) { icon() }
+                        } else icon()
                     }
                     Text(
                         stringResource(t.label),

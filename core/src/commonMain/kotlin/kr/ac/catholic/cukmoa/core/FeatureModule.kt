@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.core
 
+import kr.ac.catholic.cukmoa.core.ui.AnimatedIcon
 import org.jetbrains.compose.resources.StringResource
 
 import androidx.compose.runtime.Composable
@@ -31,6 +32,9 @@ interface FeatureModule {
     val summary: StringResource
 
     val icon: ImageVector
+
+    /** Animated tab icon (plays once when the tab is selected), or null to use [icon] with a short pop */
+    val animatedIcon: AnimatedIcon? get() = null
 
     /** Whether it needs the server (internet) to work. Shown in the module manager. */
     val needsNetwork: Boolean get() = false

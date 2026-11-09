@@ -217,7 +217,7 @@ fun ScreenList(
                         onTextLayout = { textWidth = it.size.width },
                     )
                 }
-                if (info != null) IconButton(onClick = { showInfo = true }) { Icon(Icons.Outlined.Info, stringResource(Res.string.about)) }
+                if (info != null) InfoButton(stringResource(Res.string.about), onClick = { showInfo = true })
                 actions()
             }
         }
@@ -253,7 +253,8 @@ fun ScreenList(
 fun InfoDialog(title: String, text: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Outlined.Info, null) },
+        // The "i" plays once as the dialog opens
+        icon = { LottieIcon(AnimatedIcon.Info, play = 1) },
         title = { Text(title) },
         text = { Text(text) },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.close)) } },
@@ -288,9 +289,7 @@ fun SectionHeader(title: String, action: Pair<String, () -> Unit>? = null, info:
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, Modifier.weight(1f, fill = false), color = AppTheme.colors.ink, style = MaterialTheme.typography.titleMedium)
-        if (info != null) IconButton(onClick = { showInfo = true }, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Outlined.Info, stringResource(Res.string.about), Modifier.size(18.dp), tint = AppTheme.colors.ink2)
-        }
+        if (info != null) InfoButton(stringResource(Res.string.about), onClick = { showInfo = true }, modifier = Modifier.size(36.dp), size = 18.dp, tint = AppTheme.colors.ink2)
         Spacer(Modifier.weight(1f))
         action?.let { (label, onClick) -> TextButton(onClick = onClick) { Text(label) } }
     }
