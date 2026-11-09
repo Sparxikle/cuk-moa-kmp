@@ -41,7 +41,11 @@ fun FacultyScreen(list: FacultyList, student: StudentState) {
     // One chip per department site that has professors, named after a department on it
     val majorChips = remember(list) {
         list.items.flatMap { m -> m.majors.map { it to m.departments.firstOrNull() } }
-            .groupBy({ it.first }, { it.second }).mapValues { (code, names) -> names.filterNotNull().groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: code }
+            .groupBy({ it.first }, { it.second }).mapValues { (code, names) ->
+                // Professors of the 융복합전공 belong to many home departments: the chip names the shared programme
+                names.filterNotNull().firstOrNull { CONVERGENCE in it }?.let { CONVERGENCE }
+                    ?: names.filterNotNull().groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: code
+            }
             .entries.sortedBy { it.value }.map { it.key to it.value }
     }
 
@@ -66,3 +70,5 @@ fun FacultyScreen(list: FacultyList, student: StudentState) {
         cardItems(shown, key = { it.id }) { m -> FacultyRow(m) { nav.openProfessor(m.name) } }
     }
 }
+
+private const val CONVERGENCE = "융복합전공"
