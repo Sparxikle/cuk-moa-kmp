@@ -22,6 +22,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Edit
+import kr.ac.catholic.cukmoa.core.ui.DetailSheet
+import kr.ac.catholic.cukmoa.core.ui.SearchField
+import kr.ac.catholic.cukmoa.core.ui.SheetHeader
+import kr.ac.catholic.cukmoa.logic.clashesWith
+import kr.ac.catholic.cukmoa.logic.with
+import kr.ac.catholic.cukmoa.logic.without
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -94,7 +104,12 @@ fun TimetableScreen(catalog: Catalog, student: StudentState) {
     }
 }
 
-/** Main page: the saved timetable (or an empty week) and the button that opens the AI maker. */
+/**
+ * Main page: the saved timetable (or an empty week) and the button that opens the AI maker.
+ * The pencil switches to editing: remove classes, move a class to another section, add classes from this
+ * semester's list (clashing ones can't be picked). Every change is saved right away. Editing an empty week
+ * builds a timetable by hand.
+ */
 @Composable
 private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
     val vm = LocalAppViewModel.current
@@ -102,16 +117,42 @@ private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
     val all = classesList?.items.orEmpty()
     val chosen = student.timetable
     val current = chosen?.takeIf { c -> classesList?.let { it.year == c.year && it.semester == c.semester } == true }
+    var editing by rememberSaveable { mutableStateOf(false) }
+    AppBackHandler(enabled = editing) { editing = false }
+    // Sheet: null = closed, "" = add a class, subject number = other sections of that course
+    var picker by remember { mutableStateOf<String?>(null) }
+
+    val myTimetable = stringResource(Res.string.my_timetable)
+    val plan = current?.plan ?: TimetablePlan(title = myTimetable, items = emptyList())
+    fun save(p: TimetablePlan) {
+        val list = classesList ?: return
+        if (p.items.isEmpty() && current == null) return
+        vm.editTimetable(list.year, list.semester, p)
+    }
 
     Box(Modifier.fillMaxSize()) {
         ScreenList(
             title = classesList?.let { stringResource(Res.string.term_year_sem, it.year, it.semester) } ?: stringResource(Res.string.module_timetable),
             info = stringResource(Res.string.timetable_privacy),
             actions = {
-                if (current != null) IconButton(onClick = vm::clearTimetable) { Icon(Icons.Outlined.Delete, stringResource(Res.string.clear)) }
+                if (classesList != null) IconButton(onClick = { editing = !editing }) {
+                    if (editing) Icon(Icons.Default.Check, stringResource(Res.string.done))
+                    else Icon(Icons.Outlined.Edit, stringResource(Res.string.edit_timetable))
+                }
+                if (current != null && !editing) IconButton(onClick = vm::clearTimetable) { Icon(Icons.Outlined.Delete, stringResource(Res.string.clear)) }
             },
         ) {
-            if (current != null) {
+            if (editing) {
+                item(key = "edit-hint") { Txt(stringResource(Res.string.edit_hint), MaterialTheme.typography.bodySmall, Modifier.contentWidth().padding(horizontal = Space.l), tone = Tone.Ink2) }
+                item(key = "plan") {
+                    PlanView(
+                        plan, all,
+                        onRemove = { save(plan.without(it)) },
+                        onSection = { picker = it },
+                        onAdd = { picker = "" },
+                    )
+                }
+            } else if (current != null) {
                 item(key = "plan") { PlanView(current.plan, all) }
             } else {
                 item(key = "grid") { WeekGrid(emptyList()) }
@@ -122,17 +163,64 @@ private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
                             chosen != null -> stringResource(Res.string.timetable_old, chosen.year, chosen.semester)
                             else -> stringResource(Res.string.timetable_empty)
                         },
-                    )
+                        if (classesList != null) stringResource(Res.string.build_by_hand) else null,
+                    ) { editing = true }
                 }
             }
             item(key = "fab-space") { Box(Modifier.height(72.dp)) }
         }
-        if (classesList != null) ExtendedFloatingActionButton(
+        if (classesList != null && !editing) ExtendedFloatingActionButton(
             onClick = onMake,
             icon = { Icon(Icons.Default.AutoAwesome, null) },
             text = { Text(stringResource(if (current != null) Res.string.new_timetable else Res.string.make_with_ai)) },
             modifier = Modifier.align(Alignment.BottomEnd).padding(Space.l),
         )
+    }
+    picker?.let { subject ->
+        ClassPicker(all, plan, subject.ifEmpty { null }, onDismiss = { picker = null }) { k -> save(plan.with(k)); picker = null }
+    }
+}
+
+/**
+ * Picks a class for the timetable: every class of the semester with a search field, or ([subjectNo]) the sections of
+ * one course. Classes clashing with the rest of the timetable are shown but can't be picked.
+ */
+@Composable
+private fun ClassPicker(all: List<OpenClass>, plan: TimetablePlan, subjectNo: String?, onDismiss: () -> Unit, onPick: (OpenClass) -> Unit) {
+    var query by remember { mutableStateOf("") }
+    val q = query.replace(" ", "")
+    val shown = remember(all, subjectNo, q) {
+        if (subjectNo != null) all.filter { it.subjectNo == subjectNo }
+        else if (q.isEmpty()) emptyList()
+        else all.filter { k -> q in k.name.replace(" ", "") || k.professors.any { q in it } || k.subjectNo.startsWith(q) }.take(60)
+    }
+    val chosen = plan.items.map { it.subjectNo to it.classNo }.toSet()
+    DetailSheet(onDismiss) {
+        if (subjectNo != null) SheetHeader(stringResource(Res.string.sections_of, all.firstOrNull { it.subjectNo == subjectNo }?.name ?: subjectNo))
+        else {
+            SheetHeader(stringResource(Res.string.add_class))
+            SearchField(query, { query = it }, stringResource(Res.string.search_classes))
+        }
+        shown.forEach { k ->
+            val clash = plan.clashesWith(k, all).firstOrNull()
+            val inPlan = (k.subjectNo to k.classNo) in chosen
+            ListRow(
+                k.name + " · " + stringResource(Res.string.section_n, k.classNo),
+                listOfNotNull(
+                    when {
+                        inPlan -> stringResource(Res.string.in_timetable)
+                        clash != null -> stringResource(Res.string.clashes_with, clash.name)
+                        else -> null
+                    },
+                    k.professors.joinToString(", ").ifEmpty { null },
+                    k.times.map { it.text() }.joinToString(", ").ifEmpty { stringResource(Res.string.time_tbd) },
+                    k.department,
+                ).joinToString(" · "),
+                subtitleMaxLines = 2,
+                trailing = k.credits?.let { c -> { Txt(credits(c), MaterialTheme.typography.labelMedium, tone = Tone.Ink2) } },
+                onClick = if (clash == null && !inPlan) ({ onPick(k) }) else null,
+            )
+        }
     }
 }
 
@@ -239,25 +327,43 @@ private fun MakeTimetable(onBack: () -> Unit) {
     }
 }
 
-/** Weekly grid + class list with the AI's reason for each class. */
+/**
+ * Weekly grid + class list with the AI's reason for each class.
+ * While editing ([onRemove] set): a remove button per class, tap a class for its other sections, and an "add" row.
+ */
 @Composable
-private fun PlanView(plan: TimetablePlan, all: List<OpenClass>) {
+private fun PlanView(
+    plan: TimetablePlan,
+    all: List<OpenClass>,
+    onRemove: ((String) -> Unit)? = null,
+    onSection: (String) -> Unit = {},
+    onAdd: () -> Unit = {},
+) {
     val classes = plan.classesIn(all)
     Column(Modifier.contentWidth()) {
         SectionHeader(plan.title + " · " + stringResource(Res.string.total_credits_courses, plan.credits(all), classes.size), info = plan.summary.ifBlank { null })
         WeekGrid(classes)
         plan.items.forEachIndexed { i, item ->
             val k = classes.firstOrNull { it.subjectNo == item.subjectNo && it.classNo == item.classNo }
+            val name = k?.name ?: item.subjectNo
             ListRow(
-                k?.name ?: item.subjectNo,
+                name,
                 listOfNotNull(
                     k?.professors?.joinToString(", ")?.ifEmpty { null },
                     k?.times?.map { it.text() }?.joinToString(", ")?.ifEmpty { stringResource(Res.string.time_tbd) },
                 ).joinToString(" · "),
                 leading = { Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).background(blockColor(i))) },
-                trailing = k?.credits?.let { c -> { Txt(credits(c), MaterialTheme.typography.labelMedium, tone = Tone.Ink2) } },
+                trailing = if (onRemove != null) ({
+                    IconButton(onClick = { onRemove(item.subjectNo) }) { Icon(Icons.Default.Close, stringResource(Res.string.remove_class, name), tint = AppTheme.colors.ink2) }
+                }) else k?.credits?.let { c -> { Txt(credits(c), MaterialTheme.typography.labelMedium, tone = Tone.Ink2) } },
+                onClick = if (onRemove != null && all.count { it.subjectNo == item.subjectNo } > 1) ({ onSection(item.subjectNo) }) else null,
             )
         }
+        if (onRemove != null) ListRow(
+            stringResource(Res.string.add_class),
+            leading = { Icon(Icons.Default.Add, null, tint = AppTheme.colors.ink2) },
+            onClick = onAdd,
+        )
     }
 }
 

@@ -163,6 +163,19 @@
     <string name="try_again">再試行</string>
     <string name="suggested_n">おすすめ時間割 %1$d件</string>
     <string name="save_timetable">この時間割を保存</string>
+    <string name="edit_timetable">時間割を編集</string>
+    <string name="done">完了</string>
+    <string name="add_class">授業を追加</string>
+    <string name="remove_class">%1$sを外す</string>
+    <string name="change_section">クラスを変更</string>
+    <string name="sections_of">%1$sのクラス</string>
+    <string name="section_n">%1$sクラス</string>
+    <string name="clashes_with">%1$sと時間が重なります</string>
+    <string name="in_timetable">時間割に追加済み</string>
+    <string name="build_by_hand">自分で作る</string>
+    <string name="my_timetable">マイ時間割</string>
+    <string name="search_classes">授業名・教授で検索</string>
+    <string name="edit_hint">授業をタップするとクラスを変更できます。時間が重なる授業は追加できません。</string>
     <string name="timetable_privacy">時間割の作成時に、学年・専攻・履修科目・入力した成績がAI（Google Gemini）に送信されます。氏名と学籍番号は送信されません。授業時間は1限=9時を基準としています。</string>
     <string name="total_credits_courses">合計%1$d単位 · %2$d科目</string>
     <string name="time_tbd">時間未定</string>

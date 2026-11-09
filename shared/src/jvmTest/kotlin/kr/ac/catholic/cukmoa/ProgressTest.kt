@@ -7,6 +7,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kr.ac.catholic.cukmoa.logic.bucketOf
+import kr.ac.catholic.cukmoa.logic.clashesWith
+import kr.ac.catholic.cukmoa.logic.with
+import kr.ac.catholic.cukmoa.logic.without
 import kr.ac.catholic.cukmoa.logic.catalogProblems
 import kr.ac.catholic.cukmoa.logic.courseFor
 import kr.ac.catholic.cukmoa.logic.foreignTotal
@@ -288,6 +291,14 @@ class ProgressTest {
         val global = all + k("5", "Global " + catalog.courses.first().name, kr.ac.catholic.cukmoa.model.ClassTime("수", 1, 2))
         assertTrue(timetableProblems(plan("4", "5"), global, prefs, student, catalog).any { "국문·영문" in it })
         assertEquals(1.0, plan("1").timeFit(all, kr.ac.catholic.cukmoa.model.TimePreference.Morning))
+
+        // Editing by hand: adding another section of a course swaps it, clashes leave out the course itself
+        val other = k("1", "가", kr.ac.catholic.cukmoa.model.ClassTime("목", 1, 3)).copy(classNo = "02")
+        val withAll = all + other
+        assertEquals(listOf("1" to "02", "3" to "01"), plan("1", "3").with(other).items.map { it.subjectNo to it.classNo })
+        assertEquals(listOf("3"), plan("1", "3").with(all[3]).without("1").items.map { it.subjectNo }.dropLast(1))
+        assertEquals(listOf("가", "다"), plan("1", "3").clashesWith(all[1], withAll).map { it.name })
+        assertEquals(emptyList(), plan("1", "3").clashesWith(other, withAll))
         assertEquals(0.0, plan("3").timeFit(all, kr.ac.catholic.cukmoa.model.TimePreference.Morning))
     }
 }

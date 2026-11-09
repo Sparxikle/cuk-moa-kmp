@@ -163,6 +163,19 @@
     <string name="try_again">Try again</string>
     <string name="suggested_n">%1$d suggested timetables</string>
     <string name="save_timetable">Save this timetable</string>
+    <string name="edit_timetable">Edit timetable</string>
+    <string name="done">Done</string>
+    <string name="add_class">Add a class</string>
+    <string name="remove_class">Remove %1$s</string>
+    <string name="change_section">Change section</string>
+    <string name="sections_of">Sections of %1$s</string>
+    <string name="section_n">Section %1$s</string>
+    <string name="clashes_with">Clashes with %1$s</string>
+    <string name="in_timetable">In your timetable</string>
+    <string name="build_by_hand">Build it yourself</string>
+    <string name="my_timetable">My timetable</string>
+    <string name="search_classes">Search classes or professors</string>
+    <string name="edit_hint">Tap a class to change its section. Classes that clash with your timetable can't be added.</string>
     <string name="timetable_privacy">Making a timetable sends your year, majors, completed courses and grades to AI (Google Gemini). Your name and student ID are not sent. Class times assume 1st period = 9:00.</string>
     <string name="total_credits_courses">%1$d credits · %2$d courses</string>
     <string name="time_tbd">Time TBA</string>

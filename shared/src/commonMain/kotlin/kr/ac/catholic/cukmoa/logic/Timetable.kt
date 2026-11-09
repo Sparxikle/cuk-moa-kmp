@@ -29,6 +29,21 @@ fun TimetablePlan.classesIn(all: List<OpenClass>): List<OpenClass> =
 
 fun TimetablePlan.credits(all: List<OpenClass>): Int = classesIn(all).sumOf { it.credits ?: 0 }
 
+// Editing a saved timetable by hand: one section per course, so adding a section of a course already in the plan swaps it.
+
+/** The plan with [k] added, or replacing the other section of the same course */
+fun TimetablePlan.with(k: OpenClass): TimetablePlan {
+    val item = kr.ac.catholic.cukmoa.model.TimetableItem(k.subjectNo, k.classNo)
+    val at = items.indexOfFirst { it.subjectNo == k.subjectNo }
+    return copy(items = if (at < 0) items + item else items.toMutableList().also { it[at] = item })
+}
+
+fun TimetablePlan.without(subjectNo: String): TimetablePlan = copy(items = items.filterNot { it.subjectNo == subjectNo })
+
+/** Classes in the plan that meet at the same time as [k] (its own course left out, since adding [k] would replace it) */
+fun TimetablePlan.clashesWith(k: OpenClass, all: List<OpenClass>): List<OpenClass> =
+    classesIn(all).filter { o -> o.subjectNo != k.subjectNo && o.times.any { a -> k.times.any { it.overlaps(a) } } }
+
 /** Whether a course with this subject number or name is already completed (catalog check or picked class). */
 fun StudentState.hasCompleted(catalog: Catalog, k: OpenClass): Boolean =
     hasTaken(k.subjectNo) || catalog.courseFor(k)?.let { it.id in completedCourseIds } == true

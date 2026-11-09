@@ -267,6 +267,10 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     fun chooseTimetable(res: TimetableResponse, plan: TimetablePlan) =
         update { it.copy(timetable = ChosenTimetable(res.year, res.semester, plan)) }
 
+    /** Saves a timetable edited by hand (classes removed, added or moved to another section) */
+    fun editTimetable(year: Int, semester: String, plan: TimetablePlan) =
+        update { it.copy(timetable = ChosenTimetable(year, semester, plan)) }
+
     fun clearTimetable() = update { it.copy(timetable = null) }
 
     /** Back to the empty maker form (after saving a suggestion) */

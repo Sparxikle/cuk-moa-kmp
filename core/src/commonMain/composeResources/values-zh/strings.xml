@@ -163,6 +163,19 @@
     <string name="try_again">重试</string>
     <string name="suggested_n">推荐课表%1$d份</string>
     <string name="save_timetable">保存此课表</string>
+    <string name="edit_timetable">编辑课表</string>
+    <string name="done">完成</string>
+    <string name="add_class">添加课程</string>
+    <string name="remove_class">移除%1$s</string>
+    <string name="change_section">更换班级</string>
+    <string name="sections_of">%1$s 的班级</string>
+    <string name="section_n">%1$s班</string>
+    <string name="clashes_with">与%1$s时间冲突</string>
+    <string name="in_timetable">已在课表中</string>
+    <string name="build_by_hand">自己排课</string>
+    <string name="my_timetable">我的课表</string>
+    <string name="search_classes">搜索课程或教授</string>
+    <string name="edit_hint">点击课程可更换班级。与课表时间冲突的课程无法添加。</string>
     <string name="timetable_privacy">制作课表时，年级、专业、已修课程和输入的成绩会发送给AI（Google Gemini）。不会发送姓名和学号。上课时间按第1节=9点计算。</string>
     <string name="total_credits_courses">共%1$d学分 · %2$d门</string>
     <string name="time_tbd">时间待定</string>
