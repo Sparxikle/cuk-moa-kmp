@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -233,7 +234,8 @@ fun ScreenList(
                 },
             )
             LazyColumn(
-                modifier = Modifier.fillMaxSize().graphicsLayer { translationY = pulled() * PullDistance.toPx() },
+                // Shrinks above the keyboard (edge-to-edge: adjustResize alone no longer resizes), so text fields stay visible
+                modifier = Modifier.fillMaxSize().imePadding().graphicsLayer { translationY = pulled() * PullDistance.toPx() },
                 contentPadding = PaddingValues(bottom = Space.xxl),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 content = content,

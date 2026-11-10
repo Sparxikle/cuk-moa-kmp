@@ -10,6 +10,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
@@ -100,7 +102,9 @@ private fun MainTabs(
         // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
         AnimatedContent(
             targetState = route,
-            modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg).padding(bottom = padding.calculateBottomPadding()),
+            modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg).padding(bottom = padding.calculateBottomPadding())
+                // The tab bar already covers this much of the keyboard, so screens only pad for the rest (imePadding)
+                .consumeWindowInsets(PaddingValues(bottom = padding.calculateBottomPadding())),
             transitionSpec = { tabSlide(forward = index(targetState) > index(initialState)) },
             label = "tab",
         ) { r ->
