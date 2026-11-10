@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.roadmap
 
+import kr.ac.catholic.cukmoa.core.ui.AnimatedIcon
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Route
@@ -18,6 +19,7 @@ object RoadmapModule : FeatureModule {
     override val title = Res.string.module_roadmap
     override val summary = Res.string.module_roadmap_summary
     override val icon = Icons.Default.Route
+    override val animatedIcon = AnimatedIcon.Roadmap
 
     @Composable
     override fun Screen(catalog: Catalog, student: StudentState) {

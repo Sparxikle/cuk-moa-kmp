@@ -35,6 +35,9 @@ enum class AnimatedIcon(val file: String, val returns: Boolean = true) {
     Table("table"),
     Info("info", returns = false),
     Users("users"),
+    Announcement("announcement"),
+    GraduationHat("graduation_hat"),
+    Roadmap("roadmap"),
 }
 
 /**

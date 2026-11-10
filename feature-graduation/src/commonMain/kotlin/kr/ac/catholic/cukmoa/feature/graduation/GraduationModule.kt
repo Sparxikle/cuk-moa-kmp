@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.graduation
 
+import kr.ac.catholic.cukmoa.core.ui.AnimatedIcon
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.School
@@ -15,6 +16,7 @@ object GraduationModule : FeatureModule {
     override val title = Res.string.module_graduation
     override val summary = Res.string.module_graduation_summary
     override val icon = Icons.Default.School
+    override val animatedIcon = AnimatedIcon.GraduationHat
 
     @Composable
     override fun Screen(catalog: Catalog, student: StudentState) = GraduationScreen(catalog, student)

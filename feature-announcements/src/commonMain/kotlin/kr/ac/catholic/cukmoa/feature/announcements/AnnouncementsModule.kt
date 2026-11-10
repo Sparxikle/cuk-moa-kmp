@@ -12,6 +12,7 @@ import kr.ac.catholic.cukmoa.core.FeatureModule
 import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import kr.ac.catholic.cukmoa.core.LocalNavigator
 import kr.ac.catholic.cukmoa.core.Routes
+import kr.ac.catholic.cukmoa.core.ui.AnimatedIcon
 import kr.ac.catholic.cukmoa.core.ui.EmptyState
 import kr.ac.catholic.cukmoa.core.ui.Section
 import kr.ac.catholic.cukmoa.model.Catalog
@@ -24,6 +25,7 @@ object AnnouncementsModule : FeatureModule {
     override val title = Res.string.module_announcements
     override val summary = Res.string.module_announcements_summary
     override val icon = Icons.Default.Campaign
+    override val animatedIcon = AnimatedIcon.Announcement
     override val needsNetwork = true
     override val homeCards = setOf(HomeCardId.Announcements)
 
