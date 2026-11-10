@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Restore
+import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -36,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +69,17 @@ import kr.ac.catholic.cukmoa.model.Catalog
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.model.StudentState
 import kr.ac.catholic.cukmoa.model.ThemeMode
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readString
+import io.github.vinceglb.filekit.writeString
+import kotlinx.coroutines.launch
+import kr.ac.catholic.cukmoa.logic.BACKUP_EXTENSION
+import kr.ac.catholic.cukmoa.logic.backupFileName
+import org.jetbrains.compose.resources.getString
 
 /** App name (가대모아 = "gathering Catholic University info"). The store/launcher name is also set in AndroidManifest and the desktop config. */
 const val APP_NAME = "가대모아"
@@ -80,7 +94,7 @@ private enum class SettingsPage(val parent: SettingsPage?) {
 
 /** Settings: a profile card (내 정보) and categories — home screen · features · announcements · appearance · data · about */
 @Composable
-fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, onBack: () -> Unit, onRestart: () -> Unit = {}) {
+fun SettingsScreen(catalog: Catalog, student: StudentState, onBack: () -> Unit, onRestart: () -> Unit = {}) {
     var page by rememberSaveable { mutableStateOf(SettingsPage.Main) }
     AppBackHandler { page.parent?.let { page = it } ?: onBack() }
     // Moving between pages: screen open/close transition by depth
@@ -89,7 +103,7 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, apiBaseUrl: String, 
         modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg),
         transitionSpec = { screenPop(forward = targetState.depth > initialState.depth) },
         label = "settings",
-    ) { p -> SettingsPageContent(p, catalog, student, apiBaseUrl, onBack, onRestart) { page = it } }
+    ) { p -> SettingsPageContent(p, catalog, student, onBack, onRestart) { page = it } }
 }
 
 @Composable
@@ -97,7 +111,6 @@ private fun SettingsPageContent(
     page: SettingsPage,
     catalog: Catalog,
     student: StudentState,
-    apiBaseUrl: String,
     onBack: () -> Unit,
     onRestart: () -> Unit,
     go: (SettingsPage) -> Unit,
@@ -109,6 +122,27 @@ private fun SettingsPageContent(
     val storage by vm.storage.collectAsStateWithLifecycle()
     val majors = departments.findAll(student.departments, student.majors)
     var confirmReset by remember { mutableStateOf(false) }
+    // Backup (Settings → Data): file text waiting for the replace confirmation, and the last result to show
+    var pendingImport by remember { mutableStateOf<String?>(null) }
+    var backupMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val exportFailed = stringResource(Res.string.export_failed)
+    val importFailed = stringResource(Res.string.import_failed)
+    val saver = rememberFileSaverLauncher(dialogSettings = FileKitDialogSettings.createDefault()) { file ->
+        if (file == null) return@rememberFileSaverLauncher // cancelled
+        scope.launch {
+            backupMessage = runCatching { file.writeString(vm.exportBackup()) }
+                .fold({ getString(Res.string.export_done, file.name) }, { exportFailed })
+        }
+    }
+    // Any file: some Android file managers don't label .json as JSON. The contents are checked on import.
+    val picker = rememberFilePickerLauncher(type = FileKitType.File()) { file ->
+        if (file == null) return@rememberFilePickerLauncher
+        scope.launch {
+            val text = runCatching { file.readString() }.getOrNull()
+            if (text == null) backupMessage = importFailed else pendingImport = text
+        }
+    }
     // Language picked but not confirmed yet (changing it restarts the app)
     var pendingLanguage by remember { mutableStateOf<Pending?>(null) }
     val back = { page.parent?.let(go) ?: onBack() }
@@ -117,8 +151,8 @@ private fun SettingsPageContent(
     val tracks = if (catalogTracks) student.trackIds.mapNotNull { id -> catalog.tracks.firstOrNull { it.id == id }?.shortName }
     else student.careerInterests.filter { it in majors.firstOrNull()?.careers.orEmpty() }
     val serverSummary = when (val s = catalogStatus) {
-        CatalogStatus.Live -> stringResource(Res.string.connected, apiBaseUrl)
-        CatalogStatus.Loading -> stringResource(Res.string.connecting, apiBaseUrl)
+        CatalogStatus.Live -> stringResource(Res.string.connected)
+        CatalogStatus.Loading -> stringResource(Res.string.connecting)
         is CatalogStatus.Offline -> stringResource(Res.string.offline_saved, s.error.text())
     }
 
@@ -303,6 +337,20 @@ private fun SettingsPageContent(
                         },
                     )
                     ListRow(
+                        stringResource(Res.string.export_data),
+                        stringResource(Res.string.export_data_detail),
+                        leading = { Icon(Icons.Outlined.SaveAlt, null) },
+                        subtitleMaxLines = 2,
+                        onClick = { saver.launch(suggestedName = backupFileName(kotlin.time.Clock.System.now().toString()), defaultExtension = BACKUP_EXTENSION) },
+                    )
+                    ListRow(
+                        stringResource(Res.string.import_data),
+                        stringResource(Res.string.import_data_detail),
+                        leading = { Icon(Icons.Outlined.Restore, null) },
+                        subtitleMaxLines = 2,
+                        onClick = { picker.launch() },
+                    )
+                    ListRow(
                         stringResource(Res.string.clear_records),
                         leading = { Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error) },
                         onClick = { confirmReset = true },
@@ -335,6 +383,29 @@ private fun SettingsPageContent(
                 TextButton(onClick = { pendingLanguage = null; vm.setLanguage(p.language); onRestart() }) { Text(stringResource(Res.string.restart)) }
             },
             dismissButton = { TextButton(onClick = { pendingLanguage = null }) { Text(stringResource(Res.string.cancel)) } },
+        )
+    }
+
+    pendingImport?.let { text ->
+        AlertDialog(
+            onDismissRequest = { pendingImport = null },
+            title = { Text(stringResource(Res.string.import_data_q)) },
+            text = { Text(stringResource(Res.string.import_data_warning)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingImport = null
+                    scope.launch { backupMessage = if (vm.importBackup(text)) getString(Res.string.import_done) else importFailed }
+                }) { Text(stringResource(Res.string.import)) }
+            },
+            dismissButton = { TextButton(onClick = { pendingImport = null }) { Text(stringResource(Res.string.cancel)) } },
+        )
+    }
+
+    backupMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { backupMessage = null },
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = { backupMessage = null }) { Text(stringResource(Res.string.ok)) } },
         )
     }
 

@@ -486,6 +486,24 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     /** Clears the course record (Settings → Data). */
     fun resetRecords() = update { it.withEmptyRecords() }
 
+    /** Backup file text with the student's own records (Settings → Data → Export). */
+    fun exportBackup(): String = kr.ac.catholic.cukmoa.logic.encodeBackup(_student.value, kotlin.time.Clock.System.now().toString())
+
+    /**
+     * Replaces the records with a backup's (settings stay). false if the file isn't a readable backup.
+     * Also a way out of unreadable storage, like [resetStorage]: the imported state is saved.
+     */
+    fun importBackup(text: String): Boolean {
+        val imported = kr.ac.catholic.cukmoa.logic.decodeBackup(text, _student.value) ?: return false
+        _storage.value = StorageStatus.Ok
+        update { imported }
+        // Board codes of the imported majors come from the department list
+        _departments.value?.let(::syncBoards) ?: refreshDepartments()
+        _announcements.update { it.copy(filter = if (_student.value.majors.isNotEmpty()) AnnouncementFilter.Mine else null) }
+        refreshAnnouncements()
+        return true
+    }
+
     fun resetAnnouncementsSeen() {
         update { it.copy(announcementsSeenAt = null) }
         _announcements.update { it.copy(newCount = 0) }

@@ -248,7 +248,7 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Bo
                     AppScreen.Onboarding ->
                         OnboardingScreen(catalog = c, student = student, editing = false, startAtCards = false, onClose = {})
                     AppScreen.Settings ->
-                        SettingsScreen(c, student, platform.apiBaseUrl, onBack = { settings = false }, onRestart = onRestart)
+                        SettingsScreen(c, student, onBack = { settings = false }, onRestart = onRestart)
                     AppScreen.Modules -> {
                         AppBackHandler { managing = false }
                         ModulesScreen(modules.map { it.id }, vm::setModules, onBack = { managing = false })

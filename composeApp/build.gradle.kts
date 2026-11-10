@@ -43,6 +43,7 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.runtime.compose)
+            implementation(libs.filekit.dialogs.compose)
         }
         androidMain.dependencies { implementation(libs.androidx.core.ktx) }
         val desktopMain by getting {

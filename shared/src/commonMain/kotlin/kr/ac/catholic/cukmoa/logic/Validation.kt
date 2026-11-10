@@ -65,14 +65,20 @@ fun parseCatalog(text: String): Catalog {
  * null if unreadable — callers must not overwrite the original and should ask the user to reset.
  */
 fun decodeStudentState(text: String): StudentState? = runCatching {
-    var obj = Json.parseToJsonElement(text).jsonObject
+    val obj = migrateStudentJson(Json.parseToJsonElement(text).jsonObject) ?: return null
+    ApiJson.decodeFromJsonElement(StudentState.serializer(), obj)
+}.getOrNull()
+
+/** Student state JSON (whole or partial, as in a backup) converted to the latest format. null if saved by a newer app. */
+fun migrateStudentJson(json: JsonObject): JsonObject? {
+    var obj = json
     val version = (obj["schemaVersion"] as? JsonPrimitive)?.int ?: 1
     if (version > StudentState.CURRENT_SCHEMA_VERSION) return null // Value saved by a newer app
     for (v in version until StudentState.CURRENT_SCHEMA_VERSION) {
         obj = migrations.getValue(v)(obj)
     }
-    ApiJson.decodeFromJsonElement(StudentState.serializer(), obj)
-}.getOrNull()
+    return obj
+}
 
 fun encodeStudentState(state: StudentState): String = ApiJson.encodeToString(StudentState.serializer(), state)
 
