@@ -69,7 +69,7 @@ import kr.ac.catholic.cukmoa.model.ThemeMode
 
 /** App name (가대모아 = "gathering Catholic University info"). The store/launcher name is also set in AndroidManifest and the desktop config. */
 const val APP_NAME = "가대모아"
-const val APP_VERSION = "0.2.0"
+const val APP_VERSION = "0.9"
 
 /** Settings pages. Main lists the categories; each category is its own screen, 전공 opens from 내 정보. */
 private enum class SettingsPage(val parent: SettingsPage?) {

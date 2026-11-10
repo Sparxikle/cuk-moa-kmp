@@ -38,6 +38,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.zIndex
 import androidx.compose.material3.Icon
+import kr.ac.catholic.cukmoa.core.ui.LottieIcon
 import kr.ac.catholic.cukmoa.core.ui.Toggle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -199,7 +200,11 @@ fun ModuleList(enabled: List<String>, onChange: (List<String>) -> Unit) {
                                     )
                                 },
                             ) else Box(Modifier.size(36.dp))
-                            Icon(m.icon, null, Modifier.padding(start = 4.dp), tint = if (isOn) MaterialTheme.colorScheme.primary else c.ink3)
+                            // Same icon as the tab bar: the animated one rests on its first frame
+                            val tint = if (isOn) MaterialTheme.colorScheme.primary else c.ink3
+                            val animated = m.animatedIcon
+                            if (animated != null) LottieIcon(animated, play = 0, modifier = Modifier.padding(start = 4.dp), tint = tint)
+                            else Icon(m.icon, null, Modifier.padding(start = 4.dp), tint = tint)
                         }
                     },
                     trailing = {
