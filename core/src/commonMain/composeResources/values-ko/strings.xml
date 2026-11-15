@@ -463,4 +463,8 @@
     <string name="open_in_browser">브라우저에서 열기</string>
     <string name="reload">새로고침</string>
     <string name="pick_announcement">공지를 고르면 여기에 보여요</string>
+    <string name="share">공유</string>
+    <string name="undo">실행 취소</string>
+    <string name="marked_completed">%1$s 이수 완료로 표시했어요</string>
+    <string name="unmarked_completed">%1$s 이수 표시를 해제했어요</string>
 </resources>

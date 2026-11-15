@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.core.ui
 
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.runtime.getValue
@@ -33,6 +34,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -189,6 +192,16 @@ fun ScreenList(
     val refreshing by vm.refreshing.collectAsStateWithLifecycle()
     val pull = rememberPullToRefreshState()
     val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    // Tapping the current tab again: back to the top with the big title showing (tab screens only)
+    val reselect = LocalTabReselect.current
+    var handled by remember { mutableIntStateOf(reselect) }
+    LaunchedEffect(reselect) {
+        if (reselect == handled) return@LaunchedEffect
+        handled = reselect
+        if (onBack != null) return@LaunchedEffect
+        scroll.state.heightOffset = 0f
+        state.animateScrollToItem(0)
+    }
     val c = AppTheme.colors
     var showInfo by remember { mutableStateOf(false) }
     // Sub-pages have no big title, so nothing to collapse
@@ -308,6 +321,12 @@ private val PanesWidth = 1280.dp
 
 /** Window width from which the app switches to the wide layout: side tab rail, two-column home. */
 val WideLayoutWidth = 840.dp
+
+/** The tab screens' snackbar (e.g. "Marked completed · Undo"). Shown above the tab bar by the app shell. */
+val LocalSnackbar = staticCompositionLocalOf { androidx.compose.material3.SnackbarHostState() }
+
+/** Counts taps on the tab that is already selected; a tab screen scrolls back to the top when it changes. Set by the app shell. */
+val LocalTabReselect = compositionLocalOf { 0 }
 
 /** True when the window is at least [WideLayoutWidth] wide (tablet landscape, desktop). Set by the app shell. */
 val LocalWideLayout = staticCompositionLocalOf { false }
@@ -549,6 +568,7 @@ fun PrimaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modif
 /** M3 checkbox look for rows whose whole row toggles (the box itself isn't a separate target). */
 @Composable
 fun CheckCircle(checked: Boolean) {
+    HapticOnChange(checked) { if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff }
     Checkbox(checked = checked, onCheckedChange = null)
 }
 

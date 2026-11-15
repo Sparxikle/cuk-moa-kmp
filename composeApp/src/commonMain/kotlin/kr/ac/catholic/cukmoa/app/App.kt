@@ -9,6 +9,9 @@ import org.jetbrains.compose.resources.StringResource
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.widthIn
+import kr.ac.catholic.cukmoa.core.ui.LocalSnackbar
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,6 +21,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import kr.ac.catholic.cukmoa.core.ui.LocalExternalUriHandler
 import kr.ac.catholic.cukmoa.core.ui.LocalWebOpen
+import kr.ac.catholic.cukmoa.core.ui.LocalTabReselect
 import kr.ac.catholic.cukmoa.core.ui.WebPage
 import kr.ac.catholic.cukmoa.core.ui.opensInApp
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -118,6 +122,7 @@ private fun MainTabs(
 
     run {
         val wide = LocalWideLayout.current
+        val snackbar = LocalSnackbar.current
         val content: @Composable (Modifier) -> Unit = { modifier ->
             AnimatedContent(
                 targetState = route,
@@ -135,15 +140,19 @@ private fun MainTabs(
                 // themselves (the bottom tab bar did that before).
                 Row(Modifier.fillMaxSize().background(AppTheme.colors.bg)) {
                     TabRail(tabs, route, newCount, onTab)
-                    content(
-                        Modifier.weight(1f).fillMaxHeight()
-                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End))
-                            .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End)),
-                    )
+                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                        content(
+                            Modifier.fillMaxSize()
+                                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End))
+                                .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End)),
+                        )
+                        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().widthIn(max = 600.dp))
+                    }
                 }
             } else Scaffold(
                 containerColor = AppTheme.colors.bg,
                 bottomBar = { TabBar(tabs, route, newCount, onTab) },
+                snackbarHost = { SnackbarHost(snackbar) },
             ) { padding ->
                 // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
                 content(
@@ -278,6 +287,7 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Bo
 
         var route by rememberSaveable { mutableStateOf(initialRoute) }
         var sheet by remember { mutableStateOf<Sheet?>(null) }
+        var reselect by remember { mutableIntStateOf(0) }
         var managing by rememberSaveable { mutableStateOf(initialRoute == Routes.MODULES) }
         var settings by rememberSaveable { mutableStateOf(initialRoute == Routes.SETTINGS) }
 
@@ -352,7 +362,10 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Bo
                         AppBackHandler(enabled = route != Routes.HOME && sheet == null) { route = Routes.HOME }
                         // If the current tab's module was turned off, go home
                         if (route != Routes.HOME && modules.none { it.id == route }) route = Routes.HOME
-                        MainTabs(c, student, modules, route, announcements.newCount, onTab = { navigator.open(it) })
+                        // Tapping the selected tab again scrolls its screen back to the top
+                        CompositionLocalProvider(LocalTabReselect provides reselect) {
+                            MainTabs(c, student, modules, route, announcements.newCount, onTab = { if (it == route) reselect++ else navigator.open(it) })
+                        }
                     }
                 }
             }

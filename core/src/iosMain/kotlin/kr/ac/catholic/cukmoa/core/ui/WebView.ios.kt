@@ -8,6 +8,7 @@ import androidx.compose.ui.viewinterop.UIKitView
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLRequest
+import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.WebKit.WKNavigation
 import platform.WebKit.WKNavigationAction
@@ -70,4 +71,17 @@ actual fun PlatformWebView(url: String, state: WebState, modifier: Modifier) {
         },
     )
     DisposableEffect(Unit) { onDispose { state.onGoBack = {}; state.onReload = {} } }
+}
+
+@Composable
+actual fun rememberShareLink(): ((url: String, title: String) -> Unit)? = remember {
+    { url: String, _: String ->
+        val items = listOfNotNull(NSURL.URLWithString(url) ?: url)
+        val sheet = UIActivityViewController(activityItems = items, applicationActivities = null)
+        // Present from the top-most screen (the app is one Compose view controller; a sheet may be up)
+        var top = UIApplication.sharedApplication.keyWindow?.rootViewController
+        while (top?.presentedViewController != null) top = top.presentedViewController
+        top?.presentViewController(sheet, animated = true, completion = null)
+        Unit
+    }
 }

@@ -1,5 +1,11 @@
 package kr.ac.catholic.cukmoa.feature.graduation
 
+import org.jetbrains.compose.resources.getString
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarDuration
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import kr.ac.catholic.cukmoa.core.ui.LocalSnackbar
 import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.InfoButton
 import kr.ac.catholic.cukmoa.core.ui.Choices
@@ -184,6 +190,9 @@ private fun CreditsCard(s: CreditSummary, doubleMajor: Boolean) {
 private fun Checklist(catalog: Catalog, student: StudentState, plan: GraduationPlan, bucket: GraduationBucket, classes: List<OpenClass>) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
+    val snackbar = LocalSnackbar.current
+    val scope = rememberCoroutineScope()
+    val undo = stringResource(Res.string.undo)
     var expanded by remember { mutableStateOf(false) }
     val courses = bucket.checklistCourseIds.mapNotNull { catalog.findCourse(it) }
     val done = courses.count { it.id in student.completedCourseIds }
@@ -200,7 +209,15 @@ private fun Checklist(catalog: Catalog, student: StudentState, plan: GraduationP
                     credits(c.credits),
                     if (status == CourseStatus.InProgress) stringResource(Res.string.taking_this_term) else plan.semesters[c.id]?.title(),
                 ).joinToString(" · "),
-                onClick = { vm.toggleCompleted(c.id) },
+                onClick = {
+                    vm.toggleCompleted(c.id)
+                    // A mis-tap changes the credits left, so offer to take it back
+                    scope.launch {
+                        snackbar.currentSnackbarData?.dismiss()
+                        val message = getString(if (checked) Res.string.unmarked_completed else Res.string.marked_completed, c.name)
+                        if (snackbar.showSnackbar(message, undo, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.toggleCompleted(c.id)
+                    }
+                },
                 leading = { CheckCircle(checked) },
                 trailing = {
                     Row(verticalAlignment = Alignment.CenterVertically) {

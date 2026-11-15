@@ -114,7 +114,8 @@ fun SettingsScreen(catalog: Catalog, student: StudentState, onBack: () -> Unit, 
             AnimatedContent(
                 targetState = shown,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
-                transitionSpec = { screenPop(forward = targetState.depth > initialState.depth) },
+                // Switching categories opens the new page; only going up (전공 → 내 정보) closes
+                transitionSpec = { screenPop(forward = targetState.depth >= initialState.depth) },
                 label = "settings-pane",
             ) { p -> SettingsPageContent(p, catalog, student, onBack, onRestart, pane = true) { page = it } }
         }

@@ -463,4 +463,8 @@
     <string name="open_in_browser">ブラウザで開く</string>
     <string name="reload">再読み込み</string>
     <string name="pick_announcement">お知らせを選ぶとここに表示されます</string>
+    <string name="share">共有</string>
+    <string name="undo">元に戻す</string>
+    <string name="marked_completed">%1$sを履修済みにしました</string>
+    <string name="unmarked_completed">%1$sの履修済みを解除しました</string>
 </resources>

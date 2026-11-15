@@ -1,5 +1,9 @@
 package kr.ac.catholic.cukmoa.core.ui
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -177,6 +181,7 @@ fun CardGap() = Spacer(Modifier.padding(top = CardMetrics.gap))
  */
 @Composable
 fun Toggle(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    HapticOnChange(checked) { if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff }
     val c = AppTheme.colors
     val x by animateDpAsState(if (checked) ToggleWidth - ToggleThumb - ToggleGap else ToggleGap)
     val track = if (checked) c.accent else c.trackOff
@@ -210,6 +215,7 @@ private val ToggleGap = 2.dp
  */
 @Composable
 fun Choices(labels: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier, inset: Dp = Space.l) {
+    HapticOnChange(selected) { HapticFeedbackType.SegmentTick }
     val c = AppTheme.colors
     Row(modifier.fillMaxWidth().padding(horizontal = inset, vertical = Space.xs), horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
         labels.forEachIndexed { i, label ->
@@ -254,5 +260,19 @@ fun BalancedColumns(modifier: Modifier = Modifier, content: @Composable () -> Un
         layout(constraints.maxWidth, maxOf(heights[0], heights[1])) {
             placed.forEach { (p, column, y) -> p.placeRelative(column * half, y) }
         }
+    }
+}
+
+/**
+ * A short vibration when value changes (a switch flips, a box is ticked, a choice moves), not when it first shows.
+ * In the component, so tapping the row, the control itself or undo all feel the same.
+ */
+@Composable
+fun <T> HapticOnChange(value: T, type: (T) -> HapticFeedbackType) {
+    val haptics = LocalHapticFeedback.current
+    var last by remember { mutableStateOf(value) }
+    LaunchedEffect(value) {
+        if (value != last) haptics.performHapticFeedback(type(value))
+        last = value
     }
 }

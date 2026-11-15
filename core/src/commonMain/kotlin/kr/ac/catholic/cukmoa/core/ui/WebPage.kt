@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,12 +32,13 @@ import kr.ac.catholic.cukmoa.core.resources.Res
 import kr.ac.catholic.cukmoa.core.resources.close
 import kr.ac.catholic.cukmoa.core.resources.open_in_browser
 import kr.ac.catholic.cukmoa.core.resources.reload
+import kr.ac.catholic.cukmoa.core.resources.share
 import kr.ac.catholic.cukmoa.core.theme.AppTheme
 import kr.ac.catholic.cukmoa.core.theme.Space
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * In-app browser page: an LG UX toolbar (accent close, 16sp bold page title, reload, open in the system browser),
+ * In-app browser page: an LG UX toolbar (accent close, 16sp bold page title, share, reload, open in the system browser),
  * a thin progress line while loading, then the page. Back steps through the page's history, then closes.
  * fullScreen pads for the system bars (shown over the whole app); a reading pane inside a screen does not.
  */
@@ -57,6 +59,10 @@ fun WebPage(url: String, onClose: () -> Unit, modifier: Modifier = Modifier, ful
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            val share = rememberShareLink()
+            if (share != null) IconButton(onClick = { share(url, state.title.ifBlank { fallbackTitle }) }) {
+                Icon(Icons.Default.Share, stringResource(Res.string.share), tint = c.accent)
+            }
             IconButton(onClick = state::reload) { Icon(Icons.Default.Refresh, stringResource(Res.string.reload), tint = c.accent) }
             if (external != null) IconButton(onClick = { runCatching { external.openUri(url) } }) {
                 Icon(Icons.AutoMirrored.Filled.OpenInNew, stringResource(Res.string.open_in_browser), tint = c.accent)

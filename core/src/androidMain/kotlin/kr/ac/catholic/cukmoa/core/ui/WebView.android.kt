@@ -13,6 +13,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.platform.LocalContext
 
 actual val inAppBrowserSupported: Boolean = true
 
@@ -70,4 +71,16 @@ actual fun PlatformWebView(url: String, state: WebState, modifier: Modifier) {
         onRelease = { it.destroy() },
     )
     DisposableEffect(Unit) { onDispose { state.onGoBack = {}; state.onReload = {} } }
+}
+
+@Composable
+actual fun rememberShareLink(): ((url: String, title: String) -> Unit)? {
+    val context = LocalContext.current
+    return remember(context) {
+        { url: String, title: String ->
+            val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url).putExtra(Intent.EXTRA_SUBJECT, title)
+            runCatching { context.startActivity(Intent.createChooser(send, title.ifBlank { null }).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+            Unit
+        }
+    }
 }

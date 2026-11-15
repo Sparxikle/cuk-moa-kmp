@@ -31,6 +31,10 @@ class WebState {
 @Composable
 expect fun PlatformWebView(url: String, state: WebState, modifier: Modifier = Modifier)
 
+/** The platform's share sheet for a link (title as the subject), or null where there is none (desktop). */
+@Composable
+expect fun rememberShareLink(): ((url: String, title: String) -> Unit)?
+
 /** The platform's own link handler (system browser), for "open in browser" while in-app browsing is on. */
 val LocalExternalUriHandler = staticCompositionLocalOf<UriHandler?> { null }
 

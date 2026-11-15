@@ -463,4 +463,8 @@
     <string name="open_in_browser">Open in browser</string>
     <string name="reload">Reload</string>
     <string name="pick_announcement">Pick an announcement to read it here</string>
+    <string name="share">Share</string>
+    <string name="undo">Undo</string>
+    <string name="marked_completed">Marked %1$s completed</string>
+    <string name="unmarked_completed">Unmarked %1$s</string>
 </resources>

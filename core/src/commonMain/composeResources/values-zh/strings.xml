@@ -463,4 +463,8 @@
     <string name="open_in_browser">在浏览器中打开</string>
     <string name="reload">重新加载</string>
     <string name="pick_announcement">选择一条公告即可在此阅读</string>
+    <string name="share">分享</string>
+    <string name="undo">撤销</string>
+    <string name="marked_completed">已将%1$s标记为已修</string>
+    <string name="unmarked_completed">已取消%1$s的已修标记</string>
 </resources>

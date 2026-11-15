@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.timetable
 
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.Choices
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
@@ -169,12 +170,15 @@ private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
             }
             item(key = "fab-space") { Box(Modifier.height(72.dp)) }
         }
-        if (classesList != null && !editing) ExtendedFloatingActionButton(
-            onClick = onMake,
-            icon = { Icon(Icons.Default.AutoAwesome, null) },
-            text = { Text(stringResource(if (current != null) Res.string.new_timetable else Res.string.make_with_ai)) },
-            modifier = Modifier.align(Alignment.BottomEnd).padding(Space.l),
-        )
+        // Kept to the content column, so on wide screens it sits by the timetable instead of the far corner
+        if (classesList != null && !editing) Box(Modifier.align(Alignment.BottomCenter).contentWidth(), contentAlignment = Alignment.BottomEnd) {
+            ExtendedFloatingActionButton(
+                onClick = onMake,
+                icon = { Icon(Icons.Default.AutoAwesome, null) },
+                text = { Text(stringResource(if (current != null) Res.string.new_timetable else Res.string.make_with_ai)) },
+                modifier = Modifier.padding(Space.l),
+            )
+        }
     }
     picker?.let { subject ->
         ClassPicker(all, plan, subject.ifEmpty { null }, onDismiss = { picker = null }) { k -> save(plan.with(k)); picker = null }
@@ -368,6 +372,7 @@ private fun PlanView(
 }
 
 private val CELL = 30.dp
+private val WIDE_CELL = 56.dp
 private val TIME_COL = 26.dp
 
 @Composable
@@ -382,6 +387,10 @@ private fun WeekGrid(classes: List<OpenClass>) {
     val days = if (classes.any { k -> k.times.any { it.day == "토" } }) WEEKDAYS else WEEKDAYS.take(5)
     val last = maxOf(9, classes.flatMap { it.times }.maxOfOrNull { it.end } ?: 9)
     val line = AppTheme.colors.line
+    // Wide screens: taller hours and bigger names, so the week fills the screen instead of a thin strip
+    val wide = LocalWideLayout.current
+    val cell = if (wide) WIDE_CELL else CELL
+    val blockText = if (wide) AppTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 15.sp) else AppTheme.type.caption.copy(fontSize = 10.sp, lineHeight = 12.sp)
     Column(Modifier.contentWidth().padding(horizontal = Space.l, vertical = Space.s)) {
         Row {
             Box(Modifier.width(TIME_COL))
@@ -390,25 +399,25 @@ private fun WeekGrid(classes: List<OpenClass>) {
         Row {
             Column(Modifier.width(TIME_COL)) {
                 (1..last).forEach { p ->
-                    Box(Modifier.height(CELL), contentAlignment = Alignment.TopStart) {
+                    Box(Modifier.height(cell), contentAlignment = Alignment.TopStart) {
                         Txt("${periodStartHour(p)}", AppTheme.type.caption.copy(fontSize = 10.sp), tone = Tone.Ink3)
                     }
                 }
             }
             days.forEach { d ->
-                Box(Modifier.weight(1f).height(CELL * last)) {
-                    (0 until last).forEach { p -> Box(Modifier.offset(y = CELL * p).fillMaxWidth().height(0.5.dp).background(line)) }
+                Box(Modifier.weight(1f).height(cell * last)) {
+                    (0 until last).forEach { p -> Box(Modifier.offset(y = cell * p).fillMaxWidth().height(0.5.dp).background(line)) }
                     classes.forEachIndexed { i, k ->
                         k.times.filter { it.day == d }.forEach { t ->
                             Box(
-                                Modifier.offset(y = CELL * (t.start - 1)).padding(1.dp).fillMaxWidth()
-                                    .height(CELL * (t.end - t.start + 1) - 2.dp)
+                                Modifier.offset(y = cell * (t.start - 1)).padding(1.dp).fillMaxWidth()
+                                    .height(cell * (t.end - t.start + 1) - 2.dp)
                                     .clip(RoundedCornerShape(6.dp)).background(blockColor(i)).padding(3.dp),
                             ) {
                                 Txt(
                                     k.name + (t.room?.let { "\n$it" } ?: ""),
-                                    AppTheme.type.caption.copy(fontSize = 10.sp, lineHeight = 12.sp),
-                                    maxLines = t.end - t.start + 2,
+                                    blockText,
+                                    maxLines = (t.end - t.start + 1) * (if (wide) 3 else 1) + 1,
                                 )
                             }
                         }
