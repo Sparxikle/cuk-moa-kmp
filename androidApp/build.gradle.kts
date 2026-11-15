@@ -1,8 +1,22 @@
+import java.util.Properties
+
 plugins {
     // AGP 9 has Kotlin built in — the kotlin-android plugin isn't applied separately.
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
 }
+
+// Release signing key, from local.properties (not in git) or the same names as Gradle properties / -P flags:
+//   release.storeFile=/path/to/cukmoa-release.jks
+//   release.storePassword=...
+//   release.keyAlias=cukmoa
+//   release.keyPassword=...   (PKCS12 keystores use the store password; may be left out)
+// Without them, release builds fall back to the debug key (device testing only).
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
+fun releaseSetting(name: String): String? = providers.gradleProperty(name).orNull ?: localProperties.getProperty(name)
+val releaseStoreFile = releaseSetting("release.storeFile")?.let { file(it) }?.takeIf { it.exists() }
 
 android {
     namespace = "kr.ac.catholic.cukmoa.android"
@@ -19,14 +33,22 @@ android {
         val apiBaseUrl = providers.gradleProperty("apiBaseUrl").getOrElse("http://localhost:8080")
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
+    signingConfigs {
+        if (releaseStoreFile != null) create("release") {
+            storeFile = releaseStoreFile
+            storePassword = releaseSetting("release.storePassword")
+            keyAlias = releaseSetting("release.keyAlias")
+            keyPassword = releaseSetting("release.keyPassword") ?: releaseSetting("release.storePassword")
+        }
+    }
     buildTypes {
         // Release build: R8 shrinks and optimizes the code (2–3x faster startup).
-        // Without a store signing key, sign with the debug key (for device testing). Change signingConfig when publishing to the store.
+        // Signed with the release key when it is set up (see the top of this file), otherwise with the debug key.
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
     buildFeatures {
