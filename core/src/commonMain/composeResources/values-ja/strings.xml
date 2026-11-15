@@ -176,7 +176,7 @@
     <string name="my_timetable">マイ時間割</string>
     <string name="search_classes">授業名・教授で検索</string>
     <string name="edit_hint">授業をタップするとクラスを変更できます。時間が重なる授業は追加できません。</string>
-    <string name="timetable_privacy">時間割の作成時に、学年・専攻・履修科目・入力した成績がAI（Google Gemini）に送信されます。氏名と学籍番号は送信されません。授業時間は1限=9時を基準としています。</string>
+    <string name="timetable_privacy">時間割の作成時に、学年・専攻・履修科目・入力した成績がアプリのサーバー経由でAI（Amazon Bedrock）に送信されます。氏名と学籍番号は送信されません。授業時間は1限=9時を基準としています。</string>
     <string name="total_credits_courses">合計%1$d単位 · %2$d科目</string>
     <string name="time_tbd">時間未定</string>
     <string name="source_main">学校</string>

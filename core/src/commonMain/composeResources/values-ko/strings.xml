@@ -176,7 +176,7 @@
     <string name="my_timetable">내 시간표</string>
     <string name="search_classes">수업명 또는 교수 검색</string>
     <string name="edit_hint">수업을 누르면 분반을 바꿀 수 있어요. 시간이 겹치는 수업은 추가할 수 없어요.</string>
-    <string name="timetable_privacy">시간표를 만들 때 학년·전공·이수 과목·입력한 성적이 AI(Google Gemini)로 전송돼요. 이름과 학번은 보내지 않아요. 수업 시간은 1교시 = 9시 기준이에요.</string>
+    <string name="timetable_privacy">시간표를 만들 때 학년·전공·이수 과목·입력한 성적이 가대모아 서버를 거쳐 AI(Amazon Bedrock)로 전송돼요. 이름과 학번은 보내지 않아요. 수업 시간은 1교시 = 9시 기준이에요.</string>
     <string name="total_credits_courses">총 %1$d학점 · %2$d과목</string>
     <string name="time_tbd">시간 미정</string>
     <string name="source_main">학교</string>

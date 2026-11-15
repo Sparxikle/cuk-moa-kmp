@@ -260,14 +260,6 @@ fun ScreenList(
         }
         Box(Modifier.fillMaxSize().clipToBounds()) {
             val pulled = { pull.distanceFraction.coerceIn(0f, 1.6f) }
-            if (refreshable) PullIndicator(
-                progress = pull.distanceFraction,
-                refreshing = refreshing,
-                modifier = Modifier.align(Alignment.TopCenter).graphicsLayer {
-                    // Centered in the revealed gap
-                    translationY = (pulled() * PullDistance.toPx() - size.height) / 2f
-                },
-            )
             val list: @Composable (Modifier) -> Unit = { modifier ->
                 Box(modifier) {
                     LazyColumn(
@@ -279,6 +271,15 @@ fun ScreenList(
                         content = content,
                     )
                     overlay()
+                    // In the list's own column (above the pulled list, beside any reading pane rather than over it)
+                    if (refreshable) PullIndicator(
+                        progress = pull.distanceFraction,
+                        refreshing = refreshing,
+                        modifier = Modifier.align(Alignment.TopCenter).graphicsLayer {
+                            // Centered in the revealed gap
+                            translationY = (pulled() * PullDistance.toPx() - size.height) / 2f
+                        },
+                    )
                 }
             }
             if (!panes) list(Modifier.fillMaxSize())

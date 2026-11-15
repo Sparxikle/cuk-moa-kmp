@@ -176,7 +176,7 @@
     <string name="my_timetable">我的课表</string>
     <string name="search_classes">搜索课程或教授</string>
     <string name="edit_hint">点击课程可更换班级。与课表时间冲突的课程无法添加。</string>
-    <string name="timetable_privacy">制作课表时，年级、专业、已修课程和输入的成绩会发送给AI（Google Gemini）。不会发送姓名和学号。上课时间按第1节=9点计算。</string>
+    <string name="timetable_privacy">制作课表时，年级、专业、已修课程和输入的成绩会经由本应用的服务器发送给AI（Amazon Bedrock）。不会发送姓名和学号。上课时间按第1节=9点计算。</string>
     <string name="total_credits_courses">共%1$d学分 · %2$d门</string>
     <string name="time_tbd">时间待定</string>
     <string name="source_main">学校</string>
