@@ -17,6 +17,9 @@ val localProperties = Properties().apply {
 }
 fun releaseSetting(name: String): String? = providers.gradleProperty(name).orNull ?: localProperties.getProperty(name)
 val releaseStoreFile = releaseSetting("release.storeFile")?.let { file(it) }?.takeIf { it.exists() }
+// Default: localhost. Forward the phone's port to the dev PC with: adb reverse tcp:8080 tcp:8080
+// Release: -PapiBaseUrl=https://<server address>
+val apiBaseUrl: String = providers.gradleProperty("apiBaseUrl").getOrElse("http://localhost:8080")
 
 android {
     namespace = "kr.ac.catholic.cukmoa.android"
@@ -28,9 +31,6 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "0.9"
-        // Default: localhost. Forward the phone's port to the dev PC with: adb reverse tcp:8080 tcp:8080
-        // Release: -PapiBaseUrl=https://<server address>
-        val apiBaseUrl = providers.gradleProperty("apiBaseUrl").getOrElse("http://localhost:8080")
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
     signingConfigs {
@@ -42,9 +42,15 @@ android {
         }
     }
     buildTypes {
+        // Plain HTTP: debug builds always (dev servers); release builds only for an http:// API address (e.g. a demo
+        // server on the local network). Web pages in the in-app browser load over HTTPS either way.
+        debug {
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
+        }
         // Release build: R8 shrinks and optimizes the code (2–3x faster startup).
         // Signed with the release key when it is set up (see the top of this file), otherwise with the debug key.
         release {
+            manifestPlaceholders["usesCleartextTraffic"] = apiBaseUrl.startsWith("http://").toString()
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

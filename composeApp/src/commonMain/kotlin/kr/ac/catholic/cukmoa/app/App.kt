@@ -23,7 +23,7 @@ import kr.ac.catholic.cukmoa.core.ui.LocalExternalUriHandler
 import kr.ac.catholic.cukmoa.core.ui.LocalWebOpen
 import kr.ac.catholic.cukmoa.core.ui.LocalTabReselect
 import kr.ac.catholic.cukmoa.core.ui.WebPage
-import kr.ac.catholic.cukmoa.core.ui.opensInApp
+import kr.ac.catholic.cukmoa.core.ui.inAppAddress
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -320,7 +320,7 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Bo
         var web by rememberSaveable { mutableStateOf<String?>(null) }
         val links = remember(system) {
             object : UriHandler {
-                override fun openUri(uri: String) { if (opensInApp(uri)) web = uri else system.openUri(uri) }
+                override fun openUri(uri: String) { inAppAddress(uri)?.let { web = it } ?: system.openUri(uri) }
             }
         }
 

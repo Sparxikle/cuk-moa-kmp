@@ -3,11 +3,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- usesCleartextTraffic: for reaching the HTTP dev server (localhost via adb reverse). Switch to HTTPS and turn this off before release. -->
+    <!-- usesCleartextTraffic (set per build type in build.gradle.kts): debug builds allow plain HTTP for the dev server
+         (localhost via adb reverse); release builds allow it only when the API address itself is http:// -->
     <application
         android:label="가대모아"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="${usesCleartextTraffic}"
         android:theme="@style/Theme.App"
         android:localeConfig="@xml/locales_config">
         <activity

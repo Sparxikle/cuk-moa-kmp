@@ -41,5 +41,15 @@ val LocalExternalUriHandler = staticCompositionLocalOf<UriHandler?> { null }
 /** True while the in-app browser covers the app. Sheets (windows of their own) step aside meanwhile and come back after. */
 val LocalWebOpen = compositionLocalOf { false }
 
-/** Whether a link can be shown in the in-app browser: http(s) on a platform that has one. */
-fun opensInApp(uri: String) = inAppBrowserSupported && (uri.startsWith("https://") || uri.startsWith("http://"))
+/**
+ * The address the in-app browser should load for a link, or null to hand it to the system (no in-app browser on this
+ * platform, not a web link, or plain http that can't be upgraded). Release builds don't allow plain http, so school
+ * links still written as http:// are upgraded: every catholic.ac.kr site checked serves the same page over https.
+ */
+fun inAppAddress(uri: String): String? {
+    if (!inAppBrowserSupported) return null
+    if (uri.startsWith("https://")) return uri
+    if (!uri.startsWith("http://")) return null
+    val host = uri.removePrefix("http://").substringBefore('/').substringBefore(':').lowercase()
+    return if (host == "catholic.ac.kr" || host.endsWith(".catholic.ac.kr")) "https://" + uri.removePrefix("http://") else null
+}

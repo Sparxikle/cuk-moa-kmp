@@ -8,6 +8,7 @@ import kr.ac.catholic.cukmoa.core.ui.Tone
 import kr.ac.catholic.cukmoa.core.ui.Txt
 import kr.ac.catholic.cukmoa.core.ui.WebPage
 import kr.ac.catholic.cukmoa.core.ui.inAppBrowserSupported
+import kr.ac.catholic.cukmoa.core.ui.inAppAddress
 import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.cardItems
 import org.jetbrains.compose.resources.stringResource
@@ -102,7 +103,7 @@ fun AnnouncementsScreen(student: StudentState) {
     // Wide screens with an in-app browser: list + reading pane. The picked post opens in the pane instead of over the app.
     val reader = LocalWideLayout.current && inAppBrowserSupported
     var selected by rememberSaveable { mutableStateOf<String?>(null) }
-    val picked = state.items.firstOrNull { it.link == selected }
+    val picked = state.items.firstOrNull { inAppAddress(it.link) == selected }
 
     ScreenList(
         title = stringResource(Res.string.module_announcements),
@@ -138,8 +139,9 @@ fun AnnouncementsScreen(student: StudentState) {
         cardItems(state.items, key = { it.id }) { a ->
             AnnouncementRow(
                 a, seenAt = student.announcementsSeenAt, showSource = true,
-                selected = reader && a.link == selected,
-                onOpen = if (reader) ({ selected = a.link }) else null,
+                selected = reader && inAppAddress(a.link) == selected,
+                // Links the in-app browser can't load (plain http elsewhere) go to the system browser
+                onOpen = if (reader) inAppAddress(a.link)?.let { address -> { selected = address } } else null,
             )
         }
         if (state.items.isEmpty() && !state.loading && state.error == null) item(key = "empty") {

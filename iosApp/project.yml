@@ -34,9 +34,10 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        # Development servers are plain http (localhost, Tailscale); release builds use https
+        # HTTPS only, except the local network (localhost, *.local) for a dev server on this Mac.
+        # Plain-http web links open in Safari instead of the in-app browser.
         NSAppTransportSecurity:
-          NSAllowsArbitraryLoads: true
+          NSAllowsLocalNetworking: true
     settings:
       base:
         PRODUCT_NAME: CukMoa
