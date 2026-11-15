@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -164,6 +166,8 @@ fun ScreenList(
     actions: @Composable RowScope.() -> Unit = {},
     /** Pull to refresh (fetch everything from the server again). On by default for the main tabs, which have no back arrow. */
     refreshable: Boolean = onBack == null,
+    /** Width the header keeps to on wide screens; match it to the widest content (two-column home is wider). */
+    headerWidth: Dp = 840.dp,
     content: LazyListScope.() -> Unit,
 ) {
     val vm = LocalAppViewModel.current
@@ -186,6 +190,8 @@ fun ScreenList(
     Column(Modifier.fillMaxSize().background(c.bg).nestedScroll(scroll.nestedScrollConnection)) {
         CompositionLocalProvider(LocalContentColor provides c.accent) {
         Box(Modifier.fillMaxWidth().background(barColor).statusBarsPadding().height(barHeight)) {
+        // On wide screens the header keeps to the content column, so the title sits above the cards
+        Box(Modifier.align(Alignment.Center).fillMaxHeight().contentWidth(headerWidth)) {
             if (onBack != null) IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart).padding(start = Space.xs)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
             }
@@ -221,6 +227,7 @@ fun ScreenList(
                 if (info != null) InfoButton(stringResource(Res.string.about), onClick = { showInfo = true })
                 actions()
             }
+        }
         }
         }
         Box(Modifier.fillMaxSize().clipToBounds()) {
@@ -263,8 +270,14 @@ fun InfoDialog(title: String, text: String, onDismiss: () -> Unit) {
     )
 }
 
-/** On wide screens (desktop/tablet), content is kept within 640dp. */
-fun Modifier.contentWidth() = this.widthIn(max = 640.dp).fillMaxWidth()
+/** On wide screens (desktop/tablet), content is kept within 840dp. */
+fun Modifier.contentWidth(max: Dp = 840.dp) = this.widthIn(max = max).fillMaxWidth()
+
+/** Window width from which the app switches to the wide layout: side tab rail, two-column home. */
+val WideLayoutWidth = 840.dp
+
+/** True when the window is at least [WideLayoutWidth] wide (tablet landscape, desktop). Set by the app shell. */
+val LocalWideLayout = staticCompositionLocalOf { false }
 
 /**
  * A titled block of a screen as one LG UX card: the title is the card's first row (primary text color, like

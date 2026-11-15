@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.runtime.LaunchedEffect
@@ -190,7 +191,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
             },
         ) { s ->
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = Space.xxl), horizontalAlignment = Alignment.CenterHorizontally) {
-                Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()) {
+                Column(Modifier.contentWidth()) {
                     when (s) {
                         Step.Intro -> Unit
                         Step.Grade -> StepFrame(stringResource(Res.string.ask_grade)) {
@@ -248,12 +249,15 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
 @Composable
 private fun PillButton(label: String, onClick: () -> Unit) {
     val c = AppTheme.colors
+    // On wide screens it keeps to the content column, centered
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
     Box(
-        Modifier.fillMaxWidth().padding(horizontal = Space.l, vertical = Space.m).height(52.dp)
+        Modifier.contentWidth().padding(horizontal = Space.l, vertical = Space.m).height(52.dp)
             .clip(CircleShape).background(c.accent).clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(label, color = c.onAccent, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), maxLines = 1)
+    }
     }
 }
 
@@ -290,9 +294,9 @@ private fun Intro(onStart: () -> Unit) {
         Triple(Icons.Default.Group, Color(0xFF34C25A), Res.string.intro_point4),
     )
     Column(Modifier.fillMaxSize().background(c.bg).statusBarsPadding().navigationBarsPadding()) {
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
             Column(
-                Modifier.widthIn(max = 640.dp).fillMaxWidth().padding(start = Space.xxl, end = Space.xxl, top = 56.dp, bottom = Space.s),
+                Modifier.contentWidth().padding(start = Space.xxl, end = Space.xxl, top = 56.dp, bottom = Space.s),
                 verticalArrangement = Arrangement.spacedBy(Space.l),
             ) {
                 Box(Modifier.size(56.dp).clip(RoundedCornerShape(percent = 30)).background(c.accent), contentAlignment = Alignment.Center) {

@@ -9,6 +9,16 @@ import org.jetbrains.compose.resources.StringResource
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
+import kr.ac.catholic.cukmoa.core.ui.WideLayoutWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -95,21 +105,42 @@ private fun MainTabs(
     val tabs = listOf(TabItem(Routes.HOME, Res.string.tab_home, Icons.Default.GridView, AnimatedIcon.Grid)) + modules.map { TabItem(it.id, it.title, it.icon, it.animatedIcon) }
     fun index(r: String) = tabs.indexOfFirst { it.route == r }.coerceAtLeast(0)
 
-    Scaffold(
-        containerColor = AppTheme.colors.bg,
-        bottomBar = { TabBar(tabs, route, newCount, onTab) },
-    ) { padding ->
-        // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
-        AnimatedContent(
-            targetState = route,
-            modifier = Modifier.fillMaxSize().background(AppTheme.colors.bg).padding(bottom = padding.calculateBottomPadding())
-                // The tab bar already covers this much of the keyboard, so screens only pad for the rest (imePadding)
-                .consumeWindowInsets(PaddingValues(bottom = padding.calculateBottomPadding())),
-            transitionSpec = { tabSlide(forward = index(targetState) > index(initialState)) },
-            label = "tab",
-        ) { r ->
-            val module = ModuleRegistry.byId(r)
-            if (module == null) HomeScreen(catalog, student, modules) else module.Screen(catalog, student)
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val wide = maxWidth >= WideLayoutWidth
+        val content: @Composable (Modifier) -> Unit = { modifier ->
+            AnimatedContent(
+                targetState = route,
+                modifier = modifier.background(AppTheme.colors.bg),
+                transitionSpec = { tabSlide(forward = index(targetState) > index(initialState)) },
+                label = "tab",
+            ) { r ->
+                val module = ModuleRegistry.byId(r)
+                if (module == null) HomeScreen(catalog, student, modules) else module.Screen(catalog, student)
+            }
+        }
+        CompositionLocalProvider(LocalWideLayout provides wide) {
+            if (wide) {
+                // Tablet landscape / desktop: tabs in a rail on the start edge. Screens pad for the bottom system bar
+                // themselves (the bottom tab bar did that before).
+                Row(Modifier.fillMaxSize().background(AppTheme.colors.bg)) {
+                    TabRail(tabs, route, newCount, onTab)
+                    content(
+                        Modifier.weight(1f).fillMaxHeight()
+                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End))
+                            .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End)),
+                    )
+                }
+            } else Scaffold(
+                containerColor = AppTheme.colors.bg,
+                bottomBar = { TabBar(tabs, route, newCount, onTab) },
+            ) { padding ->
+                // Each screen (ScreenList) handles the top inset (status bar) itself → only reserve the bottom tab height.
+                content(
+                    Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding())
+                        // The tab bar already covers this much of the keyboard, so screens only pad for the rest (imePadding)
+                        .consumeWindowInsets(PaddingValues(bottom = padding.calculateBottomPadding())),
+                )
+            }
         }
     }
 }
@@ -121,60 +152,94 @@ private fun MainTabs(
  */
 @Composable
 private fun TabBar(tabs: List<TabItem>, route: String, newCount: Long, onTab: (String) -> Unit) {
-    val c = AppTheme.colors
-    val off = c.ink.copy(alpha = 0.4f)
     // LG pads tabs 4dp + 8dp; with five tabs (home + 4 modules) the labels need the room
     val crowded = tabs.size > 4
-    Row(Modifier.fillMaxWidth().background(c.bg).navigationBarsPadding().height(75.dp).padding(horizontal = 4.dp)) {
+    Row(Modifier.fillMaxWidth().background(AppTheme.colors.bg).navigationBarsPadding().height(75.dp).padding(horizontal = 4.dp)) {
         tabs.forEach { t ->
-            val selected = route == t.route
-            val color = if (selected) c.accent else off
-            // Animate only when a tab becomes selected, not for the first tab at start: animated icons play their
-            // Lottie once (play counts selections), plain icons pop
-            val pop = remember { Animatable(1f) }
-            var play by remember { mutableIntStateOf(0) }
-            var started by remember { mutableStateOf(false) }
-            LaunchedEffect(selected) {
-                if (selected && started) {
-                    if (t.animated != null) play++
-                    else {
-                        pop.snapTo(0.55f)
-                        pop.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = 260f))
-                    }
-                } else pop.snapTo(1f)
-                started = true
-            }
-            val icon: @Composable () -> Unit = {
-                if (t.animated != null) LottieIcon(t.animated, play, tint = color, size = 30.dp)
-                else Icon(t.icon, null, Modifier.size(28.dp), tint = color)
-            }
             Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = if (crowded) 1.dp else 4.dp), contentAlignment = Alignment.Center) {
-                Column(
-                    Modifier.fillMaxWidth().height(61.dp).clip(RoundedCornerShape(25.dp))
-                        .selectable(selected = selected, role = Role.Tab, onClick = { onTab(t.route) })
-                        .padding(horizontal = if (crowded) 2.dp else 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Box(Modifier.size(36.dp).graphicsLayer { scaleX = pop.value; scaleY = pop.value }, contentAlignment = Alignment.Center) {
-                        if (t.route == Routes.ANNOUNCEMENTS && newCount > 0) {
-                            BadgedBox(badge = { Badge { Text("$newCount") } }) { icon() }
-                        } else icon()
-                    }
-                    Text(
-                        stringResource(t.label),
-                        color = color,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = 12.sp,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                            letterSpacing = 0.sp,
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                TabCell(
+                    t, route == t.route, newCount, onTab,
+                    Modifier.fillMaxWidth().height(61.dp), RoundedCornerShape(25.dp), padding = if (crowded) 2.dp else 8.dp,
+                )
             }
         }
+    }
+}
+
+/**
+ * Wide-screen version of [TabBar]: the same tabs stacked in a 112dp rail on the start edge, vertically centered.
+ * The touch shape uses LG's landscape corner radius (7dp).
+ */
+@Composable
+private fun TabRail(tabs: List<TabItem>, route: String, newCount: Long, onTab: (String) -> Unit) {
+    Column(
+        Modifier.fillMaxHeight().background(AppTheme.colors.bg)
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start))
+            .width(112.dp).padding(horizontal = 6.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        tabs.forEach { t ->
+            TabCell(t, route == t.route, newCount, onTab, Modifier.fillMaxWidth().height(72.dp), RoundedCornerShape(7.dp), padding = 2.dp)
+        }
+    }
+}
+
+/** One tab: icon over label, accent when selected, and the selection pop / Lottie. Shared by [TabBar] and [TabRail]. */
+@Composable
+private fun TabCell(
+    t: TabItem,
+    selected: Boolean,
+    newCount: Long,
+    onTab: (String) -> Unit,
+    modifier: Modifier,
+    shape: RoundedCornerShape,
+    padding: androidx.compose.ui.unit.Dp,
+) {
+    val c = AppTheme.colors
+    val off = c.ink.copy(alpha = 0.4f)
+    val color = if (selected) c.accent else off
+    // Animate only when a tab becomes selected, not for the first tab at start: animated icons play their
+    // Lottie once (play counts selections), plain icons pop
+    val pop = remember { Animatable(1f) }
+    var play by remember { mutableIntStateOf(0) }
+    var started by remember { mutableStateOf(false) }
+    LaunchedEffect(selected) {
+        if (selected && started) {
+            if (t.animated != null) play++
+            else {
+                pop.snapTo(0.55f)
+                pop.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = 260f))
+            }
+        } else pop.snapTo(1f)
+        started = true
+    }
+    val icon: @Composable () -> Unit = {
+        if (t.animated != null) LottieIcon(t.animated, play, tint = color, size = 30.dp)
+        else Icon(t.icon, null, Modifier.size(28.dp), tint = color)
+    }
+    Column(
+        modifier.clip(shape)
+            .selectable(selected = selected, role = Role.Tab, onClick = { onTab(t.route) })
+            .padding(horizontal = padding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Box(Modifier.size(36.dp).graphicsLayer { scaleX = pop.value; scaleY = pop.value }, contentAlignment = Alignment.Center) {
+            if (t.route == Routes.ANNOUNCEMENTS && newCount > 0) {
+                BadgedBox(badge = { Badge { Text("$newCount") } }) { icon() }
+            } else icon()
+        }
+        Text(
+            stringResource(t.label),
+            color = color,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontSize = 12.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                letterSpacing = 0.sp,
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

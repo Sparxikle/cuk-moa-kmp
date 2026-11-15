@@ -46,6 +46,8 @@ import kr.ac.catholic.cukmoa.core.ui.MoreRow
 import kr.ac.catholic.cukmoa.core.ui.ProgressBar
 import kr.ac.catholic.cukmoa.core.ui.SaveButton
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
+import kr.ac.catholic.cukmoa.core.ui.contentWidth
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.Section
 import kr.ac.catholic.cukmoa.core.ui.Tone
 import kr.ac.catholic.cukmoa.core.ui.Txt
@@ -63,31 +65,49 @@ import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.HomeCardId
 import kr.ac.catholic.cukmoa.model.StudentState
 
+/** Two-column home width on wide screens: two cards of up to 640dp. */
+private val HomeWideWidth = 1280.dp
+
 @Composable
 fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureModule>) {
     val nav = LocalNavigator.current
 
+    val wide = LocalWideLayout.current
+    // Hide a card too if its module is off
+    val cards = student.homeCards.filter { id ->
+        val provider = ModuleRegistry.all.firstOrNull { id in it.homeCards }
+        provider == null || provider in modules
+    }
+    val card: @Composable (HomeCardId) -> Unit = { id ->
+        val provider = ModuleRegistry.all.firstOrNull { id in it.homeCards }
+        when (id) {
+            HomeCardId.Progress -> ProgressCard(catalog, student)
+            HomeCardId.Announcements -> provider?.HomeCard(id, catalog, student)
+            HomeCardId.Next -> NextCard(catalog, student)
+            HomeCardId.Saved -> SavedCard(catalog, student)
+            HomeCardId.Story -> StoryCard(catalog, student)
+            HomeCardId.Events -> EventsCard()
+            HomeCardId.Professors -> provider?.HomeCard(id, catalog, student)
+            HomeCardId.Explore -> ExploreCard(catalog)
+        }
+    }
+
     ScreenList(
         title = APP_NAME,
         actions = { IconButton(onClick = nav.openSettings) { Icon(Icons.Outlined.Settings, stringResource(Res.string.settings)) } },
+        headerWidth = if (wide) HomeWideWidth else 840.dp,
     ) {
         item(key = "banners") { StatusBanners() }
-        student.homeCards.forEach { id ->
-            val provider = ModuleRegistry.all.firstOrNull { id in it.homeCards }
-            if (provider != null && provider !in modules) return@forEach // Hide the card too if its module is off
-            item(key = id.name) {
-                when (id) {
-                    HomeCardId.Progress -> ProgressCard(catalog, student)
-                    HomeCardId.Announcements -> provider?.HomeCard(id, catalog, student)
-                    HomeCardId.Next -> NextCard(catalog, student)
-                    HomeCardId.Saved -> SavedCard(catalog, student)
-                    HomeCardId.Story -> StoryCard(catalog, student)
-                    HomeCardId.Events -> EventsCard()
-                    HomeCardId.Professors -> provider?.HomeCard(id, catalog, student)
-                    HomeCardId.Explore -> ExploreCard(catalog)
+        if (wide) {
+            // Wide screens: cards in two columns, filled left, right, left… in the user's order
+            if (cards.isNotEmpty()) item(key = "cards") {
+                Row(Modifier.contentWidth(HomeWideWidth), verticalAlignment = Alignment.Top) {
+                    for (column in 0..1) Column(Modifier.weight(1f)) {
+                        cards.filterIndexed { i, _ -> i % 2 == column }.forEach { card(it) }
+                    }
                 }
             }
-        }
+        } else cards.forEach { id -> item(key = id.name) { card(id) } }
         if (student.homeCards.isEmpty()) item(key = "empty") {
             EmptyState(stringResource(Res.string.home_empty), stringResource(Res.string.settings), nav.openSettings)
         }
