@@ -223,7 +223,7 @@ private fun Checklist(catalog: Catalog, student: StudentState, plan: GraduationP
                 trailing = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (checked) GradeChip(student.grades[c.id]) { vm.setCourseGrade(c.id, it) }
-                        InfoButton(stringResource(Res.string.see_details, c.name), onClick = { nav.openCourse(c.id) }, tint = AppTheme.colors.ink2)
+                        InfoButton(stringResource(Res.string.see_details, c.name), onClick = { nav.openCourse(c.id) }, tint = AppTheme.colors.ink2, animated = false)
                     }
                 },
             )

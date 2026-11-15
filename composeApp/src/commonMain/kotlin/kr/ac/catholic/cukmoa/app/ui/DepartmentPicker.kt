@@ -1,5 +1,7 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.runtime.Stable
 import kr.ac.catholic.cukmoa.core.ui.InfoButton
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
@@ -73,44 +75,56 @@ fun List<Department>.toggle(d: Department): List<Department> = when {
     else -> take(StudentState.MAX_MAJORS - 1) + d
 }
 
+/** Search text and the department whose ⓘ sheet is open, kept by the screen that shows the picker. */
+@Stable
+class DepartmentPickerState {
+    var query by mutableStateOf("")
+    var detail by mutableStateOf<Department?>(null)
+}
+
+@Composable
+fun rememberDepartmentPickerState() = remember { DepartmentPickerState() }
+
+/** The ⓘ sheet of the department picker. Call once beside [departmentPicker]. */
+@Composable
+fun DepartmentPickerSheet(state: DepartmentPickerState, selected: List<Department>, onChange: (List<Department>) -> Unit) {
+    state.detail?.let { d ->
+        DepartmentSheet(
+            department = d,
+            order = selected.indexOfFirst { it.id == d.id },
+            highlight = state.query,
+            onToggle = { onChange(selected.toggle(d)) },
+            onDismiss = { state.detail = null },
+        )
+    }
+}
+
 /**
  * Every school department grouped by college (or by field when there's no college info), with a search field on top.
  * Up to 2 majors can be chosen regardless of college (1st major + 2nd major); the row says which.
  * Departments whose announcements are collected get a megaphone icon.
+ * Lazy list items, one per college card, so opening the list only builds the cards on screen (60+ departments).
  */
-@Composable
-fun DepartmentPicker(list: DepartmentList?, selected: List<Department>, onChange: (List<Department>) -> Unit) {
-    var query by remember { mutableStateOf("") }
-    var detail by remember { mutableStateOf<Department?>(null) }
-
-    detail?.let { d ->
-        DepartmentSheet(
-            department = d,
-            order = selected.indexOfFirst { it.id == d.id },
-            highlight = query,
-            onToggle = { onChange(selected.toggle(d)) },
-            onDismiss = { detail = null },
-        )
-    }
-
-    Column(Modifier.contentWidth()) {
-        // "Clear all" lives inside the search field, so choosing or clearing majors never moves the list
+fun LazyListScope.departmentPicker(state: DepartmentPickerState, list: DepartmentList?, selected: List<Department>, onChange: (List<Department>) -> Unit) {
+    // "Clear all" lives inside the search field, so choosing or clearing majors never moves the list
+    item(key = "department-search") {
         SearchField(
-            query, { query = it }, stringResource(Res.string.search_departments),
+            state.query, { state.query = it }, stringResource(Res.string.search_departments),
             extra = if (selected.isNotEmpty()) {
                 { TextButton(onClick = { onChange(emptyList()) }, modifier = Modifier.padding(end = Space.xs)) { Text(stringResource(Res.string.deselect_all)) } }
             } else null,
         )
-
-        if (list == null) {
-            EmptyState(stringResource(Res.string.loading_departments))
-            return@Column
-        }
-
-        val groups = list.items.filter { it.matches(query) }.groupBy { it.campus to it.college }
-        if (groups.isEmpty()) EmptyState(stringResource(Res.string.no_department_for, query))
-        groups.forEach { (key, departments) ->
-            val (campus, college) = key
+    }
+    if (list == null) {
+        item(key = "department-loading") { EmptyState(stringResource(Res.string.loading_departments)) }
+        return
+    }
+    val query = state.query
+    val groups = list.items.filter { it.matches(query) }.groupBy { it.campus to it.college }
+    if (groups.isEmpty()) item(key = "department-none") { EmptyState(stringResource(Res.string.no_department_for, query)) }
+    groups.forEach { (key, departments) ->
+        val (campus, college) = key
+        item(key = "college-$campus-$college") {
             Section(if (campus != "성심") "$college · ${stringResource(Res.string.campus_name, campus)}" else college) {
             departments.forEach { d ->
                 val hits = if (d.name.squash().contains(query.trim().squash(), ignoreCase = true)) emptyList() else d.subjectHits(query)
@@ -127,7 +141,7 @@ fun DepartmentPicker(list: DepartmentList?, selected: List<Department>, onChange
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (d.board != null) Icon(Icons.Outlined.Campaign, stringResource(Res.string.notices_supported), tint = AppTheme.colors.ink2, modifier = Modifier.size(20.dp))
-                            InfoButton(stringResource(Res.string.view_courses_of, d.name), onClick = { detail = d }, tint = AppTheme.colors.ink2)
+                            InfoButton(stringResource(Res.string.view_courses_of, d.name), onClick = { state.detail = d }, tint = AppTheme.colors.ink2, animated = false)
                         }
                     },
                 )

@@ -3,6 +3,9 @@ package kr.ac.catholic.cukmoa.core.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -81,9 +84,24 @@ fun LottieIcon(
     )
 }
 
-/** Info button with the animated "i": plays once on tap, then runs [onClick] (usually opens an explanation). */
+/**
+ * Info button with the animated "i": plays once on tap, then runs [onClick] (usually opens an explanation).
+ * animated = false draws a plain "i" for buttons repeated on every row of a long list: each Lottie player costs
+ * setup and drawing, and dozens of them at once make the screen stutter as it opens.
+ */
 @Composable
-fun InfoButton(contentDescription: String, onClick: () -> Unit, modifier: Modifier = Modifier, size: Dp = 24.dp, tint: Color = LocalContentColor.current) {
+fun InfoButton(
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = 24.dp,
+    tint: Color = LocalContentColor.current,
+    animated: Boolean = true,
+) {
+    if (!animated) {
+        IconButton(onClick = onClick, modifier = modifier) { Icon(Icons.Outlined.Info, contentDescription, Modifier.size(size), tint = tint) }
+        return
+    }
     var play by remember { mutableIntStateOf(0) }
     IconButton(onClick = { play++; onClick() }, modifier = modifier) {
         LottieIcon(AnimatedIcon.Info, play, tint = tint, size = size, contentDescription = contentDescription)

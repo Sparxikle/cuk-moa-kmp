@@ -271,8 +271,12 @@ private fun SettingsPageContent(
             }
         }
 
-        SettingsPage.Department -> ScreenList(title = stringResource(Res.string.major), onBack = back) {
-            item { DepartmentPicker(departments, majors) { vm.setDepartments(it) } }
+        SettingsPage.Department -> {
+            val picker = rememberDepartmentPickerState()
+            ScreenList(title = stringResource(Res.string.major), onBack = back) {
+                departmentPicker(picker, departments, majors) { vm.setDepartments(it) }
+            }
+            DepartmentPickerSheet(picker, majors) { vm.setDepartments(it) }
         }
 
         SettingsPage.Home -> ScreenList(title = stringResource(Res.string.home_screen), onBack = back) {

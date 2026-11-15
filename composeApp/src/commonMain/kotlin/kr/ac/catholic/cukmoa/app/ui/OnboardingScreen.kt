@@ -1,5 +1,9 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import kr.ac.catholic.cukmoa.model.DepartmentList
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.width
 import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
@@ -123,6 +127,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
     var cards by remember { mutableStateOf(student.homeCards) }
     var cardsTouched by remember { mutableStateOf(editing) }
     var modules by remember { mutableStateOf(ModuleRegistry.enabled(student).map { it.id }) }
+    val picker = rememberDepartmentPickerState()
     // Interests come from the 1st major, so without a major the interests step is skipped
     val steps = (if (editing) listOf(Step.Grade, Step.Major, Step.Tracks, Step.Modules, Step.Cards) else Step.entries)
         .filter { it != Step.Tracks || majors.isNotEmpty() }
@@ -146,6 +151,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
     }
 
     AppBackHandler(enabled = index > 0) { go(-1) }
+    DepartmentPickerSheet(picker, majors) { picked = it }
 
     // Welcome → steps: shared-axis slide (forward to the left, back to the right)
     AnimatedContent(
@@ -194,6 +200,11 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                 (slideInHorizontally { it * dir / 3 } + fadeIn()) togetherWith (slideOutHorizontally { -it * dir / 3 } + fadeOut())
             },
         ) { s ->
+            // The major list is long (60+ departments): a lazy list of its own instead of the shared scroll column
+            if (s == Step.Major) {
+                MajorStep(picker, departments, majors) { picked = it }
+                return@AnimatedContent
+            }
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = Space.xxl), horizontalAlignment = Alignment.CenterHorizontally) {
                 Column(Modifier.contentWidth(onboardingWidth())) {
                     when (s) {
@@ -205,9 +216,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
                                 }
                             }
                         }
-                        Step.Major -> StepFrame(stringResource(Res.string.ask_major)) {
-                            DepartmentPicker(departments, majors) { picked = it }
-                        }
+                        Step.Major -> Unit // MajorStep above
                         Step.Tracks -> {
                             val first = majors.firstOrNull()
                             StepFrame(stringResource(Res.string.ask_interest)) {
@@ -277,6 +286,28 @@ private fun ChoiceRow(label: String, selected: Boolean, onClick: () -> Unit) {
         onClick = onClick,
         trailing = { if (selected) Icon(Icons.Default.Check, stringResource(Res.string.selected), tint = AppTheme.colors.accent) },
     )
+}
+
+/** Major step: the question and the department picker in one lazy list (side by side on wide screens). */
+@Composable
+private fun MajorStep(picker: DepartmentPickerState, list: DepartmentList?, selected: List<Department>, onChange: (List<Department>) -> Unit) {
+    val title = stringResource(Res.string.ask_major)
+    val titleModifier = Modifier.padding(start = Space.xxl, end = Space.xxl, top = Space.l, bottom = Space.xs)
+    if (LocalWideLayout.current) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            Row(Modifier.contentWidth(onboardingWidth()).fillMaxHeight()) {
+                Txt(title, MaterialTheme.typography.headlineLarge, Modifier.width(400.dp).then(titleModifier))
+                LazyColumn(Modifier.weight(1f).fillMaxHeight(), contentPadding = PaddingValues(top = Space.s, bottom = Space.xxl)) {
+                    departmentPicker(picker, list, selected, onChange)
+                }
+            }
+        }
+    } else {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = Space.xxl), horizontalAlignment = Alignment.CenterHorizontally) {
+            item(key = "title") { Txt(title, MaterialTheme.typography.headlineLarge, Modifier.contentWidth().then(titleModifier)) }
+            departmentPicker(picker, list, selected, onChange)
+        }
+    }
 }
 
 /** Step page: an LG UX big title (32sp bold) above the step's cards. */
