@@ -4,6 +4,9 @@ import kr.ac.catholic.cukmoa.core.ui.cardItems
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kr.ac.catholic.cukmoa.core.LocalAppViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,17 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kr.ac.catholic.cukmoa.core.LocalNavigator
-import kr.ac.catholic.cukmoa.core.ui.ChipRow
 import kr.ac.catholic.cukmoa.core.ui.EmptyState
 import kr.ac.catholic.cukmoa.core.ui.FacultyRow
-import kr.ac.catholic.cukmoa.core.ui.FilterChip
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
 import kr.ac.catholic.cukmoa.core.ui.SearchField
 import kr.ac.catholic.cukmoa.model.FacultyList
 import kr.ac.catholic.cukmoa.model.FacultyMember
 import kr.ac.catholic.cukmoa.model.StudentState
-
-private const val MINE = "mine"
 
 /** Professor search: name · English name · research area · keyword · office · department */
 fun FacultyMember.matches(query: String): Boolean {
@@ -31,44 +30,34 @@ fun FacultyMember.matches(query: String): Boolean {
         .any { it.replace(" ", "").contains(q, ignoreCase = true) }
 }
 
-/** Real professor profiles (5 departments of the College of AI, Electronics & Information Convergence). Filtered by my majors → by department → all. */
+/** Real professor profiles (5 departments of the College of AI, Electronics & Information Convergence). Filtered by my 1st / 2nd major or all, sorted by name. */
 @Composable
 fun FacultyScreen(list: FacultyList, student: StudentState) {
-    var query by remember { mutableStateOf("") }
-    // Default: my majors' professors, if I have a major whose announcements are collected
-    var filter by remember { mutableStateOf(if (student.majors.isNotEmpty()) MINE else null) }
+    val vm = LocalAppViewModel.current
+    val departments by vm.departments.collectAsStateWithLifecycle()
     val nav = LocalNavigator.current
-    // One chip per department site that has professors, named after a department on it
-    val majorChips = remember(list) {
-        list.items.flatMap { m -> m.majors.map { it to m.departments.firstOrNull() } }
-            .groupBy({ it.first }, { it.second }).mapValues { (code, names) ->
-                // Professors of the 융복합전공 belong to many home departments: the chip names the shared programme
-                names.filterNotNull().firstOrNull { CONVERGENCE in it }?.let { CONVERGENCE }
-                    ?: names.filterNotNull().groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: code
-            }
-            .entries.sortedBy { it.value }.map { it.key to it.value }
-    }
+    // 1st major, then 2nd major if any: name, and its board code when its announcements are collected
+    val majors = student.departments.map { id -> id.substringAfter('/') to departments?.items?.firstOrNull { it.id == id }?.board }
+    var query by remember { mutableStateOf("") }
+    // Default: my 1st major; All when no major is picked
+    var filter by remember { mutableStateOf(if (majors.isNotEmpty()) 0 else null) }
+    val listState = rememberLazyListState()
 
     val shown = list.items.filter { m ->
-        when (filter) {
-            null -> true
-            MINE -> m.majors.any { it in student.majors }
-            else -> filter in m.majors
-        } && m.matches(query)
-    }
+        val major = filter?.let { majors.getOrNull(it) }
+        (major == null || major.second in m.majors || major.first in m.departments) && m.matches(query)
+    }.sortedBy { it.name }
 
-    ScreenList(title = stringResource(Res.string.module_professors), info = stringResource(Res.string.faculty_notice, list.source.label, list.source.asOf)) {
+    ScreenList(
+        title = stringResource(Res.string.module_professors),
+        info = stringResource(Res.string.faculty_notice, list.source.label, list.source.asOf),
+        state = listState,
+        // Rows start after the search field and the filter
+        overlay = { NameIndex(shown, { it.name }, listState, firstIndex = if (majors.isNotEmpty()) 2 else 1) },
+    ) {
         item(key = "search") { SearchField(query, { query = it }, stringResource(Res.string.search_faculty)) }
-        item(key = "filters") {
-            ChipRow {
-                if (student.majors.isNotEmpty()) item { FilterChip(stringResource(Res.string.my_major), filter == MINE) { filter = MINE } }
-                majorChips.forEach { (code, name) -> item(key = code) { FilterChip(name, filter == code) { filter = code } } }
-                item { FilterChip(stringResource(Res.string.all), filter == null) { filter = null } }
-            }
-        }
+        if (majors.isNotEmpty()) item(key = "filters") { MajorFilter(majors.map { it.first }, filter) { filter = it } }
         if (shown.isEmpty()) item(key = "empty") { EmptyState(stringResource(Res.string.no_matching_professors)) }
         cardItems(shown, key = { it.id }) { m -> FacultyRow(m) { nav.openProfessor(m.name) } }
     }
 }
-
-private const val CONVERGENCE = "융복합전공"

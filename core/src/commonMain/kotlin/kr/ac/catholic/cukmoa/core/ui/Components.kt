@@ -40,6 +40,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -168,6 +171,10 @@ fun ScreenList(
     refreshable: Boolean = onBack == null,
     /** Width the header keeps to on wide screens; match it to the widest content (two-column home is wider). */
     headerWidth: Dp = 840.dp,
+    /** Scroll state of the list, for screens that jump to an item (index bar). */
+    state: LazyListState = rememberLazyListState(),
+    /** Drawn over the list, below the header (e.g. an index bar at the end edge). */
+    overlay: @Composable BoxScope.() -> Unit = {},
     content: LazyListScope.() -> Unit,
 ) {
     val vm = LocalAppViewModel.current
@@ -241,12 +248,14 @@ fun ScreenList(
                 },
             )
             LazyColumn(
+                state = state,
                 // Shrinks above the keyboard (edge-to-edge: adjustResize alone no longer resizes), so text fields stay visible
                 modifier = Modifier.fillMaxSize().imePadding().graphicsLayer { translationY = pulled() * PullDistance.toPx() },
                 contentPadding = PaddingValues(bottom = Space.xxl),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 content = content,
             )
+            overlay()
         }
     }
     }
