@@ -515,21 +515,23 @@ private val LANGUAGE_NAMES = listOf("ko" to "한국어", "en" to "English", "zh"
 private fun languageLabel(language: String?): String =
     LANGUAGE_NAMES.firstOrNull { it.first == language }?.second ?: stringResource(Res.string.follow_phone)
 
-/** Settings → Data: runs the server check and lists each endpoint's result, path and time. */
+/** Settings → Data: runs the server check when the page opens (and again on "Check"), listing each endpoint's result, path and time. */
 @Composable
 private fun ServerCheck() {
     val vm = LocalAppViewModel.current
     val scope = rememberCoroutineScope()
     var running by remember { mutableStateOf(false) }
     var results by remember { mutableStateOf<List<EndpointCheck>>(emptyList()) }
+    suspend fun check() {
+        running = true
+        results = vm.checkServer()
+        running = false
+    }
+    LaunchedEffect(Unit) { check() }
     Section(
         stringResource(Res.string.server_check),
         action = stringResource(if (running) Res.string.checking else Res.string.run_check) to {
-            if (!running) scope.launch {
-                running = true
-                results = vm.checkServer()
-                running = false
-            }
+            if (!running) scope.launch { check() }
         },
     ) {
         if (results.isEmpty()) {
