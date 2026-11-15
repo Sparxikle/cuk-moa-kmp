@@ -1,5 +1,14 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import kr.ac.catholic.cukmoa.core.theme.CardMetrics
+import kr.ac.catholic.cukmoa.core.ui.Tone
+import kr.ac.catholic.cukmoa.core.ui.Txt
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.CheckCircle
+import kr.ac.catholic.cukmoa.core.state.ServerEndpoint
+import kr.ac.catholic.cukmoa.core.state.EndpointCheck
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Row
@@ -151,6 +160,8 @@ private fun SettingsPageContent(
     val storage by vm.storage.collectAsStateWithLifecycle()
     val majors = departments.findAll(student.departments, student.majors)
     var confirmReset by remember { mutableStateOf(false) }
+    var showLicense by remember { mutableStateOf(false) }
+    if (showLicense) LicenseDialog { showLicense = false }
     // Backup (Settings → Data): file text waiting for the replace confirmation, and the last result to show
     var pendingImport by remember { mutableStateOf<String?>(null) }
     var backupMessage by remember { mutableStateOf<String?>(null) }
@@ -396,6 +407,7 @@ private fun SettingsPageContent(
                     )
                 }
             }
+            item(key = "server-check") { ServerCheck() }
         }
 
         SettingsPage.About -> ScreenList(title = stringResource(Res.string.about), onBack = back) {
@@ -407,7 +419,12 @@ private fun SettingsPageContent(
                     ListRow(stringResource(Res.string.academic_calendar), calendar?.source?.let { stringResource(Res.string.as_of, it.label, it.asOf) } ?: stringResource(Res.string.not_received_yet), subtitleMaxLines = 3)
                     ListRow(stringResource(Res.string.department_list), departments?.source?.label ?: stringResource(Res.string.loading), subtitleMaxLines = 3)
                     ListRow(stringResource(Res.string.module_announcements), stringResource(Res.string.announcements_sources), subtitleMaxLines = 3)
-                    ListRow(stringResource(Res.string.font), stringResource(Res.string.font_name))
+                    ListRow(
+                        stringResource(Res.string.open_source_licenses),
+                        stringResource(Res.string.lottie_icons_credit),
+                        subtitleMaxLines = 2,
+                        onClick = { showLicense = true },
+                    )
                 }
             }
         }
@@ -498,3 +515,58 @@ private val LANGUAGE_NAMES = listOf("ko" to "한국어", "en" to "English", "zh"
 private fun languageLabel(language: String?): String =
     LANGUAGE_NAMES.firstOrNull { it.first == language }?.second ?: stringResource(Res.string.follow_phone)
 
+/** Settings → Data: runs the server check and lists each endpoint's result, path and time. */
+@Composable
+private fun ServerCheck() {
+    val vm = LocalAppViewModel.current
+    val scope = rememberCoroutineScope()
+    var running by remember { mutableStateOf(false) }
+    var results by remember { mutableStateOf<List<EndpointCheck>>(emptyList()) }
+    Section(
+        stringResource(Res.string.server_check),
+        action = stringResource(if (running) Res.string.checking else Res.string.run_check) to {
+            if (!running) scope.launch {
+                running = true
+                results = vm.checkServer()
+                running = false
+            }
+        },
+    ) {
+        if (results.isEmpty()) {
+            Txt(stringResource(Res.string.server_check_detail), MaterialTheme.typography.bodyMedium, Modifier.padding(horizontal = CardMetrics.inset, vertical = Space.s), tone = Tone.Ink2)
+        }
+        results.forEach { r ->
+            val label = stringResource(
+                when (r.endpoint) {
+                    ServerEndpoint.Health -> Res.string.endpoint_health
+                    ServerEndpoint.CollectionStatus -> Res.string.endpoint_collection
+                    ServerEndpoint.Course -> Res.string.endpoint_course
+                    ServerEndpoint.Announcement -> Res.string.endpoint_announcement
+                },
+            )
+            val detail = r.detail.ifBlank { if (r.ok) "" else stringResource(Res.string.nothing_to_look_up) }
+            ListRow(
+                label,
+                listOf("${r.path} · ${r.millis} ms", detail).filter { it.isNotBlank() }.joinToString("\n"),
+                subtitleMaxLines = 3,
+                leading = {
+                    if (r.ok) Icon(Icons.Filled.CheckCircle, null, tint = AppTheme.colors.accent)
+                    else Icon(Icons.Filled.Error, null, tint = MaterialTheme.colorScheme.error)
+                },
+            )
+        }
+    }
+}
+
+/** The animated icons' MIT license (useAnimations), as shipped in files/lottie/LICENSE.txt. */
+@Composable
+private fun LicenseDialog(onDismiss: () -> Unit) {
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) { text = runCatching { Res.readBytes("files/lottie/LICENSE.txt").decodeToString() }.getOrDefault("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.lottie_icons_credit)) },
+        text = { Text(text, Modifier.verticalScroll(rememberScrollState()), style = MaterialTheme.typography.bodySmall) },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.close)) } },
+    )
+}

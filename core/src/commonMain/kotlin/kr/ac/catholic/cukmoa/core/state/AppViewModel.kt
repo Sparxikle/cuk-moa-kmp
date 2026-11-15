@@ -145,6 +145,33 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     val dynamicScheme = platform.dynamicScheme
 
     private val api = ApiClient(platform.apiBaseUrl)
+
+    /**
+     * Server check (Settings → Data): calls the endpoints the screens don't use — status, collection status, one course
+     * and one announcement — and reports each one's result and time.
+     */
+    suspend fun checkServer(): List<EndpointCheck> {
+        suspend fun <T> timed(endpoint: ServerEndpoint, path: String, call: suspend () -> T, detail: (T) -> String): EndpointCheck {
+            val start = kotlin.time.TimeSource.Monotonic.markNow()
+            return runCatching { call() }.fold(
+                { EndpointCheck(endpoint, path, true, start.elapsedNow().inWholeMilliseconds, detail(it)) },
+                { EndpointCheck(endpoint, path, false, start.elapsedNow().inWholeMilliseconds, it.message.orEmpty()) },
+            )
+        }
+        val courseId = _catalog.value?.courses?.firstOrNull()?.id
+        val announcementId = _announcements.value.items.firstOrNull()?.id
+            ?: runCatching { api.announcements(AnnouncementQuery(limit = 1)).items.firstOrNull()?.id }.getOrNull()
+        return listOf(
+            timed(ServerEndpoint.Health, "/health", { api.health() }) { "${it.status} · ${it.dataMode} · ${it.announcements.lastScrape.orEmpty()}" },
+            timed(ServerEndpoint.CollectionStatus, "/api/v1/announcements/meta", { api.announcementMeta() }) { m ->
+                "${m.scrapeRuns.size} · ${m.scrapeRuns.count { it.lastError != null }}"
+            },
+            if (courseId == null) EndpointCheck(ServerEndpoint.Course, "/api/v1/courses/{id}", false, 0, "")
+            else timed(ServerEndpoint.Course, "/api/v1/courses/$courseId", { api.course(courseId) }) { it.name },
+            if (announcementId == null) EndpointCheck(ServerEndpoint.Announcement, "/api/v1/announcements/{id}", false, 0, "")
+            else timed(ServerEndpoint.Announcement, "/api/v1/announcements/$announcementId", { api.announcement(announcementId) }) { it.title },
+        )
+    }
     private val store = platform.store
 
     private val _catalog = MutableStateFlow<Catalog?>(null)
@@ -577,3 +604,12 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         }
     }
 }
+
+/** The endpoints the server check calls. */
+enum class ServerEndpoint { Health, CollectionStatus, Course, Announcement }
+
+/**
+ * One endpoint's result in the server check. detail: on success a short summary ("ok · live · last scrape",
+ * "sources · failing", the course name, the post title); on failure the error message.
+ */
+data class EndpointCheck(val endpoint: ServerEndpoint, val path: String, val ok: Boolean, val millis: Long, val detail: String)

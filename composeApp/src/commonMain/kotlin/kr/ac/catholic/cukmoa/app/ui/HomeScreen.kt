@@ -199,7 +199,8 @@ private fun SavedCard(catalog: Catalog, student: StudentState) {
 private fun StoryCard(catalog: Catalog, student: StudentState) {
     val nav = LocalNavigator.current
     val story = catalog.stories.firstOrNull { it.trackId == student.trackIds.firstOrNull() } ?: catalog.stories.firstOrNull() ?: return
-    Section(stringResource(Res.string.card_story)) {
+    // Senior records are still sample data until the senior survey: say so on the card
+    Section(stringResource(Res.string.card_story) + if (catalog.source.isSample) stringResource(Res.string.sample_suffix) else "") {
         ListRow(
             story.quote,
             "${story.cohort} · ${story.role}",

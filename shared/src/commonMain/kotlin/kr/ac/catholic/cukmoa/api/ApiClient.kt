@@ -1,5 +1,7 @@
 package kr.ac.catholic.cukmoa.api
 
+import kr.ac.catholic.cukmoa.model.Announcement
+import kr.ac.catholic.cukmoa.model.Health
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
@@ -61,7 +63,12 @@ class ApiClient(baseUrl: String, timeoutMs: Long = 5_000) {
         return catalog
     }
 
+    /** Server status, for the server check in Settings → Data. */
+    suspend fun health(): Health = get("/health")
+
     suspend fun course(id: String): Course = get("/api/v1/courses/$id")
+
+    suspend fun announcement(id: Long): Announcement = get("/api/v1/announcements/$id")
 
     suspend fun announcements(q: AnnouncementQuery): AnnouncementPage = get("/api/v1/announcements") {
         if (q.source.isNotEmpty()) parameter("source", q.source.joinToString(","))

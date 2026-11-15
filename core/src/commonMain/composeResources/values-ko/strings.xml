@@ -433,9 +433,7 @@
     <string name="as_of">%1$s · %2$s 기준</string>
     <string name="not_received_yet">아직 받지 못함</string>
     <string name="department_list">학과 목록</string>
-    <string name="announcements_sources">학교·LMS·행사·외부 공모·AI전자정보융합대학 학과 게시판 (서버가 30분마다 수집)</string>
-    <string name="font">서체</string>
-    <string name="font_name">LG EI Text</string>
+    <string name="announcements_sources">학교·LMS·행사·외부 공모·학과 홈페이지 게시판 (서버가 30분마다 수집)</string>
     <string name="clear_records_q">이수 기록을 지울까요?</string>
     <string name="clear_records_warning">체크한 이수·수강 중·담은 과목과 입력한 학점이 모두 지워져요. 되돌릴 수 없어요.</string>
     <string name="export_data">내 데이터 내보내기</string>
@@ -468,4 +466,15 @@
     <string name="marked_completed">%1$s 이수 완료로 표시했어요</string>
     <string name="unmarked_completed">%1$s 이수 표시를 해제했어요</string>
     <string name="checked_this_semester">이번 학기 체크한 과목 · %1$d</string>
+    <string name="server_check">서버 점검</string>
+    <string name="server_check_detail">화면에서 쓰지 않는 서버 API를 불러 봐요: 상태, 수집 상태, 과목 하나, 공지 하나</string>
+    <string name="run_check">점검</string>
+    <string name="checking">점검 중…</string>
+    <string name="endpoint_health">서버 상태</string>
+    <string name="endpoint_collection">수집 상태 (수집처 · 실패)</string>
+    <string name="endpoint_course">과목 조회</string>
+    <string name="endpoint_announcement">공지 조회</string>
+    <string name="nothing_to_look_up">아직 조회할 항목이 없어요</string>
+    <string name="open_source_licenses">오픈소스 라이선스</string>
+    <string name="lottie_icons_credit">애니메이션 아이콘: useAnimations (MIT 라이선스)</string>
 </resources>

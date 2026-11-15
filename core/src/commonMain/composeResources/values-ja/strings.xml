@@ -433,9 +433,7 @@
     <string name="as_of">%1$s · %2$s時点</string>
     <string name="not_received_yet">未受信</string>
     <string name="department_list">学科一覧</string>
-    <string name="announcements_sources">学校・LMS・イベント・学外公募・AI電子情報融合大学の学科掲示板（サーバーが30分ごとに収集）</string>
-    <string name="font">書体</string>
-    <string name="font_name">LG EI Text</string>
+    <string name="announcements_sources">学校・LMS・イベント・学外公募・各学科サイトの掲示板（サーバーが30分ごとに収集）</string>
     <string name="clear_records_q">履修記録を消去しますか？</string>
     <string name="clear_records_warning">チェックした履修・履修中・保存した科目と入力した単位がすべて消去されます。元に戻せません。</string>
     <string name="export_data">データをエクスポート</string>
@@ -468,4 +466,15 @@
     <string name="marked_completed">%1$sを履修済みにしました</string>
     <string name="unmarked_completed">%1$sの履修済みを解除しました</string>
     <string name="checked_this_semester">今学期チェックした科目 · %1$d</string>
+    <string name="server_check">サーバー点検</string>
+    <string name="server_check_detail">画面で使わないサーバーAPIを呼び出します: 状態、収集状態、科目1件、お知らせ1件</string>
+    <string name="run_check">点検</string>
+    <string name="checking">点検中…</string>
+    <string name="endpoint_health">サーバー状態</string>
+    <string name="endpoint_collection">収集状態 (収集先 · 失敗)</string>
+    <string name="endpoint_course">科目の取得</string>
+    <string name="endpoint_announcement">お知らせの取得</string>
+    <string name="nothing_to_look_up">まだ取得できる項目がありません</string>
+    <string name="open_source_licenses">オープンソースライセンス</string>
+    <string name="lottie_icons_credit">アニメーションアイコン: useAnimations (MITライセンス)</string>
 </resources>
