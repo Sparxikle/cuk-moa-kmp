@@ -20,3 +20,9 @@ local.properties
 
 # Document editor (LibreOffice) lock files
 .~lock.*#
+
+# iOS: the Xcode project is generated from iosApp/project.yml (xcodegen generate)
+iosApp/iosApp.xcodeproj/
+iosApp/iosApp/Info.plist
+xcuserdata/
+iosApp/local.yml

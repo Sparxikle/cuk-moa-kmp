@@ -68,7 +68,7 @@
     <string name="professors_in_charge">담당 교수</string>
     <string name="seniors_took">이 과목을 들은 선배</string>
     <string name="seniors_took_detail">진로별로 가장 많이 들은 학기</string>
-    <string name="percent_semester">%1$d%% · %2$s</string>
+    <string name="percent_semester">%1$d% · %2$s</string>
     <string name="prerequisites">먼저 들으면 좋은 과목</string>
     <string name="professor_info_hint">연구분야·연락처는 학과 홈페이지에서 확인해요.</string>
     <string name="teaching_this_term">이번 학기 담당 과목</string>
@@ -467,4 +467,5 @@
     <string name="undo">실행 취소</string>
     <string name="marked_completed">%1$s 이수 완료로 표시했어요</string>
     <string name="unmarked_completed">%1$s 이수 표시를 해제했어요</string>
+    <string name="checked_this_semester">이번 학기 체크한 과목 · %1$d</string>
 </resources>

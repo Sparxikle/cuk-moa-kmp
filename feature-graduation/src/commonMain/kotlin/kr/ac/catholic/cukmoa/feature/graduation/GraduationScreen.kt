@@ -147,6 +147,7 @@ fun GraduationScreen(catalog: Catalog, student: StudentState) {
             item(key = b.id.name) { Checklist(catalog, student, plan, b, classes?.items.orEmpty()) }
         }
         item(key = "classes") { ClassPicker(catalog, student, plan, classes) }
+        item(key = "checked-classes") { CheckedClasses(student, plan) }
         item(key = "other") { OtherCredits(student, s, plan) }
         item(key = "foreign") { ForeignLectures(catalog, plan, student) }
         item(key = "test") { GraduationTestSection(catalog, plan, student) }
@@ -280,15 +281,6 @@ private fun ClassPicker(catalog: Catalog, student: StudentState, plan: Graduatio
             EmptyState(stringResource(Res.string.classes_not_received), stringResource(Res.string.reconnect), vm::refreshClasses)
             return@Section
         }
-        student.takenClasses.forEach { t ->
-            ListRow(
-                t.name,
-                listOfNotNull(credits(t.credits), bucketLabel(t.bucket), if (t.foreignLanguage) stringResource(Res.string.foreign_lecture_short) else null).joinToString(" · "),
-                onClick = { vm.removeTakenClass(t.subjectNo) },
-                leading = { CheckCircle(true) },
-                trailing = { GradeChip(student.grades[t.subjectNo]) { vm.setCourseGrade(t.subjectNo, it) } },
-            )
-        }
         SearchField(query, { query = it; shown = PAGE }, stringResource(Res.string.search_course_professor))
         if (myMajor != null) ChipRow {
             item { FilterChip(myMajor, mineOnly) { mineOnly = true; shown = PAGE } }
@@ -305,6 +297,27 @@ private fun ClassPicker(catalog: Catalog, student: StudentState, plan: Graduatio
         }
         subjects.take(shown).forEach { sub -> SubjectRow(catalog, student, sub, bucketLabel(student.bucketOf(sub.first))) }
         if (subjects.size > shown) MoreRow(stringResource(Res.string.more_courses_left, subjects.size - shown)) { shown += PAGE }
+    }
+}
+
+/**
+ * Classes checked off from this semester's list, with their grades. Its own card below the picker, so ticking a class
+ * doesn't push the list being picked from.
+ */
+@Composable
+private fun CheckedClasses(student: StudentState, plan: GraduationPlan) {
+    val vm = LocalAppViewModel.current
+    if (student.takenClasses.isEmpty()) return
+    Section(stringResource(Res.string.checked_this_semester, student.takenClasses.size)) {
+        student.takenClasses.forEach { t ->
+            ListRow(
+                t.name,
+                listOfNotNull(credits(t.credits), bucketTitle(t.bucket, plan.doubleMajor), if (t.foreignLanguage) stringResource(Res.string.foreign_lecture_short) else null).joinToString(" · "),
+                onClick = { vm.removeTakenClass(t.subjectNo) },
+                leading = { CheckCircle(true) },
+                trailing = { GradeChip(student.grades[t.subjectNo]) { vm.setCourseGrade(t.subjectNo, it) } },
+            )
+        }
     }
 }
 

@@ -68,7 +68,7 @@
     <string name="professors_in_charge">担当教授</string>
     <string name="seniors_took">この科目を履修した先輩</string>
     <string name="seniors_took_detail">進路別に最も多く履修した学期</string>
-    <string name="percent_semester">%1$d%% · %2$s</string>
+    <string name="percent_semester">%1$d% · %2$s</string>
     <string name="prerequisites">先に履修するとよい科目</string>
     <string name="professor_info_hint">研究分野・連絡先は学科ホームページで確認してください。</string>
     <string name="teaching_this_term">今学期の担当科目</string>
@@ -467,4 +467,5 @@
     <string name="undo">元に戻す</string>
     <string name="marked_completed">%1$sを履修済みにしました</string>
     <string name="unmarked_completed">%1$sの履修済みを解除しました</string>
+    <string name="checked_this_semester">今学期チェックした科目 · %1$d</string>
 </resources>

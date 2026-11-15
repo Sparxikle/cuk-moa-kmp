@@ -1,0 +1,58 @@
+# XcodeGen spec for the iOS app shell. Generate the Xcode project on a Mac with:  xcodegen generate  (in this folder)
+# The app is one Compose view controller from composeApp (MainViewController); Gradle builds the framework before each build.
+# Server address: API_BASE_URL (override per build, e.g. xcodebuild ... API_BASE_URL=https://example.org).
+# Per-machine settings (signing team, server) go in iosApp/local.yml, which is not in git:
+#   include: [project.yml]
+#   settings: { base: { DEVELOPMENT_TEAM: <team id>, API_BASE_URL: <server> } }
+# then: xcodegen generate --spec local.yml
+name: iosApp
+options:
+  deploymentTarget:
+    iOS: "16.0"
+settings:
+  base:
+    API_BASE_URL: http://localhost:8080
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources: [iosApp]
+    info:
+      path: iosApp/Info.plist
+      properties:
+        CFBundleDisplayName: 가대모아
+        CFBundleShortVersionString: "0.9"
+        CFBundleVersion: "1"
+        ApiBaseUrl: $(API_BASE_URL)
+        UILaunchScreen: {}
+        # Compose renders every frame itself; allow 120Hz on ProMotion screens
+        CADisableMinimumFrameDurationOnPhone: true
+        UIRequiresFullScreen: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Development servers are plain http (localhost, Tailscale); release builds use https
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+    settings:
+      base:
+        PRODUCT_NAME: CukMoa
+        PRODUCT_BUNDLE_IDENTIFIER: kr.ac.catholic.cukmoa
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+        FRAMEWORK_SEARCH_PATHS: $(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
+        OTHER_LDFLAGS: [-framework, ComposeApp]
+        # The Gradle step reads and writes outside the sandbox
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    preBuildScripts:
+      - name: Compile Kotlin framework
+        basedOnDependencyAnalysis: false
+        script: |
+          # Xcode's build shell has no JAVA_HOME; use any JDK 21 macOS knows about
+          if [ -z "$JAVA_HOME" ]; then export JAVA_HOME="$(/usr/libexec/java_home -v 21 2>/dev/null)"; fi
+          cd "$SRCROOT/.."
+          ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode

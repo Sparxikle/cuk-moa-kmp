@@ -68,7 +68,7 @@
     <string name="professors_in_charge">Professors</string>
     <string name="seniors_took">Seniors who took this</string>
     <string name="seniors_took_detail">The semester most taken, by career track</string>
-    <string name="percent_semester">%1$d%% · %2$s</string>
+    <string name="percent_semester">%1$d% · %2$s</string>
     <string name="prerequisites">Good to take first</string>
     <string name="professor_info_hint">See the department website for research areas and contact details.</string>
     <string name="teaching_this_term">Teaching this semester</string>
@@ -467,4 +467,5 @@
     <string name="undo">Undo</string>
     <string name="marked_completed">Marked %1$s completed</string>
     <string name="unmarked_completed">Unmarked %1$s</string>
+    <string name="checked_this_semester">Checked off this semester · %1$d</string>
 </resources>

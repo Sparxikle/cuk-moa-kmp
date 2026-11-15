@@ -8,6 +8,13 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -23,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -98,13 +104,26 @@ fun DetailSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Un
 @Composable
 private fun SideSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     val c = AppTheme.colors
-    val shown = remember { MutableTransitionState(false).apply { targetState = true } }
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    val shown = remember { MutableTransitionState(false) }
+    var closing by remember { mutableStateOf(false) }
+    // Closing slides the sheet out first, then dismisses (the dialog itself would just vanish)
+    val close = { closing = true; shown.targetState = false }
+    val dismiss by rememberUpdatedState(onDismiss)
+    LaunchedEffect(shown) {
+        // Slide in once the dialog window is on screen: iOS shows it a frame or two after it composes
+        withFrameNanos {}
+        withFrameNanos {}
+        if (!closing) shown.targetState = true
+        snapshotFlow { closing && shown.isIdle }.first { it }
+        dismiss()
+    }
+    // No platform transition (iOS zooms and fades dialogs); the sheet animates itself
+    Dialog(onDismissRequest = close, properties = sideSheetDialogProperties()) {
         Box(
-            Modifier.fillMaxSize().clickable(interactionSource = null, indication = null, onClick = onDismiss),
+            Modifier.fillMaxSize().clickable(interactionSource = null, indication = null, onClick = close),
             contentAlignment = Alignment.CenterEnd,
         ) {
-            AnimatedVisibility(shown, enter = slideInHorizontally { it } + fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(shown, enter = slideInHorizontally { it } + fadeIn(), exit = slideOutHorizontally { it } + fadeOut()) {
                 Column(
                     Modifier.width(440.dp).fillMaxHeight()
                         .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)).background(c.bg)
@@ -113,7 +132,7 @@ private fun SideSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.()
                         .systemBarsPadding(),
                 ) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = Space.xs, vertical = Space.xs), horizontalArrangement = Arrangement.End) {
-                        IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(Res.string.close), tint = c.accent) }
+                        IconButton(onClick = close) { Icon(Icons.Default.Close, stringResource(Res.string.close), tint = c.accent) }
                     }
                     Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(bottom = Space.l), content = content)
                 }

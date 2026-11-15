@@ -6,10 +6,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitView
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCSignatureOverride
+import kotlinx.cinterop.useContents
+import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLRequest
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
+import platform.UIKit.popoverPresentationController
 import platform.WebKit.WKNavigation
 import platform.WebKit.WKNavigationAction
 import platform.WebKit.WKNavigationActionPolicy
@@ -22,10 +26,12 @@ actual val inAppBrowserSupported: Boolean = true
 
 /** Follows the page: title, back history and a rough progress (started / finished). Other schemes go to the system. */
 private class Navigation(private val state: WebState) : NSObject(), WKNavigationDelegateProtocol {
+    @ObjCSignatureOverride
     override fun webView(webView: WKWebView, didStartProvisionalNavigation: WKNavigation?) {
         state.progress = 0.1f
     }
 
+    @ObjCSignatureOverride
     override fun webView(webView: WKWebView, didFinishNavigation: WKNavigation?) {
         state.progress = 1f
         state.title = webView.title.orEmpty()
@@ -73,6 +79,7 @@ actual fun PlatformWebView(url: String, state: WebState, modifier: Modifier) {
     DisposableEffect(Unit) { onDispose { state.onGoBack = {}; state.onReload = {} } }
 }
 
+@OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun rememberShareLink(): ((url: String, title: String) -> Unit)? = remember {
     { url: String, _: String ->
@@ -81,7 +88,16 @@ actual fun rememberShareLink(): ((url: String, title: String) -> Unit)? = rememb
         // Present from the top-most screen (the app is one Compose view controller; a sheet may be up)
         var top = UIApplication.sharedApplication.keyWindow?.rootViewController
         while (top?.presentedViewController != null) top = top.presentedViewController
-        top?.presentViewController(sheet, animated = true, completion = null)
+        val host = top ?: return@remember
+        // iPad shows the share sheet as a popover, which must point somewhere (else UIKit throws): the toolbar's end,
+        // where the share button is
+        sheet.popoverPresentationController?.let { popover ->
+            val width = host.view.bounds.useContents { size.width }
+            val safeTop = host.view.safeAreaInsets.useContents { this.top }
+            popover.sourceView = host.view
+            popover.sourceRect = CGRectMake(width - 140.0, safeTop + 28.0, 1.0, 1.0)
+        }
+        host.presentViewController(sheet, animated = true, completion = null)
         Unit
     }
 }

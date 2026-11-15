@@ -68,7 +68,7 @@
     <string name="professors_in_charge">任课教授</string>
     <string name="seniors_took">修过此课的学长学姐</string>
     <string name="seniors_took_detail">按职业方向最多修读的学期</string>
-    <string name="percent_semester">%1$d%% · %2$s</string>
+    <string name="percent_semester">%1$d% · %2$s</string>
     <string name="prerequisites">建议先修课程</string>
     <string name="professor_info_hint">研究领域和联系方式请查看院系主页。</string>
     <string name="teaching_this_term">本学期任课课程</string>
@@ -467,4 +467,5 @@
     <string name="undo">撤销</string>
     <string name="marked_completed">已将%1$s标记为已修</string>
     <string name="unmarked_completed">已取消%1$s的已修标记</string>
+    <string name="checked_this_semester">本学期已勾选课程 · %1$d</string>
 </resources>
