@@ -71,6 +71,8 @@ fun BoxScope.FastScroller(
     val scope = rememberCoroutineScope()
     val sections by rememberUpdatedState(rows)
     val reveal by rememberUpdatedState(onReveal)
+    // Read inside the long-lived drag handler, so it must follow the screen (a filter row can appear or go)
+    val rowsStart by rememberUpdatedState(firstIndex)
     // Finger position on the track (0…1) while dragging, null otherwise
     var drag by remember { mutableStateOf<Float?>(null) }
     // Scroll position (0…1) from the first visible row
@@ -111,7 +113,7 @@ fun BoxScope.FastScroller(
                             // Let a revealed page compose (frame callbacks run before recomposition) before jumping
                             withFrameNanos {}
                             withFrameNanos {}
-                            state.scrollToItem(firstIndex + target)
+                            state.scrollToItem(rowsStart + target)
                         }
                     }
                     awaitEachGesture {

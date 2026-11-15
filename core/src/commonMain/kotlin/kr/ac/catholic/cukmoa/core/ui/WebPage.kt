@@ -21,6 +21,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +72,9 @@ fun WebPage(url: String, onClose: () -> Unit, modifier: Modifier = Modifier, ful
         Box(Modifier.fillMaxWidth().height(2.dp)) {
             if (state.progress < 1f) LinearProgressIndicator(progress = { state.progress }, modifier = Modifier.fillMaxSize(), color = c.accent, trackColor = c.bg)
         }
-        PlatformWebView(url, state, Modifier.weight(1f).fillMaxWidth().then(if (fullScreen) Modifier.navigationBarsPadding() else Modifier))
+        // A new web view per link: the native view reports to the state it was created with (and history starts fresh)
+        key(url) {
+            PlatformWebView(url, state, Modifier.weight(1f).fillMaxWidth().then(if (fullScreen) Modifier.navigationBarsPadding() else Modifier))
+        }
     }
 }
