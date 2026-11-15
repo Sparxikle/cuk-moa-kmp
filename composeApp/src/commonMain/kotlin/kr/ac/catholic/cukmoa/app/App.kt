@@ -9,6 +9,17 @@ import org.jetbrains.compose.resources.StringResource
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import kr.ac.catholic.cukmoa.core.ui.LocalExternalUriHandler
+import kr.ac.catholic.cukmoa.core.ui.LocalWebOpen
+import kr.ac.catholic.cukmoa.core.ui.WebPage
+import kr.ac.catholic.cukmoa.core.ui.opensInApp
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -105,8 +116,8 @@ private fun MainTabs(
     val tabs = listOf(TabItem(Routes.HOME, Res.string.tab_home, Icons.Default.GridView, AnimatedIcon.Grid)) + modules.map { TabItem(it.id, it.title, it.icon, it.animatedIcon) }
     fun index(r: String) = tabs.indexOfFirst { it.route == r }.coerceAtLeast(0)
 
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val wide = maxWidth >= WideLayoutWidth
+    run {
+        val wide = LocalWideLayout.current
         val content: @Composable (Modifier) -> Unit = { modifier ->
             AnimatedContent(
                 targetState = route,
@@ -118,7 +129,7 @@ private fun MainTabs(
                 if (module == null) HomeScreen(catalog, student, modules) else module.Screen(catalog, student)
             }
         }
-        CompositionLocalProvider(LocalWideLayout provides wide) {
+        run {
             if (wide) {
                 // Tablet landscape / desktop: tabs in a rail on the start edge. Screens pad for the bottom system bar
                 // themselves (the bottom tab bar did that before).
@@ -294,7 +305,25 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Bo
         // Only the background color shows during the brief moment while the bundled catalog is read.
         val c = catalog ?: return@AppTheme Box(Modifier.fillMaxSize().background(AppTheme.colors.bg))
 
-        CompositionLocalProvider(LocalNavigator provides navigator, LocalAppViewModel provides vm) {
+        // Web links open in the in-app browser where there is one (Android, iOS); the system browser stays one tap away
+        val system = LocalUriHandler.current
+        var web by rememberSaveable { mutableStateOf<String?>(null) }
+        val links = remember(system) {
+            object : UriHandler {
+                override fun openUri(uri: String) { if (opensInApp(uri)) web = uri else system.openUri(uri) }
+            }
+        }
+
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+        CompositionLocalProvider(
+            LocalNavigator provides navigator,
+            LocalAppViewModel provides vm,
+            // Wide windows (tablet, desktop): side tab rail, two-pane screens, side sheets
+            LocalWideLayout provides (maxWidth >= WideLayoutWidth),
+            LocalUriHandler provides links,
+            LocalExternalUriHandler provides system,
+            LocalWebOpen provides (web != null),
+        ) {
             // Screen to show now. Depth decides the open/close direction: onboarding 0 → main 1 → settings/modules 2
             val screen = when {
                 !student.onboarded -> AppScreen.Onboarding
@@ -333,6 +362,18 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Bo
                 is Sheet.Professor -> ProfessorSheet(c, s.id, onDismiss = { sheet = null })
                 null -> Unit
             }
+
+            // In-app browser over everything (sheets included), sliding up like a sub-page
+            var lastWeb by remember { mutableStateOf(web) }
+            if (web != null) lastWeb = web
+            AnimatedVisibility(
+                visible = web != null,
+                enter = slideInVertically { it / 4 } + fadeIn(),
+                exit = slideOutVertically { it / 4 } + fadeOut(),
+            ) {
+                lastWeb?.let { WebPage(it, onClose = { web = null }) }
+            }
+        }
         }
     }
     }

@@ -460,4 +460,7 @@
     <string name="dept_graduation_page">%1$s graduation requirements</string>
     <string name="dept_graduation_page_detail">The department's own page (checks, exams, extra rules)</string>
     <string name="department_website">Department website</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="reload">Reload</string>
+    <string name="pick_announcement">Pick an announcement to read it here</string>
 </resources>

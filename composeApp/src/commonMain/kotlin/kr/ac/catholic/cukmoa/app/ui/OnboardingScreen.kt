@@ -1,5 +1,7 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import androidx.compose.foundation.layout.width
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
@@ -110,8 +112,6 @@ internal val homeCardInfo = listOf(
 fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, startAtCards: Boolean, onClose: () -> Unit) {
     val vm = LocalAppViewModel.current
     val c = AppTheme.colors
-    val steps = if (editing) listOf(Step.Grade, Step.Major, Step.Tracks, Step.Modules, Step.Cards) else Step.entries
-    var index by remember { mutableIntStateOf(if (startAtCards) steps.indexOf(Step.Cards) else 0) }
     var forward by remember { mutableStateOf(true) }
     var grade by remember { mutableIntStateOf(student.grade) }
     val departments by vm.departments.collectAsStateWithLifecycle()
@@ -123,6 +123,10 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
     var cards by remember { mutableStateOf(student.homeCards) }
     var cardsTouched by remember { mutableStateOf(editing) }
     var modules by remember { mutableStateOf(ModuleRegistry.enabled(student).map { it.id }) }
+    // Interests come from the 1st major, so without a major the interests step is skipped
+    val steps = (if (editing) listOf(Step.Grade, Step.Major, Step.Tracks, Step.Modules, Step.Cards) else Step.entries)
+        .filter { it != Step.Tracks || majors.isNotEmpty() }
+    var index by remember { mutableIntStateOf(if (startAtCards) steps.indexOf(Step.Cards) else 0) }
 
     val step = steps[index]
     val last = index == steps.lastIndex
@@ -163,7 +167,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
         val progressSteps = steps.filter { it != Step.Intro }
         val progress by animateFloatAsState((progressSteps.indexOf(step) + 1f) / progressSteps.size)
         // LG UX toolbar: accent back arrow and close, progress as a 4dp slider-style track (accent part, grey rest)
-        Row(Modifier.fillMaxWidth().height(56.dp).padding(horizontal = Space.xs), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.align(Alignment.CenterHorizontally).contentWidth(onboardingWidth()).height(56.dp).padding(horizontal = Space.xs), verticalAlignment = Alignment.CenterVertically) {
             when {
                 index > 0 && !(editing && index == 0) -> IconButton(onClick = { go(-1) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.previous), tint = c.accent) }
                 else -> Spacer(Modifier.size(48.dp))
@@ -191,7 +195,7 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
             },
         ) { s ->
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = Space.xxl), horizontalAlignment = Alignment.CenterHorizontally) {
-                Column(Modifier.contentWidth()) {
+                Column(Modifier.contentWidth(onboardingWidth())) {
                     when (s) {
                         Step.Intro -> Unit
                         Step.Grade -> StepFrame(stringResource(Res.string.ask_grade)) {
@@ -245,6 +249,10 @@ fun OnboardingScreen(catalog: Catalog, student: StudentState, editing: Boolean, 
     }
 }
 
+/** Content width of onboarding: wider on wide screens, where steps are two-pane */
+@Composable
+private fun onboardingWidth() = if (LocalWideLayout.current) 1280.dp else 840.dp
+
 /** LG UX primary button: full-width accent pill (like the selected Light/Dark choice) with bold white text. */
 @Composable
 private fun PillButton(label: String, onClick: () -> Unit) {
@@ -274,6 +282,11 @@ private fun ChoiceRow(label: String, selected: Boolean, onClick: () -> Unit) {
 /** Step page: an LG UX big title (32sp bold) above the step's cards. */
 @Composable
 private fun StepFrame(title: String, content: @Composable () -> Unit) {
+    // Wide screens: the question on the start side, its cards beside it
+    if (LocalWideLayout.current) return Row {
+        Txt(title, MaterialTheme.typography.headlineLarge, Modifier.width(400.dp).padding(start = Space.xxl, end = Space.xxl, top = Space.l))
+        Column(Modifier.weight(1f).padding(top = Space.s)) { content() }
+    }
     Column {
         Txt(title, MaterialTheme.typography.headlineLarge, Modifier.padding(start = Space.xxl, end = Space.xxl, top = Space.l, bottom = Space.xs))
         content()
@@ -294,9 +307,9 @@ private fun Intro(onStart: () -> Unit) {
         Triple(Icons.Default.Group, Color(0xFF34C25A), Res.string.intro_point4),
     )
     Column(Modifier.fillMaxSize().background(c.bg).statusBarsPadding().navigationBarsPadding()) {
-        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+        val header: @Composable (Modifier) -> Unit = { modifier ->
             Column(
-                Modifier.contentWidth().padding(start = Space.xxl, end = Space.xxl, top = 56.dp, bottom = Space.s),
+                modifier.padding(start = Space.xxl, end = Space.xxl, top = 56.dp, bottom = Space.s),
                 verticalArrangement = Arrangement.spacedBy(Space.l),
             ) {
                 Box(Modifier.size(56.dp).clip(RoundedCornerShape(percent = 30)).background(c.accent), contentAlignment = Alignment.Center) {
@@ -305,6 +318,8 @@ private fun Intro(onStart: () -> Unit) {
                 Text(APP_NAME, color = c.ink2, style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(Res.string.intro_headline), color = c.ink, style = MaterialTheme.typography.headlineLarge)
             }
+        }
+        val featureCard: @Composable () -> Unit = {
             Group {
                 points.forEach { (icon, color, title) ->
                     ListRow(stringResource(title), leading = {
@@ -314,6 +329,18 @@ private fun Intro(onStart: () -> Unit) {
                     })
                 }
             }
+        }
+        if (LocalWideLayout.current) {
+            // Wide screens: the promise on the start side, the four features beside it
+            Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center) {
+                Row(Modifier.contentWidth(onboardingWidth()), verticalAlignment = Alignment.CenterVertically) {
+                    header(Modifier.width(400.dp))
+                    Column(Modifier.weight(1f).padding(top = 56.dp)) { featureCard() }
+                }
+            }
+        } else Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+            header(Modifier.contentWidth())
+            featureCard()
         }
         PillButton(stringResource(Res.string.start), onStart)
     }

@@ -233,3 +233,26 @@ fun Choices(labels: List<String>, selected: Int, onSelect: (Int) -> Unit, modifi
         }
     }
 }
+
+/**
+ * Two columns of cards (wide home): each card goes into whichever column is shorter so far, so the columns end at
+ * about the same height. Cards keep their order within each column.
+ */
+@Composable
+fun BalancedColumns(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Layout(content, modifier) { measurables, constraints ->
+        val half = constraints.maxWidth / 2
+        val child = constraints.copy(minWidth = half, maxWidth = half, minHeight = 0)
+        val heights = intArrayOf(0, 0)
+        val placed = measurables.map { m ->
+            val p = m.measure(child)
+            val column = if (heights[1] < heights[0]) 1 else 0
+            val y = heights[column]
+            heights[column] += p.height
+            Triple(p, column, y)
+        }
+        layout(constraints.maxWidth, maxOf(heights[0], heights[1])) {
+            placed.forEach { (p, column, y) -> p.placeRelative(column * half, y) }
+        }
+    }
+}

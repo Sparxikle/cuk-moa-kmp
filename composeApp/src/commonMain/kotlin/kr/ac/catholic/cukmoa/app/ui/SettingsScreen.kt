@@ -1,5 +1,9 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Row
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.Choices
 import kr.ac.catholic.cukmoa.core.resources.*
 import kr.ac.catholic.cukmoa.core.ui.text
@@ -90,12 +94,32 @@ private enum class SettingsPage(val parent: SettingsPage?) {
     Main(null), Me(Main), Department(Me), Home(Main), Modules(Main), Announcements(Main), Appearance(Main), Language(Main), Data(Main), About(Main);
 
     val depth: Int get() = generateSequence(parent) { it.parent }.count()
+
+    /** The category this page belongs to (Department → Me); Main for Main */
+    val category: SettingsPage get() = generateSequence(this) { it.parent }.firstOrNull { it.parent == Main } ?: Main
 }
 
 /** Settings: a profile card (내 정보) and categories — home screen · features · announcements · appearance · data · about */
 @Composable
 fun SettingsScreen(catalog: Catalog, student: StudentState, onBack: () -> Unit, onRestart: () -> Unit = {}) {
     var page by rememberSaveable { mutableStateOf(SettingsPage.Main) }
+    if (LocalWideLayout.current) {
+        // Wide screens: categories on the start side, the picked page beside them (내 정보 until one is picked)
+        val shown = if (page == SettingsPage.Main) SettingsPage.Me else page
+        AppBackHandler { if (shown.parent != SettingsPage.Main) page = shown.parent ?: SettingsPage.Main else onBack() }
+        Row(Modifier.fillMaxSize().background(AppTheme.colors.bg)) {
+            Box(Modifier.width(400.dp).fillMaxHeight()) {
+                SettingsPageContent(SettingsPage.Main, catalog, student, onBack, onRestart, selected = shown.category) { page = it }
+            }
+            AnimatedContent(
+                targetState = shown,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                transitionSpec = { screenPop(forward = targetState.depth > initialState.depth) },
+                label = "settings-pane",
+            ) { p -> SettingsPageContent(p, catalog, student, onBack, onRestart, pane = true) { page = it } }
+        }
+        return
+    }
     AppBackHandler { page.parent?.let { page = it } ?: onBack() }
     // Moving between pages: screen open/close transition by depth
     AnimatedContent(
@@ -113,6 +137,10 @@ private fun SettingsPageContent(
     student: StudentState,
     onBack: () -> Unit,
     onRestart: () -> Unit,
+    /** Wide screens, category list: the category shown beside it */
+    selected: SettingsPage? = null,
+    /** Wide screens: shown beside the category list, so a category page has no back arrow */
+    pane: Boolean = false,
     go: (SettingsPage) -> Unit,
 ) {
     val vm = LocalAppViewModel.current
@@ -145,7 +173,8 @@ private fun SettingsPageContent(
     }
     // Language picked but not confirmed yet (changing it restarts the app)
     var pendingLanguage by remember { mutableStateOf<Pending?>(null) }
-    val back = { page.parent?.let(go) ?: onBack() }
+    val back: (() -> Unit)? = if (pane && page.parent == SettingsPage.Main) null else ({ page.parent?.let(go) ?: onBack() })
+    val picked = Modifier.background(AppTheme.colors.accent.copy(alpha = 0.12f))
     val majorSummary = majors.mapIndexed { i, d -> "${majorLabel(i)} ${d.name}" }.joinToString(" · ").ifEmpty { stringResource(Res.string.not_chosen) }
     val catalogTracks = usesCatalogTracks(majors.firstOrNull()?.name)
     val tracks = if (catalogTracks) student.trackIds.mapNotNull { id -> catalog.tracks.firstOrNull { it.id == id }?.shortName }
@@ -180,7 +209,7 @@ private fun SettingsPageContent(
                 ListRow(
                     yearTitle(student.grade) + " · " + (majors.firstOrNull()?.name ?: stringResource(Res.string.no_major_chosen)),
                     listOfNotNull(majors.getOrNull(1)?.name, tracks.joinToString(" · ").ifEmpty { null }).joinToString(" · ").ifEmpty { null },
-                    modifier = Modifier.contentWidth().padding(vertical = Space.s),
+                    modifier = Modifier.contentWidth().then(if (selected == SettingsPage.Me) picked else Modifier).padding(vertical = Space.s),
                     leading = {
                         Box(Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
                             Text("${student.grade}", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.titleLarge)
@@ -194,7 +223,12 @@ private fun SettingsPageContent(
                 item(key = "group$i") {
                     Group {
                         rows.forEach { e ->
-                            ListRow(e.title, e.summary, leading = { SettingsIcon(e.icon, e.color) }, onClick = { go(e.page) })
+                            ListRow(
+                                e.title, e.summary,
+                                modifier = if (selected == e.page) picked else Modifier,
+                                leading = { SettingsIcon(e.icon, e.color) },
+                                onClick = { go(e.page) },
+                            )
                         }
                     }
                 }

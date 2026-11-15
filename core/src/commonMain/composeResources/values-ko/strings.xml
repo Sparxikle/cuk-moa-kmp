@@ -460,4 +460,7 @@
     <string name="dept_graduation_page">%1$s 졸업요건 안내</string>
     <string name="dept_graduation_page_detail">학과 홈페이지의 안내 (졸업시험·추가 요건 등)</string>
     <string name="department_website">학과 홈페이지</string>
+    <string name="open_in_browser">브라우저에서 열기</string>
+    <string name="reload">새로고침</string>
+    <string name="pick_announcement">공지를 고르면 여기에 보여요</string>
 </resources>

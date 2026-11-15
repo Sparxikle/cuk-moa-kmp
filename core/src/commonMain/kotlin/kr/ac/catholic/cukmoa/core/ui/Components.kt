@@ -15,6 +15,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -175,8 +177,14 @@ fun ScreenList(
     state: LazyListState = rememberLazyListState(),
     /** Drawn over the list, below the header (e.g. an index bar at the end edge). */
     overlay: @Composable BoxScope.() -> Unit = {},
+    /** Wide screens only: a 400dp column at the start that scrolls on its own (e.g. a summary that stays in view). */
+    startPane: (@Composable ColumnScope.() -> Unit)? = null,
+    /** Wide screens only: a pane at the end that takes the rest of the width; the list keeps to 440dp (list + detail). */
+    endPane: (@Composable () -> Unit)? = null,
     content: LazyListScope.() -> Unit,
 ) {
+    val panes = LocalWideLayout.current && (startPane != null || endPane != null)
+    val headerMax = if (panes) PanesWidth else headerWidth
     val vm = LocalAppViewModel.current
     val refreshing by vm.refreshing.collectAsStateWithLifecycle()
     val pull = rememberPullToRefreshState()
@@ -198,7 +206,7 @@ fun ScreenList(
         CompositionLocalProvider(LocalContentColor provides c.accent) {
         Box(Modifier.fillMaxWidth().background(barColor).statusBarsPadding().height(barHeight)) {
         // On wide screens the header keeps to the content column, so the title sits above the cards
-        Box(Modifier.align(Alignment.Center).fillMaxHeight().contentWidth(headerWidth)) {
+        Box(Modifier.align(Alignment.Center).fillMaxHeight().contentWidth(headerMax)) {
             if (onBack != null) IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart).padding(start = Space.xs)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
             }
@@ -247,15 +255,28 @@ fun ScreenList(
                     translationY = (pulled() * PullDistance.toPx() - size.height) / 2f
                 },
             )
-            LazyColumn(
-                state = state,
-                // Shrinks above the keyboard (edge-to-edge: adjustResize alone no longer resizes), so text fields stay visible
-                modifier = Modifier.fillMaxSize().imePadding().graphicsLayer { translationY = pulled() * PullDistance.toPx() },
-                contentPadding = PaddingValues(bottom = Space.xxl),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                content = content,
-            )
-            overlay()
+            val list: @Composable (Modifier) -> Unit = { modifier ->
+                Box(modifier) {
+                    LazyColumn(
+                        state = state,
+                        // Shrinks above the keyboard (edge-to-edge: adjustResize alone no longer resizes), so text fields stay visible
+                        modifier = Modifier.fillMaxSize().imePadding().graphicsLayer { translationY = pulled() * PullDistance.toPx() },
+                        contentPadding = PaddingValues(bottom = Space.xxl),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        content = content,
+                    )
+                    overlay()
+                }
+            }
+            if (!panes) list(Modifier.fillMaxSize())
+            else Row(Modifier.align(Alignment.TopCenter).fillMaxHeight().contentWidth(PanesWidth)) {
+                if (startPane != null) Column(
+                    Modifier.width(400.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(bottom = Space.xxl),
+                    content = startPane,
+                )
+                list(if (endPane != null) Modifier.width(440.dp).fillMaxHeight() else Modifier.weight(1f).fillMaxHeight())
+                if (endPane != null) Box(Modifier.weight(1f).fillMaxHeight()) { endPane() }
+            }
         }
     }
     }
@@ -281,6 +302,9 @@ fun InfoDialog(title: String, text: String, onDismiss: () -> Unit) {
 
 /** On wide screens (desktop/tablet), content is kept within 840dp. */
 fun Modifier.contentWidth(max: Dp = 840.dp) = this.widthIn(max = max).fillMaxWidth()
+
+/** Widest a two-pane screen gets (start pane or list + the other pane). */
+private val PanesWidth = 1280.dp
 
 /** Window width from which the app switches to the wide layout: side tab rail, two-column home. */
 val WideLayoutWidth = 840.dp

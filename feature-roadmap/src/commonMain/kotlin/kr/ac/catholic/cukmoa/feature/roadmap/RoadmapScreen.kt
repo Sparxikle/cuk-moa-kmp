@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.roadmap
 
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.Group
 import kr.ac.catholic.cukmoa.core.ui.FilterChip
 import org.jetbrains.compose.resources.stringResource
@@ -57,6 +58,7 @@ import kr.ac.catholic.cukmoa.model.TrackId
 fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: TrackId?) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
+    val wide = LocalWideLayout.current
     var picked by remember(requestedTrack) { mutableStateOf(requestedTrack ?: student.trackIds.firstOrNull() ?: TrackId.Backend) }
     val track = catalog.tracks.firstOrNull { it.id == picked } ?: catalog.tracks.first()
     val roadmap = catalog.findRoadmap(track.id)
@@ -76,7 +78,7 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
     ) {
         if (roadmaps != null) item(key = "mode") { RoadmapModeTabs(ui.official) { ui.official = it } }
         if (official) {
-            officialRoadmap(roadmaps!!, catalog, student, ui.major) { ui.major = it }
+            officialRoadmap(roadmaps!!, catalog, student, ui.major, wide) { ui.major = it }
             return@ScreenList
         }
         item(key = "tracks") {
@@ -108,7 +110,19 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
         // Recent semesters on top, 1st year 1st semester at the bottom
         val steps = roadmap?.steps.orEmpty().sortedByDescending { it.semester.ordinal }
         if (steps.isNotEmpty()) item(key = "timeline-gap") { Box(Modifier.height(Space.s)) }
-        steps.forEachIndexed { i, step ->
+        if (wide) {
+            // Wide screens: one row per year, 1st semester left and 2nd right
+            val years = steps.groupBy { it.semester.year }.entries.sortedByDescending { it.key }
+            years.forEachIndexed { i, (year, inYear) ->
+                item(key = "${track.id}-year-$year") {
+                    val last = i == years.lastIndex
+                    fun side(term: Int) = inYear.firstOrNull { it.semester.term == term }?.let { step ->
+                        @Composable { m: Modifier -> SemesterStep(catalog, student, step, track.seniorCount, last, m) }
+                    }
+                    TimelinePair(side(1), side(2))
+                }
+            }
+        } else steps.forEachIndexed { i, step ->
             item(key = "${track.id}-${step.semester}") { SemesterStep(catalog, student, step, track.seniorCount, last = i == steps.lastIndex) }
         }
         if (stories.isNotEmpty()) item(key = "stories") {
@@ -128,11 +142,11 @@ fun RoadmapScreen(catalog: Catalog, student: StudentState, requestedTrack: Track
 }
 
 @Composable
-private fun SemesterStep(catalog: Catalog, student: StudentState, step: RoadmapStep, seniorCount: Int, last: Boolean) {
+private fun SemesterStep(catalog: Catalog, student: StudentState, step: RoadmapStep, seniorCount: Int, last: Boolean, modifier: Modifier = Modifier) {
     val vm = LocalAppViewModel.current
     val nav = LocalNavigator.current
     val position = step.semester.ordinal - student.currentSemester.ordinal
-    TimelineSemester(step.semester.title(), now = position == 0, past = position < 0, last = last) {
+    TimelineSemester(step.semester.title(), now = position == 0, past = position < 0, last = last, modifier = modifier) {
         step.items.forEach { item ->
             if (item.kind == RoadmapItemKind.Milestone) {
                 ListRow(

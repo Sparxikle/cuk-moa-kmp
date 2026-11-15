@@ -1,5 +1,6 @@
 package kr.ac.catholic.cukmoa.feature.graduation
 
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.InfoButton
 import kr.ac.catholic.cukmoa.core.ui.Choices
 import org.jetbrains.compose.resources.stringResource
@@ -113,21 +114,29 @@ fun GraduationScreen(catalog: Catalog, student: StudentState) {
         stringResource(Res.string.in_brackets_hint),
     ) + s.buckets.mapNotNull { b -> b.note?.let { "${bucketTitle(b.id, plan.doubleMajor)}: $it" } }
 
-    ScreenList(title = stringResource(Res.string.graduation_title), info = info.joinToString("\n\n")) {
-        item(key = "banners") { StatusBanners() }
-        item(key = "credits") { CreditsCard(s, plan.doubleMajor) }
+    val summary: @Composable () -> Unit = {
+        CreditsCard(s, plan.doubleMajor)
         departmentPage?.let { (name, url) ->
-            item(key = "dept-page") {
-                Group {
-                    ListRow(
-                        stringResource(Res.string.dept_graduation_page, name),
-                        stringResource(Res.string.dept_graduation_page_detail),
-                        chevron = true,
-                        onClick = { runCatching { uri.openUri(url) } },
-                    )
-                }
+            Group {
+                ListRow(
+                    stringResource(Res.string.dept_graduation_page, name),
+                    stringResource(Res.string.dept_graduation_page_detail),
+                    chevron = true,
+                    onClick = { runCatching { uri.openUri(url) } },
+                )
             }
         }
+    }
+    // Wide screens: the summary stays in view on the start side while the checklists scroll
+    val wide = LocalWideLayout.current
+
+    ScreenList(
+        title = stringResource(Res.string.graduation_title),
+        info = info.joinToString("\n\n"),
+        startPane = if (wide) ({ summary() }) else null,
+    ) {
+        item(key = "banners") { StatusBanners() }
+        if (!wide) item(key = "credits") { Column { summary() } }
         plan.buckets.filter { it.checklistCourseIds.isNotEmpty() }.forEach { b ->
             item(key = b.id.name) { Checklist(catalog, student, plan, b, classes?.items.orEmpty()) }
         }

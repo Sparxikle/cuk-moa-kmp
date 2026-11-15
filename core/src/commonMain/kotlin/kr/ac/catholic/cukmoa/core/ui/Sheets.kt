@@ -3,6 +3,27 @@ package kr.ac.catholic.cukmoa.core.ui
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -27,6 +48,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,10 +70,18 @@ import kr.ac.catholic.cukmoa.logic.trackShares
 import kr.ac.catholic.cukmoa.model.Catalog
 import kr.ac.catholic.cukmoa.model.StudentState
 
-/** M3 modal bottom sheet that opens fully expanded (one back press closes it), with a scrolling column. */
+/**
+ * Detail sheet with a scrolling column. Phones: an M3 modal bottom sheet that opens fully expanded (one back press
+ * closes it). Wide screens: a 440dp side sheet sliding in from the end edge over a scrim (tap the scrim to close).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    if (LocalWebOpen.current) return
+    // A sheet is a window of its own, where the platform sets its own link handler again: keep the app's (in-app browser)
+    val links = LocalUriHandler.current
+    val linked: @Composable ColumnScope.() -> Unit = { CompositionLocalProvider(LocalUriHandler provides links) { content() } }
+    if (LocalWideLayout.current) return SideSheet(onDismiss, linked)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -60,8 +90,35 @@ fun DetailSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Un
     ) {
         Column(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = Space.l).navigationBarsPadding(),
-            content = content,
+            content = linked,
         )
+    }
+}
+
+@Composable
+private fun SideSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    val c = AppTheme.colors
+    val shown = remember { MutableTransitionState(false).apply { targetState = true } }
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Box(
+            Modifier.fillMaxSize().clickable(interactionSource = null, indication = null, onClick = onDismiss),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            AnimatedVisibility(shown, enter = slideInHorizontally { it } + fadeIn(), exit = fadeOut()) {
+                Column(
+                    Modifier.width(440.dp).fillMaxHeight()
+                        .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)).background(c.bg)
+                        // Taps inside the sheet don't reach the scrim
+                        .clickable(interactionSource = null, indication = null) {}
+                        .systemBarsPadding(),
+                ) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = Space.xs, vertical = Space.xs), horizontalArrangement = Arrangement.End) {
+                        IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(Res.string.close), tint = c.accent) }
+                    }
+                    Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(bottom = Space.l), content = content)
+                }
+            }
+        }
     }
 }
 

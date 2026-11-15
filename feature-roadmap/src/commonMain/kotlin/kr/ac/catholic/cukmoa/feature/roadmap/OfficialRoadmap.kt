@@ -48,6 +48,8 @@ fun LazyListScope.officialRoadmap(
     catalog: Catalog,
     student: StudentState,
     major: String,
+    /** Wide screens: two periods per row */
+    wide: Boolean = false,
     onMajor: (String) -> Unit,
 ) {
     val roadmap = list.items.firstOrNull { it.major == major } ?: list.items.first()
@@ -84,26 +86,43 @@ fun LazyListScope.officialRoadmap(
     // Track labels only when the department splits its courses into more than one track
     val multiTrack = roadmap.entries.map { it.track }.distinct().size > 1
     if (byPeriod.isNotEmpty()) item(key = "timeline-gap") { Box(Modifier.height(Space.s)) }
-    byPeriod.forEachIndexed { i, (order, entries) ->
-        item(key = "official-${roadmap.major}-$order") {
-            val first = entries.first()
-            val position = if (first.semester != null) first.semester!!.ordinal - student.currentSemester.ordinal
-            else first.yearLevel - student.grade
-            TimelineSemester(
-                first.semester?.title() ?: yearTitle(first.yearLevel),
-                now = position == 0, past = position < 0, last = i == byPeriod.lastIndex,
-            ) {
-                // Courses grouped by the department's track (전공영역) inside the semester card
-                val byTrack = entries.groupBy { it.track }
-                byTrack.forEach { (track, rows) ->
-                    if (multiTrack && track.isNotBlank()) CardGroupLabel(track)
-                    rows.forEach { e ->
-                        val course = catalogByKey[courseKey(e.name)]
-                        OfficialRow(e.name, e.marks, course?.id ?: roadmapCourseId(e.name), course != null, student)
-                    }
+    @Composable
+    fun period(entries: List<kr.ac.catholic.cukmoa.model.MajorRoadmapEntry>, last: Boolean, modifier: Modifier = Modifier) {
+        val first = entries.first()
+        val position = if (first.semester != null) first.semester!!.ordinal - student.currentSemester.ordinal
+        else first.yearLevel - student.grade
+        TimelineSemester(
+            first.semester?.title() ?: yearTitle(first.yearLevel),
+            now = position == 0, past = position < 0, last = last, modifier = modifier,
+        ) {
+            // Courses grouped by the department's track (전공영역) inside the semester card
+            val byTrack = entries.groupBy { it.track }
+            byTrack.forEach { (track, rows) ->
+                if (multiTrack && track.isNotBlank()) CardGroupLabel(track)
+                rows.forEach { e ->
+                    val course = catalogByKey[courseKey(e.name)]
+                    OfficialRow(e.name, e.marks, course?.id ?: roadmapCourseId(e.name), course != null, student)
                 }
             }
         }
+    }
+    if (wide) {
+        // Wide screens: two periods per row, older on the left (1st semester | 2nd semester, or two years)
+        val rows = byPeriod.map { it.value }.let { periods ->
+            if (periods.all { it.first().semester != null }) periods.groupBy { it.first().semester!!.year }.values.toList()
+            else periods.chunked(2)
+        }.map { it.reversed() }
+        rows.forEachIndexed { i, pair ->
+            item(key = "official-${roadmap.major}-row-$i") {
+                val last = i == rows.lastIndex
+                TimelinePair(
+                    { m -> period(pair[0], last, m) },
+                    pair.getOrNull(1)?.let { p -> { m: Modifier -> period(p, last, m) } },
+                )
+            }
+        }
+    } else byPeriod.forEachIndexed { i, (_, entries) ->
+        item(key = "official-${roadmap.major}-${entries.first().order}") { period(entries, last = i == byPeriod.lastIndex) }
     }
 }
 

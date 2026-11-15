@@ -33,14 +33,26 @@ import kr.ac.catholic.cukmoa.core.ui.ChipTone
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
 
 /**
+ * Wide screens: two periods side by side (1st semester left, 2nd right, or two years). Both columns take the row's
+ * height so their rails run to the next row. A missing side leaves an empty half.
+ */
+@Composable
+internal fun TimelinePair(left: (@Composable (Modifier) -> Unit)?, right: (@Composable (Modifier) -> Unit)?) {
+    Row(Modifier.contentWidth(1280.dp).height(IntrinsicSize.Min)) {
+        Box(Modifier.weight(1f).fillMaxHeight()) { left?.invoke(Modifier.fillMaxHeight()) }
+        Box(Modifier.weight(1f).fillMaxHeight()) { right?.invoke(Modifier.fillMaxHeight()) }
+    }
+}
+
+/**
  * One semester (or year) on the roadmap timeline: a dot and rail on the left, the title, and its courses on one card.
  * The current semester's dot is large and filled, past ones are filled and muted, future ones are hollow.
  */
 @Composable
-internal fun TimelineSemester(title: String, now: Boolean, past: Boolean, last: Boolean, content: @Composable ColumnScope.() -> Unit) {
+internal fun TimelineSemester(title: String, now: Boolean, past: Boolean, last: Boolean, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val cs = MaterialTheme.colorScheme
     val c = AppTheme.colors
-    Row(Modifier.contentWidth().height(IntrinsicSize.Min).padding(start = Space.l, end = Space.l)) {
+    Row(modifier.contentWidth().height(IntrinsicSize.Min).padding(start = Space.l, end = Space.l)) {
         // Rail
         Column(Modifier.width(24.dp).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(Modifier.height(28.dp), contentAlignment = Alignment.Center) {

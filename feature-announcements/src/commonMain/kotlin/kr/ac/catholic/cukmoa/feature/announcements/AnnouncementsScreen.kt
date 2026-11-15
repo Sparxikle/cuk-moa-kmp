@@ -1,5 +1,14 @@
 package kr.ac.catholic.cukmoa.feature.announcements
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.saveable.rememberSaveable
+import kr.ac.catholic.cukmoa.core.theme.CardMetrics
+import kr.ac.catholic.cukmoa.core.ui.Tone
+import kr.ac.catholic.cukmoa.core.ui.Txt
+import kr.ac.catholic.cukmoa.core.ui.WebPage
+import kr.ac.catholic.cukmoa.core.ui.inAppBrowserSupported
+import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.cardItems
 import org.jetbrains.compose.resources.stringResource
 import kr.ac.catholic.cukmoa.core.resources.*
@@ -90,7 +99,26 @@ fun AnnouncementsScreen(student: StudentState) {
         }
     }
 
-    ScreenList(title = stringResource(Res.string.module_announcements), info = stringResource(Res.string.announcements_notice)) {
+    // Wide screens with an in-app browser: list + reading pane. The picked post opens in the pane instead of over the app.
+    val reader = LocalWideLayout.current && inAppBrowserSupported
+    var selected by rememberSaveable { mutableStateOf<String?>(null) }
+    val picked = state.items.firstOrNull { it.link == selected }
+
+    ScreenList(
+        title = stringResource(Res.string.module_announcements),
+        info = stringResource(Res.string.announcements_notice),
+        endPane = if (reader) ({
+            Box(
+                Modifier.fillMaxSize().padding(start = CardMetrics.margin, end = CardMetrics.margin, top = Space.m, bottom = Space.m)
+                    .clip(MaterialTheme.shapes.large).background(AppTheme.colors.surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                val link = selected
+                if (link == null) Txt(stringResource(Res.string.pick_announcement), MaterialTheme.typography.bodyMedium, tone = Tone.Ink2)
+                else WebPage(link, onClose = { selected = null }, fullScreen = false, fallbackTitle = picked?.title.orEmpty())
+            }
+        }) else null,
+    ) {
         item(key = "search") { SearchField(search, { search = it }, stringResource(Res.string.search_titles)) }
         item(key = "filters") {
             ChipRow {
@@ -108,7 +136,11 @@ fun AnnouncementsScreen(student: StudentState) {
         }
 
         cardItems(state.items, key = { it.id }) { a ->
-            AnnouncementRow(a, seenAt = student.announcementsSeenAt, showSource = true)
+            AnnouncementRow(
+                a, seenAt = student.announcementsSeenAt, showSource = true,
+                selected = reader && a.link == selected,
+                onOpen = if (reader) ({ selected = a.link }) else null,
+            )
         }
         if (state.items.isEmpty() && !state.loading && state.error == null) item(key = "empty") {
             EmptyState(stringResource(Res.string.no_matching_announcements))
@@ -124,9 +156,12 @@ fun AnnouncementsScreen(student: StudentState) {
     }
 }
 
-/** One announcement row. Tapping it opens the original post (school website). */
+/**
+ * One announcement row. Tapping it opens the original post (school website) in the in-app browser, or calls onOpen
+ * (reading pane on wide screens). selected tints the row whose post the pane shows.
+ */
 @Composable
-fun AnnouncementRow(a: Announcement, seenAt: String?, showSource: Boolean = false) {
+fun AnnouncementRow(a: Announcement, seenAt: String?, showSource: Boolean = false, selected: Boolean = false, onOpen: (() -> Unit)? = null) {
     val uri = LocalUriHandler.current
     val c = AppTheme.colors
     val isNew = seenAt != null && a.firstSeen > seenAt
@@ -138,8 +173,8 @@ fun AnnouncementRow(a: Announcement, seenAt: String?, showSource: Boolean = fals
     ListRow(
         title = a.title,
         subtitle = meta,
-        modifier = Modifier.contentWidth(),
-        onClick = { runCatching { uri.openUri(a.link) } },
+        modifier = Modifier.contentWidth().then(if (selected) Modifier.background(c.accent.copy(alpha = 0.12f)) else Modifier),
+        onClick = { if (onOpen != null) onOpen() else runCatching { uri.openUri(a.link) } },
         leading = if (a.pinned || isNew) {
             {
                 Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {

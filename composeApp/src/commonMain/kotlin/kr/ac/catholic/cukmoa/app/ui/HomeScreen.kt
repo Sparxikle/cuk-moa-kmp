@@ -46,6 +46,7 @@ import kr.ac.catholic.cukmoa.core.ui.MoreRow
 import kr.ac.catholic.cukmoa.core.ui.ProgressBar
 import kr.ac.catholic.cukmoa.core.ui.SaveButton
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
+import kr.ac.catholic.cukmoa.core.ui.BalancedColumns
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.core.ui.LocalWideLayout
 import kr.ac.catholic.cukmoa.core.ui.Section
@@ -99,12 +100,11 @@ fun HomeScreen(catalog: Catalog, student: StudentState, modules: List<FeatureMod
     ) {
         item(key = "banners") { StatusBanners() }
         if (wide) {
-            // Wide screens: cards in two columns, filled left, right, left… in the user's order
+            // Wide screens: cards in two columns, each into the shorter column, in the user's order
             if (cards.isNotEmpty()) item(key = "cards") {
-                Row(Modifier.contentWidth(HomeWideWidth), verticalAlignment = Alignment.Top) {
-                    for (column in 0..1) Column(Modifier.weight(1f)) {
-                        cards.filterIndexed { i, _ -> i % 2 == column }.forEach { card(it) }
-                    }
+                BalancedColumns(Modifier.contentWidth(HomeWideWidth)) {
+                    // One child per card (a card may draw nothing, e.g. no announcements yet)
+                    cards.forEach { id -> Column { card(id) } }
                 }
             }
         } else cards.forEach { id -> item(key = id.name) { card(id) } }

@@ -460,4 +460,7 @@
     <string name="dept_graduation_page">%1$sの卒業要件案内</string>
     <string name="dept_graduation_page_detail">学科ホームページの案内（卒業試験・追加要件など）</string>
     <string name="department_website">学科ホームページ</string>
+    <string name="open_in_browser">ブラウザで開く</string>
+    <string name="reload">再読み込み</string>
+    <string name="pick_announcement">お知らせを選ぶとここに表示されます</string>
 </resources>

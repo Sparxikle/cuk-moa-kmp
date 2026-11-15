@@ -460,4 +460,7 @@
     <string name="dept_graduation_page">%1$s毕业要求说明</string>
     <string name="dept_graduation_page_detail">院系主页的说明（毕业考试·附加要求等）</string>
     <string name="department_website">院系主页</string>
+    <string name="open_in_browser">在浏览器中打开</string>
+    <string name="reload">重新加载</string>
+    <string name="pick_announcement">选择一条公告即可在此阅读</string>
 </resources>
