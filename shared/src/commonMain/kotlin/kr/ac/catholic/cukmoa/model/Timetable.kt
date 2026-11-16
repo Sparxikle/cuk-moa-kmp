@@ -56,6 +56,22 @@ data class TimetablePlan(
     val title: String,
     val summary: String = "",
     val items: List<TimetableItem>,
+    /** Entries the student added by hand (study group, part-time job …); never sent by the AI */
+    val custom: List<CustomEntry> = emptyList(),
+)
+
+/** A timetable entry that isn't an open class: a name, a place and free times (not tied to 교시) */
+@Serializable
+data class CustomEntry(
+    /** Stable id for editing and removing (random, made by the app) */
+    val id: String,
+    val name: String,
+    val place: String? = null,
+    /** "월" … "토"; the same times on each day */
+    val days: List<String>,
+    /** Minutes since midnight */
+    val startMinute: Int,
+    val endMinute: Int,
 )
 
 @Serializable

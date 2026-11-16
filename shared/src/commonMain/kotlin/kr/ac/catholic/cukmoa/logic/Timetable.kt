@@ -38,6 +38,19 @@ fun TimetablePlan.with(k: OpenClass): TimetablePlan {
     return copy(items = if (at < 0) items + item else items.toMutableList().also { it[at] = item })
 }
 
+/** The plan with [e] added, or replacing the entry with the same id */
+fun TimetablePlan.withCustom(e: kr.ac.catholic.cukmoa.model.CustomEntry): TimetablePlan =
+    copy(custom = if (custom.any { it.id == e.id }) custom.map { if (it.id == e.id) e else it } else custom + e)
+
+fun TimetablePlan.withoutCustom(id: String): TimetablePlan = copy(custom = custom.filterNot { it.id == id })
+
+/** "09:00" */
+fun clockText(minute: Int): String = "${(minute / 60).toString().padStart(2, '0')}:${(minute % 60).toString().padStart(2, '0')}"
+
+/** "월·수 09:00~10:30" */
+fun kr.ac.catholic.cukmoa.model.CustomEntry.timeText(): String =
+    days.joinToString("·") + " " + clockText(startMinute) + "~" + clockText(endMinute)
+
 fun TimetablePlan.without(subjectNo: String): TimetablePlan = copy(items = items.filterNot { it.subjectNo == subjectNo })
 
 /** Classes in the plan that meet at the same time as [k] (its own course left out, since adding [k] would replace it) */

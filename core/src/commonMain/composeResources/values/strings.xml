@@ -477,4 +477,14 @@
     <string name="nothing_to_look_up">Nothing to look up yet</string>
     <string name="open_source_licenses">Open source licenses</string>
     <string name="lottie_icons_credit">Animated icons: useAnimations (MIT License)</string>
+    <string name="add_custom">Add your own</string>
+    <string name="add_custom_detail">Study group, part-time job, club …</string>
+    <string name="edit_custom">Edit entry</string>
+    <string name="custom_name">Name</string>
+    <string name="custom_place">Place (optional)</string>
+    <string name="custom_days">Days</string>
+    <string name="custom_start">Start</string>
+    <string name="custom_end">End</string>
+    <string name="custom_end_before">End must be after start</string>
+    <string name="delete_entry">Delete</string>
 </resources>

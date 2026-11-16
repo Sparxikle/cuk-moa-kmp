@@ -477,4 +477,14 @@
     <string name="nothing_to_look_up">まだ取得できる項目がありません</string>
     <string name="open_source_licenses">オープンソースライセンス</string>
     <string name="lottie_icons_credit">アニメーションアイコン: useAnimations (MITライセンス)</string>
+    <string name="add_custom">自分で追加</string>
+    <string name="add_custom_detail">勉強会、アルバイト、サークル…</string>
+    <string name="edit_custom">予定を編集</string>
+    <string name="custom_name">名前</string>
+    <string name="custom_place">場所（任意）</string>
+    <string name="custom_days">曜日</string>
+    <string name="custom_start">開始</string>
+    <string name="custom_end">終了</string>
+    <string name="custom_end_before">終了は開始より後にしてください</string>
+    <string name="delete_entry">削除</string>
 </resources>

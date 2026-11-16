@@ -33,6 +33,10 @@ import kr.ac.catholic.cukmoa.core.ui.SheetHeader
 import kr.ac.catholic.cukmoa.logic.clashesWith
 import kr.ac.catholic.cukmoa.logic.with
 import kr.ac.catholic.cukmoa.logic.without
+import kr.ac.catholic.cukmoa.logic.withCustom
+import kr.ac.catholic.cukmoa.logic.withoutCustom
+import kr.ac.catholic.cukmoa.logic.clockText
+import kr.ac.catholic.cukmoa.model.CustomEntry
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -122,12 +126,14 @@ private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
     AppBackHandler(enabled = editing) { editing = false }
     // Sheet: null = closed, "" = add a class, subject number = other sections of that course
     var picker by remember { mutableStateOf<String?>(null) }
+    // Custom entry editor: null = closed, a new entry (blank name) = adding, an existing one = editing
+    var customEdit by remember { mutableStateOf<CustomEntry?>(null) }
 
     val myTimetable = stringResource(Res.string.my_timetable)
     val plan = current?.plan ?: TimetablePlan(title = myTimetable, items = emptyList())
     fun save(p: TimetablePlan) {
         val list = classesList ?: return
-        if (p.items.isEmpty() && current == null) return
+        if (p.items.isEmpty() && p.custom.isEmpty() && current == null) return
         vm.editTimetable(list.year, list.semester, p)
     }
 
@@ -136,6 +142,8 @@ private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
             title = classesList?.let { stringResource(Res.string.term_year_sem, it.year, it.semester) } ?: stringResource(Res.string.module_timetable),
             info = stringResource(Res.string.timetable_privacy),
             actions = {
+                // Edit mode: + adds an entry of your own (study group, job …)
+                if (editing) IconButton(onClick = { customEdit = newCustomEntry() }) { Icon(Icons.Default.Add, stringResource(Res.string.add_custom)) }
                 if (classesList != null) IconButton(onClick = { editing = !editing }) {
                     if (editing) Icon(Icons.Default.Check, stringResource(Res.string.done))
                     else Icon(Icons.Outlined.Edit, stringResource(Res.string.edit_timetable))
@@ -151,6 +159,8 @@ private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
                         onRemove = { save(plan.without(it)) },
                         onSection = { picker = it },
                         onAdd = { picker = "" },
+                        onCustom = { customEdit = it ?: newCustomEntry() },
+                        onRemoveCustom = { save(plan.withoutCustom(it)) },
                     )
                 }
             } else if (current != null) {
@@ -179,6 +189,14 @@ private fun MyTimetable(student: StudentState, onMake: () -> Unit) {
                 modifier = Modifier.padding(Space.l),
             )
         }
+    }
+    customEdit?.let { e ->
+        CustomEntryEditor(
+            e,
+            isNew = plan.custom.none { it.id == e.id },
+            onDismiss = { customEdit = null },
+            onDelete = { save(plan.withoutCustom(e.id)); customEdit = null },
+        ) { save(plan.withCustom(it)); customEdit = null }
     }
     picker?.let { subject ->
         ClassPicker(all, plan, subject.ifEmpty { null }, onDismiss = { picker = null }) { k -> save(plan.with(k)); picker = null }
@@ -342,11 +360,14 @@ private fun PlanView(
     onRemove: ((String) -> Unit)? = null,
     onSection: (String) -> Unit = {},
     onAdd: () -> Unit = {},
+    /** Open the editor for a custom entry, or (null) a new one */
+    onCustom: (CustomEntry?) -> Unit = {},
+    onRemoveCustom: (String) -> Unit = {},
 ) {
     val classes = plan.classesIn(all)
     Column(Modifier.contentWidth()) {
         SectionHeader(plan.title + " · " + stringResource(Res.string.total_credits_courses, plan.credits(all), classes.size), info = plan.summary.ifBlank { null })
-        WeekGrid(classes)
+        WeekGrid(classes, plan.custom)
         plan.items.forEachIndexed { i, item ->
             val k = classes.firstOrNull { it.subjectNo == item.subjectNo && it.classNo == item.classNo }
             val name = k?.name ?: item.subjectNo
@@ -363,11 +384,33 @@ private fun PlanView(
                 onClick = if (onRemove != null && all.count { it.subjectNo == item.subjectNo } > 1) ({ onSection(item.subjectNo) }) else null,
             )
         }
-        if (onRemove != null) ListRow(
-            stringResource(Res.string.add_class),
-            leading = { Icon(Icons.Default.Add, null, tint = AppTheme.colors.ink2) },
-            onClick = onAdd,
-        )
+        plan.custom.forEachIndexed { j, e ->
+            ListRow(
+                e.name,
+                listOfNotNull(
+                    e.place?.ifBlank { null },
+                    e.days.map { dayTitle(it) }.joinToString(", ") + " " + clockText(e.startMinute) + "–" + clockText(e.endMinute),
+                ).joinToString(" · "),
+                leading = { Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).background(blockColor(plan.items.size + j))) },
+                trailing = if (onRemove != null) ({
+                    IconButton(onClick = { onRemoveCustom(e.id) }) { Icon(Icons.Default.Close, stringResource(Res.string.remove_class, e.name), tint = AppTheme.colors.ink2) }
+                }) else null,
+                onClick = if (onRemove != null) ({ onCustom(e) }) else null,
+            )
+        }
+        if (onRemove != null) {
+            ListRow(
+                stringResource(Res.string.add_class),
+                leading = { Icon(Icons.Default.Add, null, tint = AppTheme.colors.ink2) },
+                onClick = onAdd,
+            )
+            ListRow(
+                stringResource(Res.string.add_custom),
+                stringResource(Res.string.add_custom_detail),
+                leading = { Icon(Icons.Default.Add, null, tint = AppTheme.colors.ink2) },
+                onClick = { onCustom(null) },
+            )
+        }
     }
 }
 
@@ -383,9 +426,13 @@ private fun blockColor(i: Int): Color {
 
 /** Mon–Fri (Sat when used) × periods; each class is a colored block. */
 @Composable
-private fun WeekGrid(classes: List<OpenClass>) {
-    val days = if (classes.any { k -> k.times.any { it.day == "토" } }) WEEKDAYS else WEEKDAYS.take(5)
-    val last = maxOf(9, classes.flatMap { it.times }.maxOfOrNull { it.end } ?: 9)
+private fun WeekGrid(classes: List<OpenClass>, custom: List<CustomEntry> = emptyList()) {
+    val days = if (classes.any { k -> k.times.any { it.day == "토" } } || custom.any { "토" in it.days }) WEEKDAYS else WEEKDAYS.take(5)
+    // Rows are periods (1교시 = 09:00); custom entries are placed by minute, so the grid grows to fit them
+    val customLast = custom.maxOfOrNull { (it.endMinute - 9 * 60 + 59) / 60 } ?: 0
+    val first = minOf(0, custom.minOfOrNull { (it.startMinute - 9 * 60).floorDiv(60) } ?: 0)
+    val last = maxOf(9, classes.flatMap { it.times }.maxOfOrNull { it.end } ?: 9, customLast)
+    val rows = last - first
     val line = AppTheme.colors.line
     // Wide screens: taller hours and bigger names, so the week fills the screen instead of a thin strip
     val wide = LocalWideLayout.current
@@ -398,19 +445,28 @@ private fun WeekGrid(classes: List<OpenClass>) {
         }
         Row {
             Column(Modifier.width(TIME_COL)) {
-                (1..last).forEach { p ->
+                (first + 1..last).forEach { p ->
                     Box(Modifier.height(cell), contentAlignment = Alignment.TopStart) {
                         Txt("${periodStartHour(p)}", AppTheme.type.caption.copy(fontSize = 10.sp), tone = Tone.Ink3)
                     }
                 }
             }
             days.forEach { d ->
-                Box(Modifier.weight(1f).height(cell * last)) {
-                    (0 until last).forEach { p -> Box(Modifier.offset(y = cell * p).fillMaxWidth().height(0.5.dp).background(line)) }
+                Box(Modifier.weight(1f).height(cell * rows)) {
+                    (0 until rows).forEach { p -> Box(Modifier.offset(y = cell * p).fillMaxWidth().height(0.5.dp).background(line)) }
+                    custom.forEachIndexed { j, e ->
+                        if (d in e.days && e.endMinute > e.startMinute) Box(
+                            Modifier.offset(y = cell * ((e.startMinute - 9 * 60) / 60f - first)).padding(1.dp).fillMaxWidth()
+                                .height(cell * ((e.endMinute - e.startMinute) / 60f) - 2.dp)
+                                .clip(RoundedCornerShape(6.dp)).background(blockColor(classes.size + j)).padding(3.dp),
+                        ) {
+                            Txt(e.name + (e.place?.ifBlank { null }?.let { "\n$it" } ?: ""), blockText, maxLines = ((e.endMinute - e.startMinute) / 60 + 1) * (if (wide) 3 else 1) + 1)
+                        }
+                    }
                     classes.forEachIndexed { i, k ->
                         k.times.filter { it.day == d }.forEach { t ->
                             Box(
-                                Modifier.offset(y = cell * (t.start - 1)).padding(1.dp).fillMaxWidth()
+                                Modifier.offset(y = cell * (t.start - 1 - first)).padding(1.dp).fillMaxWidth()
                                     .height(cell * (t.end - t.start + 1) - 2.dp)
                                     .clip(RoundedCornerShape(6.dp)).background(blockColor(i)).padding(3.dp),
                             ) {
@@ -425,5 +481,76 @@ private fun WeekGrid(classes: List<OpenClass>) {
                 }
             }
         }
+    }
+}
+
+private fun newCustomEntry() = CustomEntry(
+    id = kotlin.random.Random.nextLong().toULong().toString(16),
+    name = "", days = listOf("월"), startMinute = 18 * 60, endMinute = 19 * 60,
+)
+
+/** Name, place, days and start~end time of a custom entry; saving needs a name, a day and an end after the start */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun CustomEntryEditor(entry: CustomEntry, isNew: Boolean, onDismiss: () -> Unit, onDelete: () -> Unit, onSave: (CustomEntry) -> Unit) {
+    var name by remember { mutableStateOf(entry.name) }
+    var place by remember { mutableStateOf(entry.place.orEmpty()) }
+    var days by remember { mutableStateOf(entry.days) }
+    var startMinute by remember { mutableIntStateOf(entry.startMinute) }
+    var endMinute by remember { mutableIntStateOf(entry.endMinute) }
+    // Which time the clock dialog is setting: null = closed
+    var picking by remember { mutableStateOf<Boolean?>(null) }
+    val timeOk = endMinute > startMinute
+    DetailSheet(onDismiss) {
+        SheetHeader(stringResource(if (isNew) Res.string.add_custom else Res.string.edit_custom))
+        Column(Modifier.fillMaxWidth().padding(horizontal = Space.xxl), verticalArrangement = Arrangement.spacedBy(Space.m)) {
+            OutlinedTextField(name, { name = it.take(40) }, Modifier.fillMaxWidth(), singleLine = true, label = { Text(stringResource(Res.string.custom_name)) })
+            OutlinedTextField(place, { place = it.take(40) }, Modifier.fillMaxWidth(), singleLine = true, label = { Text(stringResource(Res.string.custom_place)) })
+        }
+        Section(stringResource(Res.string.custom_days)) {
+            ChipRow {
+                WEEKDAYS.forEach { d ->
+                    item(key = d) { FilterChip(dayTitle(d), d in days) { days = if (d in days) days - d else WEEKDAYS.filter { it in days || it == d } } }
+                }
+            }
+        }
+        Section(stringResource(Res.string.time_of_day)) {
+            ListRow(stringResource(Res.string.custom_start), trailing = { Txt(clockText(startMinute), MaterialTheme.typography.titleMedium) }, onClick = { picking = true })
+            ListRow(stringResource(Res.string.custom_end), trailing = { Txt(clockText(endMinute), MaterialTheme.typography.titleMedium) }, onClick = { picking = false })
+        }
+        if (!timeOk) Txt(stringResource(Res.string.custom_end_before), MaterialTheme.typography.bodySmall, Modifier.padding(horizontal = Space.xxl), tone = Tone.Ink2)
+        Column(Modifier.fillMaxWidth().padding(Space.l), verticalArrangement = Arrangement.spacedBy(Space.s)) {
+            PrimaryButton(
+                stringResource(Res.string.save),
+                {
+                    onSave(entry.copy(name = name.trim(), place = place.trim().ifEmpty { null }, days = days, startMinute = startMinute, endMinute = endMinute))
+                },
+                enabled = name.isNotBlank() && days.isNotEmpty() && timeOk,
+            )
+            if (!isNew) androidx.compose.material3.TextButton(onClick = onDelete, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.delete_entry), color = MaterialTheme.colorScheme.error)
+            }
+        }
+    }
+    picking?.let { isStart ->
+        val initial = if (isStart) startMinute else endMinute
+        val state = androidx.compose.material3.rememberTimePickerState(initial / 60, initial % 60, is24Hour = true)
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { picking = null },
+            title = { Text(stringResource(if (isStart) Res.string.custom_start else Res.string.custom_end)) },
+            text = { androidx.compose.material3.TimePicker(state) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    val m = state.hour * 60 + state.minute
+                    if (isStart) {
+                        // Keep the length when the start moves past the end
+                        if (endMinute <= m) endMinute = (m + (endMinute - startMinute).coerceAtLeast(60)).coerceAtMost(24 * 60 - 1)
+                        startMinute = m
+                    } else endMinute = m
+                    picking = null
+                }) { Text(stringResource(Res.string.done)) }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { picking = null }) { Text(stringResource(Res.string.cancel)) } },
+        )
     }
 }
