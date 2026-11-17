@@ -9,6 +9,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kr.ac.catholic.cukmoa.logic.buildWidgetSnapshot
+import kr.ac.catholic.cukmoa.logic.encodeWidgetSnapshot
+import kr.ac.catholic.cukmoa.logic.todayKst
+import kr.ac.catholic.cukmoa.model.WidgetFeed
+import kr.ac.catholic.cukmoa.model.WidgetPosts
+import kr.ac.catholic.cukmoa.model.WidgetSnapshot
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kr.ac.catholic.cukmoa.api.ApiClient
@@ -65,6 +77,10 @@ class Platform(
     val dynamicScheme: ((dark: Boolean) -> ColorScheme)? = null,
     /** The OS's own per-app language setting (Android 13+), kept in step with the in-app choice. null where there is none. */
     val systemAppLanguage: SystemAppLanguage? = null,
+    /** Home-screen widgets fed by this app (Android, iOS). null where widgets read the view model directly (desktop). */
+    val widgets: WidgetSink? = null,
+    /** Placed widgets and their look, edited in Settings → 위젯 (Android, desktop) */
+    val widgetHost: WidgetHost? = null,
 )
 
 /** Languages the app is translated into. Anything else falls back to English (the default resources). */
@@ -125,13 +141,13 @@ data class AnnouncementsState(
     val newCount: Long = 0,
 )
 
-private const val STUDENT_KEY = "student"
+internal const val STUDENT_KEY = "student"
 private const val CATALOG_KEY = "catalog.live"
 private const val DEPARTMENTS_KEY = "departments.live"
-private const val CALENDAR_KEY = "calendar.live"
+internal const val CALENDAR_KEY = "calendar.live"
 private const val FACULTY_KEY = "faculty.live"
 private const val ROADMAPS_KEY = "roadmaps.live"
-private const val CLASSES_KEY = "classes.live"
+internal const val CLASSES_KEY = "classes.live"
 private const val PAGE = 20
 
 sealed interface TimetableState {
@@ -143,6 +159,7 @@ sealed interface TimetableState {
 
 class AppViewModel(private val platform: Platform) : ViewModel() {
     val dynamicScheme = platform.dynamicScheme
+    val widgetHost = platform.widgetHost
 
     private val api = ApiClient(platform.apiBaseUrl)
 
@@ -316,6 +333,55 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
     val announcements: StateFlow<AnnouncementsState> = _announcements.asStateFlow()
     private var announcementsJob: Job? = null
 
+    // ---- Widgets ----
+
+    /** Latest posts per widget feed (my majors, school, all), cached so widgets have posts offline */
+    private val _widgetFeeds = MutableStateFlow<Map<WidgetFeed, WidgetPosts>>(emptyMap())
+
+    private suspend fun refreshWidgetFeeds(majors: List<String>) {
+        val fresh = fetchWidgetFeeds(api, majors)
+        if (fresh.isEmpty()) return
+        _widgetFeeds.update { it + fresh }
+        val all = _widgetFeeds.value
+        saveCache(WIDGET_FEEDS_KEY) { ApiJson.encodeToString(widgetFeedsSerializer, all) }
+    }
+
+    /**
+     * What the widgets show, rebuilt a second after the timetable, majors, calendar, open classes or posts change.
+     * Desktop widget windows collect it directly; on phones it is also handed to [Platform.widgets].
+     */
+    @OptIn(kotlinx.coroutines.FlowPreview::class, kotlin.time.ExperimentalTime::class)
+    val widgetSnapshot: StateFlow<WidgetSnapshot?> =
+        combine(_student, _calendar, _classes, _widgetFeeds) { s, cal, classes, feeds -> WidgetInputs(s, cal, classes, feeds) }
+            .distinctUntilChanged()
+            .debounce(1_000)
+            .map { i ->
+                withContext(Dispatchers.Default) {
+                    buildWidgetSnapshot(
+                        i.student, i.calendar, i.classes, i.feeds,
+                        today = todayKst(),
+                        generatedAt = kotlin.time.Clock.System.now().toString(),
+                        eventsAsOf = i.calendar?.source?.asOf,
+                    ).also { snap -> platform.widgets?.let { sink -> runCatching { sink.publish(encodeWidgetSnapshot(snap)) } } }
+                }
+            }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Only the student fields widgets show, so unrelated edits (grades, theme …) don't rebuild them */
+    private data class WidgetInputs(
+        val student: StudentState,
+        val calendar: CalendarResponse?,
+        val classes: OpenClassList?,
+        val feeds: Map<WidgetFeed, WidgetPosts>,
+    ) {
+        override fun equals(other: Any?): Boolean = other is WidgetInputs &&
+            other.student.timetable == student.timetable && other.student.majors == student.majors &&
+            other.student.announcementsSeenAt == student.announcementsSeenAt &&
+            other.calendar === calendar && other.classes === classes && other.feeds == feeds
+
+        override fun hashCode(): Int = 0
+    }
+
     /** Encodes server responses to JSON in the background and stores them (large lists would make the UI stutter on the main thread). */
     private fun saveCache(key: String, encode: () -> String) {
         viewModelScope.launch(Dispatchers.Default) { runCatching { store.write(key, encode()) } }
@@ -337,6 +403,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
             cached(FACULTY_KEY) { ApiJson.decodeFromString(FacultyList.serializer(), it) }?.let { if (_faculty.value == null) _faculty.value = it }
             cached(ROADMAPS_KEY) { ApiJson.decodeFromString(MajorRoadmapList.serializer(), it) }?.let { if (_roadmaps.value == null) _roadmaps.value = it }
             cached(CLASSES_KEY) { ApiJson.decodeFromString(OpenClassList.serializer(), it) }?.let { if (_classes.value == null) _classes.value = it }
+            cached(WIDGET_FEEDS_KEY) { ApiJson.decodeFromString(widgetFeedsSerializer, it) }?.let { c -> _widgetFeeds.update { c + it } }
         }
         viewModelScope.launch {
             val cached = cached(DEPARTMENTS_KEY) { ApiJson.decodeFromString(DepartmentList.serializer(), it) }
@@ -560,6 +627,7 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
         return viewModelScope.launch {
             val majors = _student.value.majors
             val highlightFilter = if (majors.isNotEmpty()) AnnouncementFilter.Mine else AnnouncementFilter.School
+            val widgetFeeds = launch { refreshWidgetFeeds(majors) }
             runCatching {
                 val mine = api.announcements(AnnouncementFilter.query(highlightFilter, majors).copy(limit = 3, pinnedFirst = false))
                 val seenAt = _student.value.announcementsSeenAt
@@ -568,8 +636,20 @@ class AppViewModel(private val platform: Platform) : ViewModel() {
                 _announcements.update { it.copy(highlights = mine.items, newCount = fresh) }
             }
             list?.join() // Done once the list has loaded too
+            widgetFeeds.join()
         }
     }
+
+    // ---- Opening a screen from outside (widget taps, links) ----
+
+    private val _pendingRoute = MutableStateFlow<String?>(null)
+
+    /** A route (Routes.*) the app was asked to open, consumed by the tab host with [consumeRoute]. */
+    val pendingRoute: StateFlow<String?> = _pendingRoute.asStateFlow()
+
+    fun openRoute(route: String) { _pendingRoute.value = route }
+
+    fun consumeRoute() { _pendingRoute.value = null }
 
     /**
      * Opening the announcements tab marks all announcements so far as "seen".

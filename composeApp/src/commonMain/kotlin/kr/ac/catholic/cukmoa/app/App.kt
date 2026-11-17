@@ -268,8 +268,15 @@ private fun TabCell(
  * The shell knows nothing about module internals. Tab screens and home cards are drawn by the modules in ModuleRegistry.
  */
 @Composable
-fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Boolean) -> Unit = {}, onRestart: () -> Unit = {}) {
-    val vm = viewModel { AppViewModel(platform) }
+fun App(
+    platform: Platform,
+    initialRoute: String = Routes.HOME,
+    onDarkTheme: (Boolean) -> Unit = {},
+    onRestart: () -> Unit = {},
+    /** A view model made outside the window, shared with other windows (desktop widgets); null makes one here */
+    sharedViewModel: AppViewModel? = null,
+) {
+    val vm = sharedViewModel ?: viewModel { AppViewModel(platform) }
     val student by vm.student.collectAsStateWithLifecycle()
     val dark = when (student.theme) {
         ThemeMode.System -> isSystemInDarkTheme()
@@ -321,6 +328,21 @@ fun App(platform: Platform, initialRoute: String = Routes.HOME, onDarkTheme: (Bo
         val links = remember(system) {
             object : UriHandler {
                 override fun openUri(uri: String) { inAppAddress(uri)?.let { web = it } ?: system.openUri(uri) }
+            }
+        }
+
+        // Opened from outside (a widget tap): a route goes to its tab over whatever is open, a web address to the browser
+        val pending by vm.pendingRoute.collectAsStateWithLifecycle()
+        LaunchedEffect(pending) {
+            val target = pending ?: return@LaunchedEffect
+            vm.consumeRoute()
+            if (target.startsWith("http")) links.openUri(target)
+            else {
+                settings = false
+                managing = false
+                sheet = null
+                web = null
+                navigator.open(target)
             }
         }
 
