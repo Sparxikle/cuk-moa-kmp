@@ -30,6 +30,23 @@ Feature modules don't know about each other and depend only on `core`. Users tur
 2. Implement `FeatureModule`: `id`, `title`, `summary`, `icon`, `Screen()`, and optionally `homeCards` / `HomeCard()`.
 3. Add `include(":feature-xxx")` to `settings.gradle.kts`, the dependency to `composeApp/build.gradle.kts`, and one line to `ModuleRegistry.all`.
 
+## Widgets
+
+Upcoming 학사일정, the saved timetable and the latest announcements, outside the app. Every platform gets the same four widgets, and each one shows a different variant depending on its size:
+
+| Widget | Small | Wide | Large / tall | Lock screen (iOS) |
+| --- | --- | --- | --- | --- |
+| 학사일정 | Next event, D-day | Upcoming list | Longer list | D-day, next event |
+| 시간표 | Next class ("in 25 min", "now") | Today's classes (the next school day's after the last one) | The week | Next class |
+| 공지 | New-post count + newest title | Latest posts | More posts | Count, newest title |
+| 오늘 | — | Next class, next event, newest posts | More posts | — |
+
+Announcement widgets have their own feed: 내 학과, 학교 or 전체. Pick it when placing the widget, or later from the widget's edit menu. Tapping a widget opens its tab, and tapping a post opens the post.
+
+- **Android** (Glance, `androidApp/.../widget/`): the app writes a snapshot whenever its data changes (`WidgetSnapshot` in `shared`). A WorkManager job also refreshes the calendar and announcements every hour while the app is closed, and redraws at each class start and end.
+- **iOS** (WidgetKit, `iosApp/CukMoaWidgets/`, iOS 17+): the app writes the snapshot to the App Group `APP_GROUP` (see `project.yml`). The widget extension fetches the calendar and announcements from the server on its own. App Groups need a signing team that has the capability; with a free personal team the app runs but the widgets stay empty.
+- **Desktop**: there are no OS widgets, so the tray icon's menu (위젯) opens each variant as a small floating window. Drag a window to move it, and right-click it to change its feed or close it. Open widgets, their positions and "keep on top" are remembered. Closing the app window keeps the widgets open.
+
 ## Running
 
 Requires JDK 21+ and the Android SDK (compileSdk 37). `./gradlew` downloads Gradle.
@@ -52,7 +69,7 @@ iOS (macOS with Xcode 26): `cd iosApp && xcodegen generate`, open `iosApp.xcodep
 ./gradlew :shared:jvmTest
 ```
 
-27 tests: credit calculation (demo: 3rd-year backend track = 44 credits left), next semester recommendations from official roadmaps, graduation exam calculation, referential integrity of the catalog, reading/rejecting the saved-state format, and backup export/import.
+34 tests: credit calculation (demo: 3rd-year backend track = 44 credits left), next semester recommendations from official roadmaps, graduation exam calculation, referential integrity of the catalog, reading/rejecting the saved-state format, backup export/import, and the widget snapshot (next class, upcoming events, new posts).
 
 ## Relationship to the server repo
 
