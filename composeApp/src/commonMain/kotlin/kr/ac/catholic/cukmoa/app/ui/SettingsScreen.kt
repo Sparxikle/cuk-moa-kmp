@@ -101,7 +101,7 @@ import org.jetbrains.compose.resources.getString
 
 /** App name (가대모아 = "gathering Catholic University info"). The store/launcher name is also set in AndroidManifest and the desktop config. */
 const val APP_NAME = "가대모아"
-const val APP_VERSION = "0.9"
+const val APP_VERSION = "1.0"
 
 /** Settings pages. Main lists the categories; each category is its own screen, 전공 opens from 내 정보. */
 private enum class SettingsPage(val parent: SettingsPage?) {

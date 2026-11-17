@@ -29,8 +29,8 @@ android {
         applicationId = "kr.ac.catholic.cukmoa"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.9"
+        versionCode = 2
+        versionName = "1.0"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
     signingConfigs {

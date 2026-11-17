@@ -37,8 +37,8 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: kr.ac.catholic.cukmoa
             CFBundleURLSchemes: [cukmoa]
-        CFBundleShortVersionString: "0.9"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "2"
         ApiBaseUrl: $(API_BASE_URL)
         UILaunchScreen: {}
         # Compose renders every frame itself; allow 120Hz on ProMotion screens
@@ -92,8 +92,8 @@ targets:
       path: CukMoaWidgets/Info.plist
       properties:
         CFBundleDisplayName: 가대모아
-        CFBundleShortVersionString: "0.9"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "2"
         ApiBaseUrl: $(API_BASE_URL)
         AppGroup: $(APP_GROUP)
         NSExtension:
