@@ -9,4 +9,6 @@
     <string name="widget_announcements_desc">내 학과·학교·전체 최신 공지</string>
     <string name="widget_today_name">오늘</string>
     <string name="widget_today_desc">다음 수업, 다음 일정, 최신 공지를 한눈에</string>
+    <string name="widget_week_name">주간 시간표</string>
+    <string name="widget_week_desc">월~금 전체 시간표를 시간대별로 한눈에</string>
 </resources>

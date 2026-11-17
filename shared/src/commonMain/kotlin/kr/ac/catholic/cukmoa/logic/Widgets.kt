@@ -144,6 +144,21 @@ fun WidgetTimetable.dayToShow(now: KstMoment): Pair<Int, List<WidgetSlot>>? {
     return next.daysAhead to classesOn(weekday)
 }
 
+/**
+ * What a week grid covers: Mon–Fri, plus Saturday when a class meets then (it would be hidden otherwise),
+ * from the whole hour before the earliest class to the whole hour after the latest one (09:00–18:00 when empty).
+ */
+data class WeekSpan(val days: IntRange, val firstMinute: Int, val lastMinute: Int) {
+    val hours get() = (lastMinute - firstMinute) / 60
+}
+
+fun WidgetTimetable.weekSpan(): WeekSpan {
+    val shown = slots.filter { it.weekday in 1..6 }
+    val first = (shown.minOfOrNull { it.startMinute } ?: 540) / 60 * 60
+    val last = ((shown.maxOfOrNull { it.endMinute } ?: 1080) + 59) / 60 * 60
+    return WeekSpan(if (shown.any { it.weekday == 6 }) 1..6 else 1..5, first, maxOf(last, first + 60))
+}
+
 /** Events not yet over on [today], soonest first. */
 fun WidgetSnapshot.upcomingEvents(today: String, limit: Int): List<WidgetEvent> =
     events.filter { daysUntil(today, it.end ?: it.start) >= 0 }.take(limit)

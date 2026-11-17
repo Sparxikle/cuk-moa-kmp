@@ -50,6 +50,7 @@ fun widgetKindTitle(kind: WidgetKind): StringResource = when (kind) {
     WidgetKind.Timetable -> Res.string.widget_timetable_title
     WidgetKind.Announcements -> Res.string.widget_announcements_title
     WidgetKind.Today -> Res.string.widget_today_title
+    WidgetKind.Week -> Res.string.widget_week_title
 }
 
 fun widgetFeedLabel(feed: WidgetFeed): StringResource = when (feed) {

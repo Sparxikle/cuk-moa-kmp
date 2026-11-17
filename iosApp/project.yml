@@ -73,7 +73,7 @@ targets:
           if [ -z "$JAVA_HOME" ]; then export JAVA_HOME="$(/usr/libexec/java_home -v 21 2>/dev/null)"; fi
           cd "$SRCROOT/.."
           ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
-  # Home- and lock-screen widgets: 학사일정, 시간표, 공지, 오늘 (SwiftUI, WidgetKit). They read the snapshot the app
+  # Home- and lock-screen widgets: 학사일정, 시간표, 공지, 오늘, 주간 시간표 (SwiftUI, WidgetKit). They read the snapshot the app
   # writes to the App Group and refresh the calendar and announcements from the server on their own.
   CukMoaWidgets:
     type: app-extension

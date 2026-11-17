@@ -1,11 +1,12 @@
 import SwiftUI
 import WidgetKit
 
-// Four widgets; the variant follows the family the user picks:
+// Five widgets; the variant follows the family the user picks:
 //   학사일정  small: next event D-day · medium/large: upcoming list · lock screen: D-day / next event
 //   시간표    small: next class · medium: today's (or the next school day's) classes · large: the week · lock screen: next class
 //   공지      small: new-post count · medium/large: latest posts · lock screen: count / newest title (feed set per widget)
 //   오늘      medium/large: next class, next event and newest posts
+//   주간 시간표 large / extra large (iPad): the whole Mon–Fri timetable on a time grid with hours and rooms
 
 @main
 struct CukMoaWidgets: WidgetBundle {
@@ -14,6 +15,7 @@ struct CukMoaWidgets: WidgetBundle {
         TimetableWidget()
         AnnouncementsWidget()
         TodayWidget()
+        WeekWidget()
     }
 }
 
@@ -50,6 +52,15 @@ struct TodayWidget: Widget {
             .configurationDisplayName(L("widget.today_title"))
             .description(L("widget.today_desc"))
             .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+struct WeekWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "week", provider: SnapshotProvider()) { WeekView(entry: $0) }
+            .configurationDisplayName(L("widget.week_title"))
+            .description(L("widget.week_desc"))
+            .supportedFamilies([.systemLarge, .systemExtraLarge])
     }
 }
 
@@ -177,33 +188,68 @@ struct TimetableView: View {
     }
 }
 
-/// Mon–Fri (Saturday when a class meets then) on a time scale; the current class is filled.
+/// Mon–Fri (Saturday when a class meets then) on a time scale; today's classes are tinted, the current one filled.
+/// [hours] adds the hour labels and rooms (주간 시간표); the 시간표 widget's large size leaves them out.
 struct WeekGrid: View {
     let tt: WidgetTimetable
     let now: KstMoment
+    var hours = false
 
     var body: some View {
-        let days = tt.slots.contains { $0.weekday == 6 } ? Array(1...6) : Array(1...5)
-        let first = (tt.slots.map(\.startMinute).min() ?? 540) / 60 * 60
-        let last = ((tt.slots.map(\.endMinute).max() ?? 1080) + 59) / 60 * 60
+        let span = tt.weekSpan()
         HStack(alignment: .top, spacing: 3) {
-            ForEach(days, id: \.self) { d in
+            if hours {
                 VStack(spacing: 2) {
-                    Text(verbatim: dayName(d)).font(.caption2.bold()).foregroundStyle(d == now.weekday ? Brand.accent : .secondary)
+                    Text(verbatim: " ").font(.caption2.bold())
                     GeometryReader { geo in
-                        let perMinute = geo.size.height / CGFloat(max(last - first, 60))
-                        ForEach(tt.classesOn(d), id: \.self) { s in
-                            let on = d == now.weekday && s.startMinute <= now.minute && now.minute < s.endMinute
-                            Text(verbatim: s.name)
-                                .font(.system(size: 9, weight: .medium))
-                                .foregroundStyle(on ? Color.white : Brand.onAccentSoft)
-                                .padding(2)
-                                .frame(width: geo.size.width, height: perMinute * CGFloat(s.endMinute - s.startMinute), alignment: .topLeading)
-                                .background(on ? Brand.accent : Brand.accentSoft, in: RoundedRectangle(cornerRadius: 4))
-                                .offset(y: perMinute * CGFloat(s.startMinute - first))
+                        let perMinute = geo.size.height / CGFloat(span.last - span.first)
+                        ForEach(Array(stride(from: span.first, to: span.last, by: 60)), id: \.self) { m in
+                            Text(verbatim: "\(m / 60)").font(.system(size: 9)).foregroundStyle(.secondary)
+                                .offset(y: perMinute * CGFloat(m - span.first))
                         }
                     }
                 }
+                .frame(width: 14)
+            }
+            ForEach(span.days, id: \.self) { d in
+                VStack(spacing: 2) {
+                    Text(verbatim: dayName(d)).font(.caption2.bold()).foregroundStyle(d == now.weekday ? Brand.accent : .secondary)
+                    GeometryReader { geo in
+                        let perMinute = geo.size.height / CGFloat(span.last - span.first)
+                        ForEach(tt.classesOn(d), id: \.self) { s in
+                            let on = d == now.weekday && s.startMinute <= now.minute && now.minute < s.endMinute
+                            let today = d == now.weekday
+                            let height = perMinute * CGFloat(s.endMinute - s.startMinute)
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(verbatim: s.name).font(.system(size: 9, weight: .medium))
+                                if hours, let room = s.room, height >= 34 {
+                                    Text(verbatim: room).font(.system(size: 8)).opacity(0.75).lineLimit(1)
+                                }
+                            }
+                            .foregroundStyle(on ? Color.white : today ? Brand.onAccentSoft : Color.primary)
+                            .padding(2)
+                            .frame(width: geo.size.width, height: height, alignment: .topLeading)
+                            .background(on ? Brand.accent : today ? Brand.accentSoft : Color(UIColor.secondarySystemFill), in: RoundedRectangle(cornerRadius: 4))
+                            .offset(y: perMinute * CGFloat(s.startMinute - span.first))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct WeekView: View {
+    let entry: SnapshotEntry
+
+    var body: some View {
+        let now = KstMoment(entry.date)
+        let tt = entry.snapshot?.timetable
+        WidgetFrame(target: "timetable") {
+            VStack(alignment: .leading, spacing: 4) {
+                Header(L("widget.week_title"))
+                if let tt, !tt.slots.isEmpty { WeekGrid(tt: tt, now: now, hours: true) }
+                else { Empty(L(tt == nil ? "widget.no_timetable" : "widget.no_classes")) }
             }
         }
     }

@@ -67,6 +67,7 @@ suspend fun updateAllWidgets(context: Context) {
     TimetableWidget().updateAll(context)
     AnnouncementsWidget().updateAll(context)
     TodayWidget().updateAll(context)
+    WeekWidget().updateAll(context)
 }
 
 /** The app's side: stores each new snapshot and redraws the widgets. */
@@ -96,7 +97,7 @@ object WidgetSchedule {
         val manager = android.appwidget.AppWidgetManager.getInstance(context)
         val placed = listOf(
             CalendarWidgetReceiver::class.java, TimetableWidgetReceiver::class.java,
-            AnnouncementsWidgetReceiver::class.java, TodayWidgetReceiver::class.java,
+            AnnouncementsWidgetReceiver::class.java, TodayWidgetReceiver::class.java, WeekWidgetReceiver::class.java,
         ).any { manager.getAppWidgetIds(android.content.ComponentName(context, it)).isNotEmpty() }
         if (placed) ensure(context)
     }

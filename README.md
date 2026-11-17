@@ -32,14 +32,15 @@ Feature modules don't know about each other and depend only on `core`. Users tur
 
 ## Widgets
 
-Upcoming 학사일정, the saved timetable and the latest announcements, outside the app. Every platform gets the same four widgets, and each one shows a different variant depending on its size:
+Upcoming 학사일정, the saved timetable and the latest announcements, outside the app. Every platform gets the same five widgets, and each one shows a different variant depending on its size:
 
 | Widget | Small | Wide | Large / tall | Lock screen (iOS) |
 | --- | --- | --- | --- | --- |
 | 학사일정 | Next event, D-day | Upcoming list | Longer list | D-day, next event |
-| 시간표 | Next class ("in 25 min", "now") | Today's classes (the next school day's after the last one) | The week | Next class |
+| 시간표 | Next class ("in 25 min", "now") | Today's classes (the next school day's after the last one) | The week on a time grid | Next class |
 | 공지 | New-post count + newest title | Latest posts | More posts | Count, newest title |
 | 오늘 | — | Next class, next event, newest posts | More posts | — |
+| 주간 시간표 | — | — | The whole Mon–Fri timetable on a time grid: hours, rooms, today and the current class marked (Saturday too when a class meets then) | — |
 
 Announcement widgets have their own feed: 내 학과, 학교 or 전체. Pick it when placing the widget, or later from the widget's edit menu. Tapping a widget opens its tab, and tapping a post opens the post.
 
@@ -69,7 +70,7 @@ iOS (macOS with Xcode 26): `cd iosApp && xcodegen generate`, open `iosApp.xcodep
 ./gradlew :shared:jvmTest
 ```
 
-34 tests: credit calculation (demo: 3rd-year backend track = 44 credits left), next semester recommendations from official roadmaps, graduation exam calculation, referential integrity of the catalog, reading/rejecting the saved-state format, backup export/import, and the widget snapshot (next class, upcoming events, new posts).
+36 tests: credit calculation (demo: 3rd-year backend track = 44 credits left), next semester recommendations from official roadmaps, graduation exam calculation, referential integrity of the catalog, reading/rejecting the saved-state format, backup export/import, and the widget snapshot (next class, upcoming events, new posts).
 
 ## Relationship to the server repo
 

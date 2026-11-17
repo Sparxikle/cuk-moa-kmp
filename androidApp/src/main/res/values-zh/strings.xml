@@ -9,4 +9,6 @@
     <string name="widget_announcements_desc">我的专业、学校或全部的最新公告</string>
     <string name="widget_today_name">今天</string>
     <string name="widget_today_desc">下一节课、下一个日程和最新公告</string>
+    <string name="widget_week_name">周课表</string>
+    <string name="widget_week_desc">按时间排列的周一至周五完整课表</string>
 </resources>

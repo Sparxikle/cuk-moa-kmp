@@ -63,11 +63,14 @@ import kr.ac.catholic.cukmoa.logic.newCount
 import kr.ac.catholic.cukmoa.logic.nextClass
 import kr.ac.catholic.cukmoa.logic.shortDate
 import kr.ac.catholic.cukmoa.logic.upcomingEvents
+import kr.ac.catholic.cukmoa.logic.weekSpan
+import kr.ac.catholic.cukmoa.logic.classesOn
 import kr.ac.catholic.cukmoa.model.WidgetEvent
 import kr.ac.catholic.cukmoa.model.WidgetFeed
 import kr.ac.catholic.cukmoa.model.WidgetPost
 import kr.ac.catholic.cukmoa.model.WidgetSlot
 import kr.ac.catholic.cukmoa.model.WidgetSnapshot
+import kr.ac.catholic.cukmoa.model.WidgetTimetable
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -80,7 +83,7 @@ enum class DesktopWidgetKind(val id: String, val label: StringResource, val size
     Upcoming("upcoming", Res.string.widget_variant_upcoming, DpSize(340.dp, 270.dp), Routes.HOME),
     NextClass("next_class", Res.string.widget_variant_next_class, DpSize(220.dp, 150.dp), Routes.TIMETABLE),
     TodayClasses("today_classes", Res.string.widget_variant_today_classes, DpSize(340.dp, 270.dp), Routes.TIMETABLE),
-    Week("week", Res.string.widget_variant_week, DpSize(380.dp, 380.dp), Routes.TIMETABLE),
+    Week("week", Res.string.widget_week_title, DpSize(420.dp, 420.dp), Routes.TIMETABLE),
     NewPosts("new_posts", Res.string.widget_variant_new_posts, DpSize(220.dp, 150.dp), Routes.ANNOUNCEMENTS),
     Latest("latest", Res.string.widget_variant_latest, DpSize(340.dp, 330.dp), Routes.ANNOUNCEMENTS),
     Today("today", Res.string.widget_variant_today, DpSize(340.dp, 330.dp), Routes.HOME),
@@ -235,10 +238,10 @@ fun WidgetContent(kind: DesktopWidgetKind, feed: WidgetFeed, snapshot: WidgetSna
                     }
                 }
                 DesktopWidgetKind.Week -> {
-                    SectionHeader(stringResource(Res.string.widget_variant_week))
+                    SectionHeader(stringResource(Res.string.widget_week_title))
                     val tt = snapshot?.timetable
                     if (tt == null) Empty(Res.string.widget_no_timetable)
-                    else Box(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) { WeekGrid(tt.slots, now) }
+                    else Box(Modifier.padding(start = 8.dp, end = 12.dp, bottom = 12.dp)) { WeekGrid(tt, now) }
                 }
                 DesktopWidgetKind.NewPosts, DesktopWidgetKind.Latest -> {
                     val n = snapshot?.newCount(feed) ?: 0
@@ -304,30 +307,42 @@ private fun ClassRow(s: WidgetSlot, now: KstMoment, today: Boolean, next: NextCl
 private fun PostRow(p: WidgetPost, isNew: Boolean, onClick: () -> Unit) =
     ListRow(p.title, titleMaxLines = 2, leading = { Badge(shortDate(p.date), soft = isNew) }, onClick = onClick)
 
-/** Mon–Fri (Saturday too when a class meets then), with the current class highlighted. */
+/**
+ * The whole week on a time grid: hour labels, then Mon–Fri (Saturday too when a class meets then) with each class
+ * at its time. Today's classes are tinted and the current one is filled with the accent.
+ */
 @Composable
-private fun WeekGrid(slots: List<WidgetSlot>, now: KstMoment) {
+private fun WeekGrid(tt: WidgetTimetable, now: KstMoment) {
     val c = AppTheme.colors
-    val days = if (slots.any { it.weekday == 6 }) 1..6 else 1..5
-    val first = (slots.minOfOrNull { it.startMinute } ?: 540) / 60 * 60
-    val last = ((slots.maxOfOrNull { it.endMinute } ?: 1080) + 59) / 60 * 60
+    val span = tt.weekSpan()
     Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        days.forEach { d ->
+        Column(Modifier.width(18.dp).fillMaxHeight()) {
+            Text(" ", fontSize = 12.sp)
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).padding(top = 4.dp)) {
+                val perMinute = maxHeight / (span.lastMinute - span.firstMinute).toFloat()
+                (span.firstMinute until span.lastMinute step 60).forEach { m ->
+                    Text((m / 60).toString(), color = c.ink3, fontSize = 10.sp, lineHeight = 10.sp, modifier = Modifier.padding(top = perMinute * (m - span.firstMinute).toFloat()))
+                }
+            }
+        }
+        span.days.forEach { d ->
             Column(Modifier.weight(1f).fillMaxHeight()) {
                 Text(stringResource(dayName(d)), color = if (d == now.weekday) c.accent else c.ink2, fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.CenterHorizontally))
                 androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).padding(top = 4.dp)) {
-                    val perMinute = maxHeight / (last - first).toFloat()
-                    slots.filter { it.weekday == d }.forEach { s ->
+                    val perMinute = maxHeight / (span.lastMinute - span.firstMinute).toFloat()
+                    tt.classesOn(d).forEach { s ->
                         val on = d == now.weekday && s.startMinute <= now.minute && now.minute < s.endMinute
                         val today = d == now.weekday
-                        Box(
-                            Modifier.padding(top = perMinute * (s.startMinute - first).toFloat())
+                        val fg = if (on) c.onAccent else if (today) c.onAccentSoft else c.ink
+                        Column(
+                            Modifier.padding(top = perMinute * (s.startMinute - span.firstMinute).toFloat())
                                 .fillMaxWidth().height(perMinute * (s.endMinute - s.startMinute).toFloat())
                                 .clip(RoundedCornerShape(6.dp))
                                 .background(if (on) c.accent else if (today) c.accentSoft else c.fill)
                                 .padding(3.dp),
                         ) {
-                            Text(s.name, color = if (on) c.onAccent else if (today) c.onAccentSoft else c.ink, fontSize = 10.sp, lineHeight = 11.sp, overflow = TextOverflow.Ellipsis)
+                            Text(s.name, color = fg, fontSize = 10.sp, lineHeight = 11.sp, fontWeight = FontWeight.Medium, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                            s.room?.let { Text(it, color = if (on) c.onAccent else c.ink2, fontSize = 9.sp, lineHeight = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                         }
                     }
                 }

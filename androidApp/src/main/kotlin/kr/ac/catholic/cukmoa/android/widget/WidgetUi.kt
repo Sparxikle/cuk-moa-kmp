@@ -150,7 +150,7 @@ class WidgetLabels private constructor(private val map: Map<StringResource, Stri
     companion object {
         private val all = listOf(
             Res.string.widget_calendar_title, Res.string.widget_timetable_title, Res.string.widget_announcements_title,
-            Res.string.widget_today_title, Res.string.widget_next_class, Res.string.widget_next_event,
+            Res.string.widget_today_title, Res.string.widget_week_title, Res.string.widget_next_class, Res.string.widget_next_event,
             Res.string.widget_latest_posts, Res.string.widget_no_events, Res.string.widget_no_timetable,
             Res.string.widget_no_classes, Res.string.widget_no_posts, Res.string.widget_now, Res.string.widget_in_minutes,
             Res.string.widget_in_hours, Res.string.widget_tomorrow, Res.string.widget_new_posts, Res.string.widget_no_new_posts,

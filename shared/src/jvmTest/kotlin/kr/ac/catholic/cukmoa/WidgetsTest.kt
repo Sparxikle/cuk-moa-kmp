@@ -18,6 +18,7 @@ import kr.ac.catholic.cukmoa.logic.newStudent
 import kr.ac.catholic.cukmoa.logic.nextClass
 import kr.ac.catholic.cukmoa.logic.query
 import kr.ac.catholic.cukmoa.logic.upcomingEvents
+import kr.ac.catholic.cukmoa.logic.weekSpan
 import kr.ac.catholic.cukmoa.logic.KstMoment
 import kr.ac.catholic.cukmoa.model.AcademicEvent
 import kr.ac.catholic.cukmoa.model.CalendarResponse
@@ -131,6 +132,22 @@ class WidgetsTest {
         val (ahead, day) = tt.dayToShow(KstMoment("2026-11-20", 5, 15 * 60))!!
         assertEquals(3, ahead)
         assertEquals(listOf("자료구조", "운영체제"), day.map { it.name })
+    }
+
+    @Test
+    fun `week grid covers Mon-Fri in whole hours, Saturday only when a class meets then`() {
+        val tt = snapshot.timetable!!
+        // 자료구조 09:00 … 운영체제 until 14:50
+        val span = tt.weekSpan()
+        assertEquals(1..5, span.days)
+        assertEquals(9 * 60, span.firstMinute)
+        assertEquals(15 * 60, span.lastMinute)
+        assertEquals(6, span.hours)
+        val saturday = tt.copy(slots = tt.slots + tt.slots.first().copy(weekday = 6, startMinute = 8 * 60 + 30, endMinute = 9 * 60 + 20))
+        assertEquals(1..6, saturday.weekSpan().days)
+        assertEquals(8 * 60, saturday.weekSpan().firstMinute)
+        val empty = tt.copy(slots = emptyList()).weekSpan()
+        assertEquals(9 * 60 to 18 * 60, empty.firstMinute to empty.lastMinute)
     }
 
     @Test

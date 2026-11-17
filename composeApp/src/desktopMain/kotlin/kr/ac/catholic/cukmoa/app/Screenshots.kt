@@ -121,7 +121,7 @@ private fun shootWidgets(out: File, dark: Boolean) {
         seenAt = "2026-11-10T00:00:00Z",
     )
     val kinds = DesktopWidgetKind.entries
-    val scene = ImageComposeScene((760 * SCALE).toInt(), (1200 * SCALE).toInt(), Density(SCALE)) {
+    val scene = ImageComposeScene((800 * SCALE).toInt(), (1200 * SCALE).toInt(), Density(SCALE)) {
         kr.ac.catholic.cukmoa.core.theme.AppTheme(dark = dark) {
             androidx.compose.foundation.layout.Column(
                 androidx.compose.ui.Modifier.background(if (dark) androidx.compose.ui.graphics.Color(0xFF303030) else androidx.compose.ui.graphics.Color(0xFFD8DEE6))

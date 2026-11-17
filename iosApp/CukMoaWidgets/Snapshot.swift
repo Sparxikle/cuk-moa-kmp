@@ -139,6 +139,14 @@ extension WidgetTimetable {
         guard let next = nextClass(now) else { return nil }
         return (next.daysAhead, classesOn((now.weekday - 1 + next.daysAhead) % 7 + 1))
     }
+
+    /// Week grid: Mon–Fri (Saturday when a class meets then) and whole hours around the classes (09–18 when empty)
+    func weekSpan() -> (days: [Int], first: Int, last: Int) {
+        let shown = slots.filter { (1...6).contains($0.weekday) }
+        let first = (shown.map(\.startMinute).min() ?? 540) / 60 * 60
+        let last = ((shown.map(\.endMinute).max() ?? 1080) + 59) / 60 * 60
+        return (shown.contains { $0.weekday == 6 } ? Array(1...6) : Array(1...5), first, max(last, first + 60))
+    }
 }
 
 extension WidgetSnapshot {

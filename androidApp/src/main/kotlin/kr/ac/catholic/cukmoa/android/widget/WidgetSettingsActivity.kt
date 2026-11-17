@@ -173,6 +173,7 @@ fun widgetKind(context: Context, widgetId: Int): WidgetKind? {
         TimetableWidgetReceiver::class.java.name -> WidgetKind.Timetable
         AnnouncementsWidgetReceiver::class.java.name -> WidgetKind.Announcements
         TodayWidgetReceiver::class.java.name -> WidgetKind.Today
+        WeekWidgetReceiver::class.java.name -> WidgetKind.Week
         else -> null
     }
 }
@@ -182,6 +183,7 @@ private fun widgetFor(kind: WidgetKind) = when (kind) {
     WidgetKind.Timetable -> TimetableWidget()
     WidgetKind.Announcements -> AnnouncementsWidget()
     WidgetKind.Today -> TodayWidget()
+    WidgetKind.Week -> WeekWidget()
 }
 
 /** Placed widgets and their per-widget style (Glance state), for the sheet and Settings → 위젯 */

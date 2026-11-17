@@ -485,6 +485,8 @@
     <string name="widget_announcements_desc">Latest posts from my majors, the school or everywhere</string>
     <string name="widget_today_title">Today</string>
     <string name="widget_today_desc">Next class, next event and newest posts together</string>
+    <string name="widget_week_title">Weekly timetable</string>
+    <string name="widget_week_desc">Your whole Mon–Fri timetable on a time grid</string>
     <string name="widget_next_class">Next class</string>
     <string name="widget_next_event">Next event</string>
     <string name="widget_latest_posts">Latest posts</string>

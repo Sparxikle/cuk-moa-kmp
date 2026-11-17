@@ -485,6 +485,8 @@
     <string name="widget_announcements_desc">自分の学科・学校・すべての最新のお知らせ</string>
     <string name="widget_today_title">今日</string>
     <string name="widget_today_desc">次の授業、次の予定、最新のお知らせをまとめて</string>
+    <string name="widget_week_title">週間時間割</string>
+    <string name="widget_week_desc">月〜金の時間割を時間軸でまるごと</string>
     <string name="widget_next_class">次の授業</string>
     <string name="widget_next_event">次の予定</string>
     <string name="widget_latest_posts">最新のお知らせ</string>

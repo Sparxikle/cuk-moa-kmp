@@ -35,6 +35,10 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+import androidx.glance.layout.width
+import androidx.glance.layout.Box
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.padding
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -54,16 +58,18 @@ import kr.ac.catholic.cukmoa.logic.newCount
 import kr.ac.catholic.cukmoa.logic.nextClass
 import kr.ac.catholic.cukmoa.logic.shortDate
 import kr.ac.catholic.cukmoa.logic.upcomingEvents
+import kr.ac.catholic.cukmoa.logic.weekSpan
 import kr.ac.catholic.cukmoa.model.WidgetEvent
 import kr.ac.catholic.cukmoa.model.WidgetFeed
 import kr.ac.catholic.cukmoa.model.WidgetSnapshot
 import kr.ac.catholic.cukmoa.model.WidgetTimetable
 
-// Four widgets. Each lists as many rows as its size fits, drawn like the app's home cards:
+// Five widgets. Each lists as many rows as its size fits, drawn like the app's home cards:
 //   학사일정  upcoming events with the home card's round D-day badges
 //   시간표    today's (or the next school day's) classes, the next one marked · wide and tall: the week
 //   공지      latest posts of the feed picked per widget (내 학과 / 학교 / 전체), new ones marked
 //   오늘      next class, next event, then the newest posts of my majors
+//   주간 시간표 the whole Mon–Fri timetable on a time grid, like the app's timetable tab
 
 /** From this width the timetable can show the week (with [TALL] height) */
 private val WIDE = DpSize(250.dp, 110.dp)
@@ -141,7 +147,7 @@ class TimetableWidget : CukMoaWidget(WidgetKind.Timetable) {
             val day = tt?.dayToShow(now)
             if (isWide && isTall && tt != null) {
                 Header(l[Res.string.widget_variant_week])
-                Week(tt, l, now)
+                WeekGrid(tt, l, now, gridHeight())
                 return@Column
             }
             Header(
@@ -162,37 +168,6 @@ class TimetableWidget : CukMoaWidget(WidgetKind.Timetable) {
                     val remaining = day.second.filter { !today || it.endMinute > now.minute }
                     val shown = (day.second - remaining.toSet()).takeLast((rows - remaining.size).coerceAtLeast(0)) + remaining.take(rows)
                     shown.forEach { ClassRow(l, it, now, today, next) }
-                }
-            }
-        }
-    }
-
-    /** One column per weekday with its classes as blocks; today's column and the current class stand out. */
-    @Composable
-    private fun Week(tt: WidgetTimetable, l: WidgetLabels, now: KstMoment) {
-        val c = LocalWidgetColors.current
-        val days = if (tt.slots.any { it.weekday == 6 }) 1..6 else 1..5
-        Row(GlanceModifier.fillMaxSize()) {
-            days.forEach { d ->
-                Column(GlanceModifier.defaultWeight().fillMaxHeight().padding(horizontal = 2.dp)) {
-                    Text(
-                        l[dayName(d)], maxLines = 1,
-                        style = TextStyle(color = if (d == now.weekday) c.accent else c.ink2, fontSize = 12.sp, fontWeight = FontWeight.Medium),
-                        modifier = GlanceModifier.padding(bottom = 4.dp),
-                    )
-                    tt.classesOn(d).take(5).forEach { s ->
-                        val on = d == now.weekday && s.startMinute <= now.minute && now.minute < s.endMinute
-                        val today = d == now.weekday
-                        Column(
-                            GlanceModifier.fillMaxWidth().padding(bottom = 3.dp)
-                                .background(ImageProvider(R.drawable.widget_chip), colorFilter = ColorFilter.tint(if (on) c.accent else if (today) c.accentSoft else c.fill))
-                                .padding(4.dp),
-                        ) {
-                            val fg = if (on) c.onAccent else if (today) c.onAccentSoft else c.ink2
-                            Text(clockLabel(s.startMinute), maxLines = 1, style = TextStyle(color = fg, fontSize = 9.sp))
-                            Text(s.name, maxLines = 2, style = TextStyle(color = if (on || today) fg else c.ink, fontSize = 10.sp, fontWeight = FontWeight.Medium))
-                        }
-                    }
                 }
             }
         }
@@ -240,6 +215,91 @@ class TodayWidget : CukMoaWidget(WidgetKind.Today) {
     }
 }
 
+/** Glance draws at most 10 children per Row/Column/Box, so a day column holds that many classes and the axis that many labels. */
+private const val MAX_CHILDREN = 10
+
+/** Day-name row above the grid */
+private val DAY_LABEL = 18.dp
+
+/** Width of the hour labels on the left */
+private val AXIS = 20.dp
+
+class WeekWidget : CukMoaWidget(WidgetKind.Week) {
+    @Composable
+    override fun Content(snapshot: WidgetSnapshot?, l: WidgetLabels, colors: WidgetColors, style: WidgetStyle, now: KstMoment) = WidgetFrame(colors, Routes.TIMETABLE) {
+        Column(GlanceModifier.fillMaxSize()) {
+            Header(l[Res.string.widget_week_title])
+            val tt = snapshot?.timetable
+            when {
+                tt == null -> Empty(l[Res.string.widget_no_timetable])
+                tt.slots.isEmpty() -> Empty(l[Res.string.widget_no_classes])
+                else -> WeekGrid(tt, l, now, gridHeight())
+            }
+        }
+    }
+}
+
+/** The frame's vertical padding (12dp × 2) and the header leave the rest of the widget to the grid */
+@Composable
+private fun gridHeight() = LocalSize.current.height - 24.dp - (HEADER - 8.dp) - DAY_LABEL
+
+/**
+ * Hour labels, then one column per weekday with each class as a block at its time and as tall as it lasts.
+ * Glance has no absolute positions, so each block is pushed down by a top padding: the gap since the block above it.
+ * Today's classes are tinted and the class happening now is filled with the accent.
+ */
+@Composable
+private fun WeekGrid(tt: WidgetTimetable, l: WidgetLabels, now: KstMoment, height: androidx.compose.ui.unit.Dp) {
+    val c = LocalWidgetColors.current
+    val span = tt.weekSpan()
+    val perMinute = height.coerceAtLeast(60.dp) / (span.lastMinute - span.firstMinute).toFloat()
+    // Every hour when they fit, else every second or third hour
+    val step = (span.hours + MAX_CHILDREN - 2) / (MAX_CHILDREN - 1)
+    Row(GlanceModifier.fillMaxSize()) {
+        Column(GlanceModifier.width(AXIS).fillMaxHeight()) {
+            Spacer(GlanceModifier.height(DAY_LABEL))
+            (span.firstMinute until span.lastMinute step 60 * step).forEach { m ->
+                Text(
+                    (m / 60).toString(), maxLines = 1,
+                    style = TextStyle(color = c.ink3, fontSize = 9.sp),
+                    modifier = GlanceModifier.height(perMinute * minOf(60 * step, span.lastMinute - m).toFloat()),
+                )
+            }
+        }
+        span.days.forEach { d ->
+            val today = d == now.weekday
+            Column(GlanceModifier.defaultWeight().fillMaxHeight().padding(horizontal = 1.5.dp)) {
+                Text(
+                    l[dayName(d)], maxLines = 1,
+                    style = TextStyle(color = if (today) c.accent else c.ink2, fontSize = 11.sp, fontWeight = FontWeight.Medium, textAlign = androidx.glance.text.TextAlign.Center),
+                    modifier = GlanceModifier.fillMaxWidth().height(DAY_LABEL),
+                )
+                var bottom = span.firstMinute
+                tt.classesOn(d).take(MAX_CHILDREN - 1).forEach { s ->
+                    val on = today && s.startMinute <= now.minute && now.minute < s.endMinute
+                    val top = maxOf(s.startMinute, bottom)
+                    val blockHeight = perMinute * (s.endMinute - top).coerceAtLeast(20).toFloat()
+                    Box(GlanceModifier.fillMaxWidth().padding(top = perMinute * (top - bottom).toFloat())) {
+                        Column(
+                            GlanceModifier.fillMaxWidth().height(blockHeight)
+                                .background(ImageProvider(R.drawable.widget_chip), colorFilter = ColorFilter.tint(if (on) c.accent else if (today) c.accentSoft else c.fill))
+                                .padding(horizontal = 3.dp, vertical = 2.dp),
+                        ) {
+                            val fg = if (on) c.onAccent else if (today) c.onAccentSoft else c.ink
+                            // About 12dp per 10sp line; the room takes the last line when the block is tall enough
+                            val lines = ((blockHeight - 4.dp) / 12.dp).toInt().coerceAtLeast(1)
+                            val room = s.room?.takeIf { lines >= 3 }
+                            Text(s.name, maxLines = if (room != null) lines - 1 else lines, style = TextStyle(color = fg, fontSize = 10.sp, fontWeight = FontWeight.Medium))
+                            if (room != null) Text(room, maxLines = 1, style = TextStyle(color = if (on) c.onAccent else c.ink2, fontSize = 8.sp))
+                        }
+                    }
+                    bottom = top + (blockHeight / perMinute).toInt()
+                }
+            }
+        }
+    }
+}
+
 // ---- Receivers (registered in AndroidManifest.xml). The first widget placed starts the background refresh. ----
 
 abstract class CukMoaWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -252,7 +312,7 @@ abstract class CukMoaWidgetReceiver : GlanceAppWidgetReceiver() {
         super.onDisabled(context)
         // Each receiver only sees its own widgets; stop the jobs only when no widget of any kind is left
         val manager = android.appwidget.AppWidgetManager.getInstance(context)
-        val left = listOf(CalendarWidgetReceiver::class.java, TimetableWidgetReceiver::class.java, AnnouncementsWidgetReceiver::class.java, TodayWidgetReceiver::class.java)
+        val left = listOf(CalendarWidgetReceiver::class.java, TimetableWidgetReceiver::class.java, AnnouncementsWidgetReceiver::class.java, TodayWidgetReceiver::class.java, WeekWidgetReceiver::class.java)
             .sumOf { manager.getAppWidgetIds(android.content.ComponentName(context, it)).size }
         if (left == 0) WidgetSchedule.cancel(context)
     }
@@ -262,3 +322,4 @@ class CalendarWidgetReceiver : CukMoaWidgetReceiver() { override val glanceAppWi
 class TimetableWidgetReceiver : CukMoaWidgetReceiver() { override val glanceAppWidget: GlanceAppWidget = TimetableWidget() }
 class AnnouncementsWidgetReceiver : CukMoaWidgetReceiver() { override val glanceAppWidget: GlanceAppWidget = AnnouncementsWidget() }
 class TodayWidgetReceiver : CukMoaWidgetReceiver() { override val glanceAppWidget: GlanceAppWidget = TodayWidget() }
+class WeekWidgetReceiver : CukMoaWidgetReceiver() { override val glanceAppWidget: GlanceAppWidget = WeekWidget() }

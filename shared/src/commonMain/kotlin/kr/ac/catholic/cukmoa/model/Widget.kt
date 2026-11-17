@@ -98,13 +98,16 @@ data class WidgetPost(
 
 // ---- Per-widget look (set on the widget's settings sheet, in Settings → 위젯, or the iOS edit menu) ----
 
-/** The four widget families; every platform offers the same set. Ids are stored; don't rename them. */
+/** The five widget families; every platform offers the same set. Ids are stored; don't rename them. */
 @Serializable
 enum class WidgetKind {
     @SerialName("calendar") Calendar,
     @SerialName("timetable") Timetable,
     @SerialName("announcements") Announcements,
     @SerialName("today") Today,
+
+    /** The whole Mon–Fri timetable on a time grid */
+    @SerialName("week") Week,
 }
 
 /** Light or dark card, or the same as the app (which itself may follow the phone) */
