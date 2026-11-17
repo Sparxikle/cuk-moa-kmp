@@ -7,6 +7,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.core.content.edit
 import kr.ac.catholic.cukmoa.core.state.LocalStore
 import kr.ac.catholic.cukmoa.core.state.Platform
+import kr.ac.catholic.cukmoa.core.state.WidgetSink
 
 /**
  * Android: stores data in SharedPreferences.
@@ -28,11 +29,11 @@ class SharedPreferencesStore(context: Context) : LocalStore {
 }
 
 /** Dev: localhost, forwarded to the dev PC with `adb reverse tcp:8080 tcp:8080`. Release builds pass an HTTPS address as apiBaseUrl. */
-fun androidPlatform(context: Context, apiBaseUrl: String = "http://localhost:8080"): Platform {
+fun androidPlatform(context: Context, apiBaseUrl: String = "http://localhost:8080", widgets: WidgetSink? = null, widgetHost: kr.ac.catholic.cukmoa.core.state.WidgetHost? = null): Platform {
     val app = context.applicationContext
     // Material You: the wallpaper's colors, Android 12 (S) and later
     val dynamic = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         { dark: Boolean -> if (dark) dynamicDarkColorScheme(app) else dynamicLightColorScheme(app) }
     } else null
-    return Platform(SharedPreferencesStore(app), apiBaseUrl, dynamic, kr.ac.catholic.cukmoa.app.i18n.androidSystemAppLanguage(app))
+    return Platform(SharedPreferencesStore(app), apiBaseUrl, dynamic, kr.ac.catholic.cukmoa.app.i18n.androidSystemAppLanguage(app), widgets, widgetHost)
 }

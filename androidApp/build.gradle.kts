@@ -72,4 +72,11 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     // Apply the startup (baseline) profiles bundled in the Compose libraries at install time → precompiled code from the very first launch
     implementation(libs.androidx.profileinstaller)
+    // Home-screen widgets (Glance) and their hourly background refresh (WorkManager)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.work.runtime)
+    // The widget feed picker uses the app's own components (core); widgets take their colors from the app's schemes
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material3)
 }

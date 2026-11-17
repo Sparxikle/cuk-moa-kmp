@@ -17,6 +17,9 @@ logback = "1.6.5"
 compottie = "2.3.3"
 # File save/open dialogs (Android, iOS, desktop) for data export/import
 filekit = "0.16.0"
+# Home-screen widgets (Android) and their background refresh
+glance = "1.2.0"
+work = "2.12.0"
 android-compileSdk = "37"
 android-minSdk = "26"
 android-targetSdk = "36"
@@ -42,6 +45,9 @@ lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecyc
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.4.1" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.18.0" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }

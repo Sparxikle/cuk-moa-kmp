@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget picker names only: Android reads these from Android resources. In-widget texts are in core composeResources. -->
+<resources>
+    <string name="widget_calendar_name">학사일정</string>
+    <string name="widget_calendar_desc">다가오는 학사일정과 D-day</string>
+    <string name="widget_timetable_name">시간표</string>
+    <string name="widget_timetable_desc">다음 수업, 오늘 수업, 이번 주 시간표</string>
+    <string name="widget_announcements_name">공지</string>
+    <string name="widget_announcements_desc">내 학과·학교·전체 최신 공지</string>
+    <string name="widget_today_name">오늘</string>
+    <string name="widget_today_desc">다음 수업, 다음 일정, 최신 공지를 한눈에</string>
+</resources>

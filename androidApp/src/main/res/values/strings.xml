@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget picker names only: Android reads these from Android resources. In-widget texts are in core composeResources. -->
+<resources>
+    <string name="widget_calendar_name">Academic calendar</string>
+    <string name="widget_calendar_desc">Upcoming academic events and D-day</string>
+    <string name="widget_timetable_name">Timetable</string>
+    <string name="widget_timetable_desc">Next class, today\'s classes or the whole week</string>
+    <string name="widget_announcements_name">Announcements</string>
+    <string name="widget_announcements_desc">Latest posts from my majors, the school or everywhere</string>
+    <string name="widget_today_name">Today</string>
+    <string name="widget_today_desc">Next class, next event and newest posts together</string>
+</resources>

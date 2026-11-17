@@ -1,5 +1,7 @@
 package kr.ac.catholic.cukmoa.app.ui
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.text.font.FontWeight
 import kr.ac.catholic.cukmoa.core.theme.CardMetrics
 import kr.ac.catholic.cukmoa.core.ui.Tone
 import kr.ac.catholic.cukmoa.core.ui.Txt
@@ -75,6 +77,9 @@ import kr.ac.catholic.cukmoa.core.ui.Group
 import kr.ac.catholic.cukmoa.core.ui.ListRow
 import kr.ac.catholic.cukmoa.core.ui.ScreenList
 import kr.ac.catholic.cukmoa.core.ui.Section
+import kr.ac.catholic.cukmoa.core.ui.WidgetStyleEditor
+import kr.ac.catholic.cukmoa.core.ui.widgetKindTitle
+import androidx.compose.material.icons.filled.Widgets
 import kr.ac.catholic.cukmoa.core.ui.contentWidth
 import kr.ac.catholic.cukmoa.core.ui.screenPop
 import kr.ac.catholic.cukmoa.logic.usesCatalogTracks
@@ -100,7 +105,7 @@ const val APP_VERSION = "0.9"
 
 /** Settings pages. Main lists the categories; each category is its own screen, 전공 opens from 내 정보. */
 private enum class SettingsPage(val parent: SettingsPage?) {
-    Main(null), Me(Main), Department(Me), Home(Main), Modules(Main), Announcements(Main), Appearance(Main), Language(Main), Data(Main), About(Main);
+    Main(null), Me(Main), Department(Me), Home(Main), Modules(Main), Announcements(Main), Appearance(Main), Widgets(Main), Language(Main), Data(Main), About(Main);
 
     val depth: Int get() = generateSequence(parent) { it.parent }.count()
 
@@ -207,6 +212,9 @@ private fun SettingsPageContent(
         listOf(
             SettingsEntry(SettingsPage.Appearance, Icons.Filled.Palette, SettingsColors.purple, stringResource(Res.string.display), themeLabel(student.theme)),
             SettingsEntry(SettingsPage.Language, Icons.Filled.Language, SettingsColors.blue, stringResource(Res.string.language), languageLabel(student.language)),
+        ) + listOfNotNull(
+            // Android and desktop; iOS edits widgets from the home screen (long-press → Edit Widget)
+            vm.widgetHost?.let { SettingsEntry(SettingsPage.Widgets, Icons.Filled.Widgets, SettingsColors.orange, stringResource(Res.string.widget_open_settings), null) },
         ),
         listOf(
             SettingsEntry(SettingsPage.Data, Icons.Filled.Storage, SettingsColors.green, stringResource(Res.string.data), null),
@@ -348,6 +356,31 @@ private fun SettingsPageContent(
                         onClick = { vm.setDynamicColor(!student.dynamicColor) },
                         trailing = { Toggle(checked = student.dynamicColor, onCheckedChange = { vm.setDynamicColor(it) }) },
                     )
+                }
+            }
+        }
+
+        SettingsPage.Widgets -> {
+            val host = vm.widgetHost
+            var placed by remember { mutableStateOf<List<kr.ac.catholic.cukmoa.core.state.PlacedWidget>?>(null) }
+            val scope = rememberCoroutineScope()
+            LaunchedEffect(host) { placed = host?.placed() }
+            ScreenList(title = stringResource(Res.string.widget_open_settings), onBack = back, info = stringResource(Res.string.widget_settings_none).takeIf { placed?.isEmpty() == true }) {
+                // Numbered when there are several of a kind ("Today widget 2")
+                val list = placed.orEmpty()
+                list.forEach { w ->
+                    val same = list.filter { it.kind == w.kind }
+                    item(key = w.id) {
+                        val name = stringResource(Res.string.widget_settings_title, stringResource(widgetKindTitle(w.kind))) +
+                            if (same.size > 1) " ${same.indexOf(w) + 1}" else ""
+                        Column(Modifier.contentWidth()) {
+                            Text(name, color = AppTheme.colors.ink, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = Space.xl, top = Space.l))
+                            WidgetStyleEditor(w.kind, w.style, onChange = { style ->
+                                placed = list.map { if (it.id == w.id) it.copy(style = style) else it }
+                                scope.launch { host?.setStyle(w.id, style) }
+                            })
+                        }
+                    }
                 }
             }
         }
