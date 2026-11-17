@@ -356,9 +356,11 @@ fun SectionHeader(title: String, action: Pair<String, () -> Unit>? = null, info:
         Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(start = CardMetrics.inset, end = Space.xs, top = Space.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, Modifier.weight(1f, fill = false), color = AppTheme.colors.ink, style = MaterialTheme.typography.titleMedium)
-        if (info != null) InfoButton(stringResource(Res.string.about), onClick = { showInfo = true }, modifier = Modifier.size(36.dp), size = 18.dp, tint = AppTheme.colors.ink2)
-        Spacer(Modifier.weight(1f))
+        // Title and info share all the free space, so the action always sits at the end of the row
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            Text(title, Modifier.weight(1f, fill = false), color = AppTheme.colors.ink, style = MaterialTheme.typography.titleMedium)
+            if (info != null) InfoButton(stringResource(Res.string.about), onClick = { showInfo = true }, modifier = Modifier.size(36.dp), size = 18.dp, tint = AppTheme.colors.ink2)
+        }
         action?.let { (label, onClick) -> TextButton(onClick = onClick) { Text(label) } }
     }
     if (showInfo && info != null) InfoDialog(title, info) { showInfo = false }
