@@ -192,7 +192,7 @@
     <string name="cat_event">活动</string>
     <string name="my_majors_n">我的%1$d个专业</string>
     <string name="module_announcements">公告</string>
-    <string name="module_announcements_summary">将学校·LMS·院系等18个公告板的通知按你的专业汇总在一处</string>
+    <string name="module_announcements_summary">将学校·LMS·所有院系公告板的通知按你的专业汇总在一处</string>
     <string name="announcements_eyebrow">学校·LMS·院系公告板汇总</string>
     <string name="search_titles">搜索标题（如：奖学金、招聘、竞赛）</string>
     <string name="all">全部</string>

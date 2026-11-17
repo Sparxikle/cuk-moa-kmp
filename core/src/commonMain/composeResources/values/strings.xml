@@ -192,7 +192,7 @@
     <string name="cat_event">Event</string>
     <string name="my_majors_n">My %1$d majors</string>
     <string name="module_announcements">Announcements</string>
-    <string name="module_announcements_summary">Notices from 18 school, LMS and department boards, tailored to your majors</string>
+    <string name="module_announcements_summary">Notices from school, LMS and every department board, tailored to your majors</string>
     <string name="announcements_eyebrow">School, LMS and department boards in one place</string>
     <string name="search_titles">Search titles (e.g. scholarship, hiring, contest)</string>
     <string name="all">All</string>

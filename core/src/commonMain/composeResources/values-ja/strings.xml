@@ -192,7 +192,7 @@
     <string name="cat_event">イベント</string>
     <string name="my_majors_n">自分の専攻%1$d件</string>
     <string name="module_announcements">お知らせ</string>
-    <string name="module_announcements_summary">学校・LMS・学科の掲示板18か所のお知らせを専攻に合わせて一か所に</string>
+    <string name="module_announcements_summary">学校・LMS・全学科の掲示板のお知らせを専攻に合わせて一か所に</string>
     <string name="announcements_eyebrow">学校・LMS・学科の掲示板を一か所に</string>
     <string name="search_titles">タイトル検索（例：奨学金、採用、コンテスト）</string>
     <string name="all">すべて</string>

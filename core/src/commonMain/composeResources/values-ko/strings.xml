@@ -192,7 +192,7 @@
     <string name="cat_event">행사</string>
     <string name="my_majors_n">내 전공 %1$d곳</string>
     <string name="module_announcements">공지</string>
-    <string name="module_announcements_summary">학교·LMS·학과 게시판 18곳의 공지를 내 전공에 맞춰 한곳에서</string>
+    <string name="module_announcements_summary">학교·LMS·모든 학과 게시판의 공지를 내 전공에 맞춰 한곳에서</string>
     <string name="announcements_eyebrow">학교·LMS·학과 게시판을 한곳에</string>
     <string name="search_titles">제목 검색 (예: 장학, 채용, 공모전)</string>
     <string name="all">전체</string>
