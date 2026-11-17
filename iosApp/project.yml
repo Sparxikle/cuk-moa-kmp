@@ -5,6 +5,9 @@
 #   include: [project.yml]
 #   settings: { base: { DEVELOPMENT_TEAM: <team id>, API_BASE_URL: <server> } }
 # then: xcodegen generate --spec local.yml
+# Widgets (CukMoaWidgets, iOS 17+) share data with the app through an App Group. The default group id below must be
+# registered to your team; change APP_GROUP in local.yml if you sign with another team. Free (personal) teams can't
+# use App Groups: the app still runs, the widgets just stay empty.
 name: iosApp
 options:
   deploymentTarget:
@@ -12,15 +15,28 @@ options:
 settings:
   base:
     API_BASE_URL: http://localhost:8080
+    APP_GROUP: group.kr.ac.catholic.cukmoa
 targets:
   iosApp:
     type: application
     platform: iOS
     sources: [iosApp]
+    dependencies:
+      - target: CukMoaWidgets
+      - sdk: WidgetKit.framework
+    entitlements:
+      path: iosApp/iosApp.entitlements
+      properties:
+        com.apple.security.application-groups: [$(APP_GROUP)]
     info:
       path: iosApp/Info.plist
       properties:
         CFBundleDisplayName: 가대모아
+        AppGroup: $(APP_GROUP)
+        # Widget taps open cukmoa://open?target=…
+        CFBundleURLTypes:
+          - CFBundleURLName: kr.ac.catholic.cukmoa
+            CFBundleURLSchemes: [cukmoa]
         CFBundleShortVersionString: "0.9"
         CFBundleVersion: "1"
         ApiBaseUrl: $(API_BASE_URL)
@@ -57,3 +73,38 @@ targets:
           if [ -z "$JAVA_HOME" ]; then export JAVA_HOME="$(/usr/libexec/java_home -v 21 2>/dev/null)"; fi
           cd "$SRCROOT/.."
           ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+  # Home- and lock-screen widgets: 학사일정, 시간표, 공지, 오늘 (SwiftUI, WidgetKit). They read the snapshot the app
+  # writes to the App Group and refresh the calendar and announcements from the server on their own.
+  CukMoaWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: [CukMoaWidgets]
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+      - sdk: AppIntents.framework
+    entitlements:
+      path: CukMoaWidgets/CukMoaWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [$(APP_GROUP)]
+    info:
+      path: CukMoaWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: 가대모아
+        CFBundleShortVersionString: "0.9"
+        CFBundleVersion: "1"
+        ApiBaseUrl: $(API_BASE_URL)
+        AppGroup: $(APP_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        PRODUCT_NAME: CukMoaWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: kr.ac.catholic.cukmoa.widgets
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "5.0"
+        SKIP_INSTALL: YES

@@ -24,5 +24,8 @@ local.properties
 # iOS: the Xcode project is generated from iosApp/project.yml (xcodegen generate)
 iosApp/iosApp.xcodeproj/
 iosApp/iosApp/Info.plist
+iosApp/iosApp/iosApp.entitlements
+iosApp/CukMoaWidgets/Info.plist
+iosApp/CukMoaWidgets/CukMoaWidgets.entitlements
 xcuserdata/
 iosApp/local.yml
