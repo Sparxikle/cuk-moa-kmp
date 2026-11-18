@@ -64,7 +64,7 @@ compose.desktop {
         jvmArgs += "-Dcukmoa.api=$apiBaseUrl"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            // codesign (ad-hoc, run by jpackage on macOS) fails on a Korean bundle name; the Dock still shows 가대모아
+            // codesign (macOS) and WiX (Windows MSI, codepage 1252) fail on a Korean name; the window still shows 가대모아
             val os = System.getProperty("os.name")
             packageName = if (os.startsWith("Mac") || os.startsWith("Windows")) "CukMoa" else "가대모아"
             packageVersion = "1.0.0"
@@ -76,7 +76,14 @@ compose.desktop {
                 iconFile.set(project.file("icons/AppIcon.icns"))
                 dockName = "가대모아"
             }
-            windows { iconFile.set(project.file("icons/AppIcon.ico")) }
+            windows {
+                iconFile.set(project.file("icons/AppIcon.ico"))
+                menu = true
+                shortcut = true
+                dirChooser = true
+                perUserInstall = true
+                upgradeUuid = "ea7fc41d-ab08-4f5e-9ff7-f18be881166c"
+            }
             linux { iconFile.set(project.file("icons/AppIcon.png")) }
         }
     }
