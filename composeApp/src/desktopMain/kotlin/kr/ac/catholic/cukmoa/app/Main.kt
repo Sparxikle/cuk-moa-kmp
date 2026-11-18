@@ -42,7 +42,8 @@ fun main() = application {
     val platform = remember {
         Platform(
             store = store,
-            apiBaseUrl = System.getenv("CUK_MOA_API") ?: "http://localhost:8080",
+            // CUK_MOA_API wins (development); packaged builds carry -PapiBaseUrl as the cukmoa.api property
+            apiBaseUrl = System.getenv("CUK_MOA_API") ?: System.getProperty("cukmoa.api") ?: "http://localhost:8080",
         )
     }
     // One view model for the app window and the widget windows, so widgets show the app's live data

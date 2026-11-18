@@ -55,15 +55,26 @@ kotlin {
     }
 }
 
+// Desktop server address: -PapiBaseUrl=https://<server address>, baked into run and the installers (default: local server)
+val apiBaseUrl: String = providers.gradleProperty("apiBaseUrl").getOrElse("http://localhost:8080")
+
 compose.desktop {
     application {
         mainClass = "kr.ac.catholic.cukmoa.app.MainKt"
+        jvmArgs += "-Dcukmoa.api=$apiBaseUrl"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "가대모아"
+            // codesign (ad-hoc, run by jpackage on macOS) fails on a Korean bundle name; the Dock still shows 가대모아
+            packageName = if (System.getProperty("os.name").startsWith("Mac")) "CukMoa" else "가대모아"
             packageVersion = "1.0.0"
+            // The installers bundle a trimmed Java runtime. suggestRuntimeModules lists the last five; Ktor's
+            // Java HTTP engine needs java.net.http and HTTPS needs jdk.crypto.ec, which it doesn't detect.
+            modules("java.net.http", "jdk.crypto.ec", "java.instrument", "java.management", "java.scripting", "jdk.security.auth", "jdk.unsupported")
             // App icon per installer (made by icons.sh from icons/)
-            macOS { iconFile.set(project.file("icons/AppIcon.icns")) }
+            macOS {
+                iconFile.set(project.file("icons/AppIcon.icns"))
+                dockName = "가대모아"
+            }
             windows { iconFile.set(project.file("icons/AppIcon.ico")) }
             linux { iconFile.set(project.file("icons/AppIcon.png")) }
         }
