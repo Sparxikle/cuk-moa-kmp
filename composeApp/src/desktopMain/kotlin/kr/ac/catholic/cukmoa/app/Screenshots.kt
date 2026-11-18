@@ -45,6 +45,8 @@ private class MemoryStore(initial: Map<String, String>) : LocalStore {
 
 private const val WIDTH_DP = 400
 private const val SCALE = 2f
+private const val DESKTOP_WIDTH_DP = 1280
+private const val DESKTOP_HEIGHT_DP = 800
 
 fun main(args: Array<String>): Unit = runBlocking(Dispatchers.Main) {
     val out = File(args.firstOrNull() ?: "build/screenshots").apply { mkdirs() }
@@ -54,9 +56,9 @@ fun main(args: Array<String>): Unit = runBlocking(Dispatchers.Main) {
     val demo = encodeStudentState(sampleStudent(3).copy(onboarded = true, theme = ThemeMode.Light))
     val demoDark = encodeStudentState(sampleStudent(3).copy(onboarded = true, theme = ThemeMode.Dark))
 
-    suspend fun shoot(name: String, heightDp: Int, store: Map<String, String>, route: String = Routes.HOME) {
+    suspend fun shoot(name: String, heightDp: Int, store: Map<String, String>, route: String = Routes.HOME, widthDp: Int = WIDTH_DP) {
         val owner = object : ViewModelStoreOwner { override val viewModelStore = ViewModelStore() }
-        val scene = ImageComposeScene((WIDTH_DP * SCALE).toInt(), (heightDp * SCALE).toInt(), Density(SCALE)) {
+        val scene = ImageComposeScene((widthDp * SCALE).toInt(), (heightDp * SCALE).toInt(), Density(SCALE)) {
             CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
                 App(Platform(MemoryStore(store), api), initialRoute = route)
             }
@@ -83,11 +85,18 @@ fun main(args: Array<String>): Unit = runBlocking(Dispatchers.Main) {
     shoot("10-graduation-dark", 1900, mapOf("student" to demoDark), Routes.GRADUATION)
     shootWidgets(out, dark = false)
     shootWidgets(out, dark = true)
+    // Desktop window size in Korean (the wide layout: side tab rail, two panes), and the widget windows in Korean.
+    // Last, because the app's language choice changes the JVM's default locale.
+    val demoKo = encodeStudentState(sampleStudent(3).copy(onboarded = true, theme = ThemeMode.Light, language = "ko"))
+    for ((name, route) in listOf("home" to Routes.HOME, "announcements" to Routes.ANNOUNCEMENTS, "roadmap" to Routes.ROADMAP, "graduation" to Routes.GRADUATION, "settings" to Routes.SETTINGS)) {
+        shoot("13-desktop-$name", DESKTOP_HEIGHT_DP, mapOf("student" to demoKo), route, DESKTOP_WIDTH_DP)
+    }
+    shootWidgets(out, dark = false, name = "14-desktop-widgets-ko")
     kotlin.system.exitProcess(0)
 }
 
 /** Every desktop widget variant on one sheet, with made-up data around the current time. */
-private fun shootWidgets(out: File, dark: Boolean) {
+private fun shootWidgets(out: File, dark: Boolean, name: String = if (dark) "12-widgets-dark" else "11-widgets") {
     val now = kstMoment(System.currentTimeMillis())
     fun slot(name: String, weekday: Int, startPeriod: Int, endPeriod: Int, room: String) = WidgetSlot(
         name, room, null, weekday, (8 + startPeriod) * 60, (8 + endPeriod) * 60 + 50, startPeriod, endPeriod,
@@ -140,7 +149,6 @@ private fun shootWidgets(out: File, dark: Boolean) {
         }
     }
     val png = scene.render(0).encodeToData(EncodedImageFormat.PNG)!!.bytes
-    val name = if (dark) "12-widgets-dark" else "11-widgets"
     File(out, "$name.png").writeBytes(png)
     scene.close()
     println("wrote ${out.path}/$name.png")
