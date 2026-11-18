@@ -65,7 +65,8 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             // codesign (ad-hoc, run by jpackage on macOS) fails on a Korean bundle name; the Dock still shows 가대모아
-            packageName = if (System.getProperty("os.name").startsWith("Mac")) "CukMoa" else "가대모아"
+            val os = System.getProperty("os.name")
+            packageName = if (os.startsWith("Mac") || os.startsWith("Windows")) "CukMoa" else "가대모아"
             packageVersion = "1.0.0"
             // The installers bundle a trimmed Java runtime. suggestRuntimeModules lists the last five; Ktor's
             // Java HTTP engine needs java.net.http and HTTPS needs jdk.crypto.ec, which it doesn't detect.
